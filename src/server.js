@@ -4,7 +4,8 @@ import { readFileSync, writeFileSync, existsSync, realpathSync, statSync } from 
 import { homedir } from 'node:os';
 import { isAbsolute, join, relative, resolve } from 'node:path';
 import { redactLine } from './app.js';
-import { approve, scanProject } from './scan.js';
+import { Worker } from 'node:worker_threads';
+import { approve } from './scan.js';
 import { HOME, load, save } from './state.js';
 import { worst } from './policy.js';
 
@@ -83,18 +84,23 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       // a live picture of the watch: the stage, what is being read right now, how each item was settled, the last few
       const w = watch = { stage: 'finding', done: 0, total: 0, started: Date.now(), now: null, counts: { cached: 0, rules: 0, model: 0, flagged: 0 }, ms: 0, log: [] };
       const name = i => i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.name;
-      scanProject(o.project ?? process.cwd(), {
-        ...o,
-        onStep: s => { w.stage = 'reading'; w.now = { name: name(s), kind: s.kind, phase: s.phase }; },
-        onItem: (item, n, { how = 'rules', ms = 0 } = {}) => {
+      const end = error => { if (w.finished) return; if (error) w.error = String(error).slice(0, 200); w.stage = 'done'; w.now = null; w.finished = Date.now(); };
+      // the watch runs on its own thread, so this answers at once and every poll stays instant while it reads
+      const worker = new Worker(new URL('./watch-worker.js', import.meta.url), { workerData: { project: o.project ?? process.cwd(), options: o } });
+      worker.on('message', m => {
+        if (m.type === 'step') { w.stage = 'reading'; w.now = { name: name(m.step), kind: m.step.kind, phase: m.step.phase }; }
+        else if (m.type === 'item') {
+          const { item, n, how: { how = 'rules', ms = 0 } = {} } = m;
           w.stage = 'reading'; w.done++; w.total = n ?? w.total; w.counts[how]++; w.ms += ms;
           if (['review', 'hold'].includes(item.level) && !item.approved) w.counts.flagged++;
           w.log.unshift({ n: w.done, name: name(item), kind: item.kind, how, ms, level: item.approved ? 'cleared' : item.level });
           w.log.length = Math.min(w.log.length, 12);
-        },
-      })
-        .then(r => { saveRun(r, o); w.stage = 'done'; w.now = null; w.finished = Date.now(); })
-        .catch(e => { w.error = String(e.message).slice(0, 200); w.stage = 'done'; w.finished = Date.now(); });
+        }
+        else if (m.type === 'done') { saveRun(m.run, o); end(); }
+        else if (m.type === 'error') end(m.message);
+      });
+      worker.on('error', e => end(e.message));
+      worker.on('exit', code => end(code ? `the watch exited (${code})` : null));
       return send(res, 202, watch);
     }
     return send(res, 404, { error: 'not found' });
