@@ -13,14 +13,21 @@ const opt = name => { const i = args.indexOf(name); return i >= 0 ? args.splice(
 
 const noModel = flag('--no-model'), json = opt('--json'), approveWhat = opt('--approve');
 const onlyPackages = flag('--packages-only'), onlyAgents = flag('--agents-only'), offline = flag('--offline');
-const app = opt('--app');
-const [cmd = 'scan', target = '.'] = ['scan', 'ui'].includes(args[0]) ? args : ['scan', ...args];
+const app = opt('--app'), at = opt('--at'), off = flag('--off'), status = flag('--status');
+const [cmd = 'scan', target = '.'] = ['scan', 'ui', 'schedule'].includes(args[0]) ? args : ['scan', ...args];
+const options = { project: resolve(target), model: !noModel, packages: !onlyAgents, agents: !onlyPackages, fetch: !offline, app: app && resolve(app) };
 if (cmd === 'ui') {  // the morning report, on this machine only
   const port = Number(opt('--port') || process.env.SLOWSHIP_PORT || 7798), url = `http://127.0.0.1:${port}/`;
   serve(port);
   console.log(`morning report: ${url}  (Ctrl+C to stop)`);
   const open = { win32: ['explorer.exe', [url]], darwin: ['open', [url]] }[process.platform] ?? ['xdg-open', [url]];
   if (!flag('--no-open')) execFile(open[0], open[1], () => {});  // no shell; a missing opener just means open it yourself
+} else if (cmd === 'schedule') {  // let the system wake it every night
+  const { schedule, unschedule, scheduleOf } = await import('../src/schedule.js');
+  if (off) { unschedule(); console.log('the nightly watch is off.'); }
+  else if (status) { const s = scheduleOf(); console.log(s ? `watching ${s.project} every night at ${s.at}. log: ${s.log}` : 'no nightly watch. turn it on with: slowship schedule [dir] [--at 03:00]'); }
+  else { const s = schedule({ project: options.project, at: at || '03:00', options }); console.log(`every night at ${s.at}, slowship will read ${s.project} (or when this computer next wakes). the report waits in: slowship ui
+turn it off with: slowship schedule --off`); }
 } else if (cmd !== 'scan' || flag('--help') || flag('-h')) {
   console.log(`slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app build/] [--json out.json] [--approve <name|notable|review>]
 
@@ -30,13 +37,13 @@ if (cmd === 'ui') {  // the morning report, on this machine only
   --app checks your own build before it ships: secrets, Electron settings, source maps, .env files.
   --approve marks current results as seen, so they stop asking until the code changes.
 
-slowship ui [--port 7798]   opens the morning report for the last run`);
+slowship ui [--port 7798]   opens the morning report for the last run
+slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itself (--off to stop, --status to check)`);
   process.exit(cmd === 'scan' ? 0 : 1);
 } else {
 
-const project = resolve(target);
+const project = options.project;
 let n = 0;
-const options = { project, model: !noModel, packages: !onlyAgents, agents: !onlyPackages, fetch: !offline, app: app && resolve(app) };
 const run = await scanProject(project, {
   ...options,
   onItem: () => process.stderr.isTTY && process.stderr.write(`\rreading ${++n} packages…`),

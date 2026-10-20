@@ -131,3 +131,16 @@ test('code shown around a finding stays inside the item and never shows a secret
   assert.equal(codeWindow(app, '../evil-pkg/index.js', 1), null);
   assert.equal(codeWindow(app, join(FX, 'evil-pkg', 'index.js'), 1), null);
 });
+
+test('the nightly watch: quoted paths, a real time, and anything shell-like refused', async () => {
+  const { windowsTask, cronLine, flagsOf } = await import('../src/schedule.js');
+  const argv = ['C:/Program Files/nodejs/node.exe', 'C:/x/bin/slowship.js', 'D:/my project', ...flagsOf({ model: false, app: 'D:/build' })];
+  const w = windowsTask('03:00', argv, 'D:/home');
+  assert.ok(w.launcher.includes('"C:/Program Files/nodejs/node.exe" "C:/x/bin/slowship.js" "D:/my project" "--no-model" "--app" "D:/build" >> '), w.launcher);
+  assert.match(w.task, /<StartBoundary>2026-01-01T03:00:00<\/StartBoundary>/);
+  assert.match(w.task, /<StartWhenAvailable>true<\/StartWhenAvailable>/);
+  assert.match(cronLine('23:15', ['/usr/bin/node', '/x/slowship.js', '/home/me/app'], '/home/me/.slowship'), /^15 23 \* \* \* SLOWSHIP_HOME='\/home\/me\/\.slowship' '\/usr\/bin\/node' /);
+  assert.throws(() => windowsTask('3am', argv, 'D:/home'), /HH:MM/);
+  assert.throws(() => windowsTask('03:00', [...argv, 'D:/a & calc'], 'D:/home'), /can't be scheduled safely/);
+  assert.throws(() => cronLine('03:00', ["/x/it's"], '/h'), /can't be scheduled safely/);
+});

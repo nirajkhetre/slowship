@@ -769,6 +769,26 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
 @keyframes read{0%,100%{transform:translate(-3px,2px)}45%{transform:translate(3px,2px)}50%{transform:translate(3px,2px)}95%{transform:translate(-3px,2px)}}
 .mf .scan{animation:readmini 2.2s ease-in-out infinite}
 @keyframes readmini{0%,100%{transform:translateX(-1.2px)}50%{transform:translateX(1.2px)}}
+/* the nightly watch: one switch, and the system wakes it every night */
+.nightly{margin-top:14px}
+.nbtn{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:14px;border:1.5px dashed var(--line2);background:none;text-align:left;cursor:pointer;transition:border-color .2s,background .2s,transform .4s var(--bounce)}
+.nbtn:hover{border-style:solid;border-color:var(--ink);background:var(--well);transform:translateY(-1px)}
+.nbtn:active{transform:scale(.98)}
+.nbtn b,.non b{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:650}
+.nbtn small,.non small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.nbtn>svg,.non>svg{width:22px;height:22px;flex:none}
+.nbtn:hover>svg{animation:twinkle 1.6s ease-in-out infinite}
+.non{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:14px;background:var(--well);border:1px solid var(--line);animation:swap .45s var(--enter)}
+.non>svg{color:var(--peter);animation:twinkle 3.2s ease-in-out infinite}
+@keyframes twinkle{0%,100%{filter:drop-shadow(0 0 5px color-mix(in oklab,var(--peter) 55%,transparent));transform:rotate(0)}50%{filter:drop-shadow(0 0 0 transparent);transform:rotate(-10deg)}}
+.non input[type=time]{font:inherit;font-weight:650;border:0;border-radius:6px;background:none;color:var(--ink);padding:0 2px;cursor:pointer}
+.non input[type=time]:hover{background:var(--card)}
+.sw2{position:relative;flex:none;margin-left:auto;width:44px;height:26px;border-radius:999px;border:0;background:var(--line2);cursor:pointer;transition:background .3s}
+.sw2 i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
+.sw2[aria-checked=true]{background:var(--peter)}
+.sw2[aria-checked=true] i{transform:translateX(18px)}
+.sw2:active i{width:24px}
+.nightly.busy{opacity:.6;pointer-events:none}
 </style>
 </head>
 <body data-v="night" class="boot">
@@ -1047,7 +1067,7 @@ function ticket() {
   }
 
   cargo(v);
-  $('#when').textContent = r?.finished ? `watched ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
+  $('#when').textContent = r?.finished ? `watched ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}${$('#when').dataset.next || ''}` : '';
   $('#who').lastChild.textContent = r ? (r.model ? `${r.model.split(':')[0]} · on this laptop` : 'rules only · no model') : 'on this laptop';
 }
 
@@ -1129,9 +1149,11 @@ function tiles() {
     <svg class="flow" viewBox="0 0 300 156" role="img" aria-label="${streams.map(([, v, l]) => `${v} ${l}`).join(', ')}">
       <defs><linearGradient id="flowG" x1="0" x2="1"><stop offset="0" stop-color="var(--ink)" stop-opacity=".55"/><stop offset="1" stop-color="var(--accent)"/></linearGradient></defs>
       <rect class="src" x="6" y="${CY - sum / 2}" width="8" height="${sum}" rx="3"/>${bands}</svg>` : ''}
+    <div class="nightly" id="nightly"></div>
     <span class="badge">${IC.lock}read, never run · uploads none</span></div>`;
 
   $('#tiles').innerHTML = read + touch + watch;
+  nightly();
   $('#ringN').style.fontSize = `${[27, 27, 27, 27, 22, 18][String(G.length).length] ?? 16}px`;  // the number always fits the ring's hole
   odo($('#ringN'), G.length, intro); odo($('#wT'), big, intro);
 }
@@ -1173,6 +1195,28 @@ T.addEventListener('pointermove', e => {
   const b = card.getBoundingClientRect();
   card.style.setProperty('--mx', `${e.clientX - b.left}px`); card.style.setProperty('--my', `${e.clientY - b.top}px`);
 }, { passive: true });
+// ---------- the nightly watch ----------
+IC.moon = svg('<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><path d="M16.5 3.5v3M15 5h3" stroke-width="1.5"/>');
+const nextAt = at => { const [h, m] = at.split(':').map(Number), d = new Date(); d.setHours(h, m, 0, 0); if (d <= new Date()) d.setDate(d.getDate() + 1); return d; };
+const nextLabel = at => { const d = nextAt(at), soon = d - new Date() < 18 * 3600e3 && d.getDate() !== new Date().getDate(); return `${soon ? 'tonight' : d.toLocaleDateString([], { weekday: 'short' })}, ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`; };
+function nightly() {
+  const el = $('#nightly'), sc = S.sched;
+  if (!el) return;
+  el.innerHTML = sc?.at
+    ? `<div class="non">${IC.moon}<span><b>nightly at <input type="time" id="nat" value="${esc(sc.at)}" aria-label="Time of the nightly watch"></b><small>next: ${nextLabel(sc.at)}</small></span><button class="sw2" role="switch" aria-checked="true" data-night="off" aria-label="Turn the nightly watch off"><i></i></button></div>`
+    : `<button class="nbtn" data-night="on">${IC.moon}<span><b>watch every night${info('nightly')}</b><small>at 3:00, or when this computer next wakes. you just read the morning report.</small></span></button>`;
+  const when = $('#when'); if (when) when.dataset.next = sc?.at ? ` · next ${nextAt(sc.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
+  if (when?.textContent) when.textContent = when.textContent.replace(/ · next .*$/, '') + when.dataset.next;
+}
+async function setNightly(body) {
+  const el = $('#nightly'); el?.classList.add('busy');
+  try { S.sched = await api('/api/schedule', body); if (S.sched.off) S.sched = null; toast(S.sched ? `the watch will run every night at <b>${esc(S.sched.at)}</b>. the report will be waiting.` : 'the nightly watch is off.'); }
+  catch (e) { toast(`couldn’t change the nightly watch: ${esc(e.message)}`); }
+  el?.classList.remove('busy'); nightly(); ticket();
+}
+$('#tiles').addEventListener('click', e => { const b = e.target.closest('[data-night]'); if (b && !e.target.closest('.xi')) setNightly(b.dataset.night === 'on' ? { at: '03:00' } : { on: false }); });
+$('#tiles').addEventListener('change', e => { if (e.target.id === 'nat' && /^\d\d:\d\d$/.test(e.target.value)) setNightly({ at: e.target.value }); });
+
 const info = k => `<button class="xi" data-explain="${k}" aria-label="What is this?">i</button>`;
 
 // ---------- explanations: one sentence for every part, in the skipper's harbour words ----------
@@ -1206,6 +1250,7 @@ const EXPLAIN = {
   cargo: () => ({ t: 'the cargo', b: '<span>everything this project brings aboard, one container each: packages from your lockfile, agent skills, MCP servers and your own build.</span><span>quiet cargo sits low and faint. flagged cargo is stacked on top: <b>blue</b> to glance at, <b>dark</b> on hold, <b>white</b> cleared.</span><span>point at a container for a replay of what was found in it. click to open it.</span>' }),
   read: () => ({ t: 'read overnight', b: '<span>everything slowship read in this project, by kind. the same bytes installed in two places count once.</span><span>point at a slice to count it. tap it to list just those in the manifest.</span>' }),
   touch: () => ({ t: 'what they can touch', b: '<span>what the code can actually do, read from the code itself, not from its description. the shape is your project’s power signature: the further a point reaches, the more things have that power.</span><span>none of it is bad on its own: a downloader makes network calls. point at a power to see who has it; tap to list them.</span>' }),
+  nightly: () => ({ t: 'every night, by itself', b: '<span>slowship asks your computer’s own scheduler (Task Scheduler on Windows, cron elsewhere) to run the watch every night with the same settings as this one. no app stays open.</span><span>it runs at low priority, and if the computer was asleep it runs when it wakes. Ollama is optional: without it the night is rules only. turn it off any time.</span>' }),
   watch: () => ({ t: 'the watch', b: '<span>how slowship stayed fast: everything it found takes one of three ways through. same bytes as before are skipped, most things need only its rules, and only the few worth a second opinion go to the local model.</span><span>tomorrow’s watch only reads what’s new. nothing is uploaded.</span>' }),
   reader: () => ({ t: 'the reader', b: S.run?.model ? `<span><b>${esc(S.run.model)}</b> runs on this laptop through Ollama. it compares what code does with what its description says.</span><span>it can raise a flag, but only patterns found in the code can hold the ship.</span>` : '<span>no local model ran, so slowship used rules only. start Ollama and run again for the full watch.</span>' }),
   noted: () => ({ t: 'noted, not urgent', b: '<span>things that use a power you’d expect from what they are, like a logger that writes files. nothing to clear. tap one to see the evidence.</span>' }),
@@ -1879,6 +1924,7 @@ addEventListener('resize', thumb);
 matchMedia('(min-width: 980px)').addEventListener('change', () => { if (S.run && !S.run.empty) review(); });
 
 (async () => {
+  S.sched = await api('/api/schedule').then(x => x.off ? null : x).catch(() => null);
   try { load(await api('/api/run')); }
   catch { S.run = { empty: true, error: true }; render(); }
   requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('boot')));

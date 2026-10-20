@@ -6,6 +6,7 @@ import { isAbsolute, join, relative, resolve } from 'node:path';
 import { redactLine } from './app.js';
 import { Worker } from 'node:worker_threads';
 import { approve } from './scan.js';
+import { schedule, scheduleOf, unschedule } from './schedule.js';
 import { HOME, load, save } from './state.js';
 import { worst } from './policy.js';
 
@@ -60,6 +61,7 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
         return w ? send(res, 200, w) : send(res, 404, { error: 'no code' });
       }
       if (url.pathname === '/api/watch') return send(res, 200, watch ?? { idle: true });
+      if (url.pathname === '/api/schedule') return send(res, 200, scheduleOf() ?? { off: true });
       return send(res, 404, { error: 'not found' });
     }
     if (req.method !== 'POST') return send(res, 405, { error: 'method' });
@@ -77,6 +79,13 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       if (url.pathname === '/api/approve') approve(run, body.key);
       else { const s = load(); if (s.approved[item.key] === item.fp) delete s.approved[item.key]; save(s); }
       return send(res, 200, relevel(run));
+    }
+    // nightly: the project and flags come from the last run, never from the page; the page only picks the hour
+    if (url.pathname === '/api/schedule') {
+      if (!run?.options) return send(res, 400, { error: 'run the watch once first' });
+      if (body.on === false) { unschedule(); return send(res, 200, { off: true }); }
+      try { return send(res, 200, schedule({ project: run.options.project, at: String(body.at || '03:00'), options: run.options })); }
+      catch (e) { return send(res, 400, { error: String(e.message).slice(0, 200) }); }
     }
     if (url.pathname === '/api/scan') {
       if (watch && !watch.finished) return send(res, 409, { error: 'already watching' });
