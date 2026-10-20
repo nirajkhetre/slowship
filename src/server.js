@@ -1,7 +1,9 @@
 // The morning report, served on this machine only. Approve (and undo), run the watch again, read the last run.
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, realpathSync, statSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { isAbsolute, join, relative, resolve } from 'node:path';
+import { redactLine } from './app.js';
 import { approve, scanProject } from './scan.js';
 import { HOME, load, save } from './state.js';
 import { worst } from './policy.js';
@@ -12,6 +14,18 @@ const FONTS = new Set(['Unbounded.ttf', 'SchibstedGrotesk.ttf', 'IBMPlexMono-Reg
 
 export const saveRun = (run, options) => writeFileSync(LAST, JSON.stringify({ ...run, options, finished: new Date().toISOString() }));
 const lastRun = () => (existsSync(LAST) ? JSON.parse(readFileSync(LAST, 'utf8')) : null);
+
+/** The lines around one finding, from inside the item's own folder only, with secrets cut down. Null if it can't be shown. */
+export function codeWindow(dir, file, line, around = 4) {
+  if (!dir || typeof file !== 'string' || !file || !(line > 0)) return null;
+  try {
+    const root = realpathSync(dir), full = realpathSync(resolve(root, file)), rel = relative(root, full);
+    if (!rel || rel.startsWith('..') || isAbsolute(rel)) return null;  // a symlink or ../ can't walk out of the item
+    if (!statSync(full).isFile() || statSync(full).size > 2_000_000) return null;
+    const all = readFileSync(full, 'utf8').split(/\r?\n/), start = Math.max(1, line - around);
+    return { start, total: all.length, lines: all.slice(start - 1, line + around).map(l => redactLine(l.slice(0, 240))) };
+  } catch { return null; }
+}
 
 function relevel(run) {
   const state = load();
@@ -38,7 +52,12 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       if (url.pathname === '/') return send(res, 200, readFileSync(join(UI, 'index.html')), 'text/html; charset=utf-8');
       if (url.pathname.startsWith('/fonts/') && FONTS.has(url.pathname.slice(7)))
         return send(res, 200, readFileSync(join(UI, 'fonts', url.pathname.slice(7))), 'font/ttf');
-      if (url.pathname === '/api/run') { const r = lastRun(); return send(res, 200, r ? relevel(r) : { empty: true }); }
+      if (url.pathname === '/api/run') { const r = lastRun(); return send(res, 200, r ? { ...relevel(r), home: homedir() } : { empty: true }); }
+      if (url.pathname === '/api/code') {
+        const item = lastRun()?.items.find(i => i.key === url.searchParams.get('key'));
+        const w = codeWindow(item?.dir, url.searchParams.get('file'), Number(url.searchParams.get('line')));
+        return w ? send(res, 200, w) : send(res, 404, { error: 'no code' });
+      }
       if (url.pathname === '/api/watch') return send(res, 200, watch ?? { idle: true });
       return send(res, 404, { error: 'not found' });
     }

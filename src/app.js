@@ -26,6 +26,12 @@ const TEXT = new Set(['.js', '.mjs', '.cjs', '.json', '.map', '.html', '.htm', '
 
 const redact = s => `${s.slice(0, 4)}…(${s.length} chars)`;
 
+/** One line with every secret-shaped value cut down to its first four characters, for showing code around a finding. */
+export function redactLine(line) {
+  for (const s of SECRETS) line = line.replace(new RegExp(s.re.source, 'g'), redact);
+  return line.replace(new RegExp(ASSIGNED.source, 'gi'), (m, v) => entropy(v) > 3.8 ? m.replace(v, redact(v)) : m);
+}
+
 export function secretFacts(text, file) {
   const out = [];
   text.split(/\r?\n/).forEach((line, i) => {

@@ -36,7 +36,7 @@ export async function checkItems(items, { model = true, onItem = () => {} } = {}
     }
     const approved = state.approved[it.key] === it.fp;
     const diff = approved ? null : newSince(state, `${it.kind}:${it.name}`, r.caps);
-    run.items.push({ ...r, key: it.key, name: it.name, kind: it.kind, fp: it.fp, approved, diff });  // same bytes, other place: same result
+    run.items.push({ ...r, key: it.key, name: it.name, kind: it.kind, fp: it.fp, dir: it.dir, claim: (it.claim || '').slice(0, 320), approved, diff });  // same bytes, other place: same result
     onItem(run.items.at(-1), items.length);
   }
   save(state);

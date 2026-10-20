@@ -121,3 +121,13 @@ test('the morning report answers only this machine, and only JSON from its own p
     assert.equal(await req('POST', '/api/approve', { host, 'content-type': 'text/plain' }, '{}'), 415);  // a plain cross-site form
   } finally { server.close(); }
 });
+
+test('code shown around a finding stays inside the item and never shows a secret', async () => {
+  const { codeWindow } = await import('../src/server.js');
+  const app = join(FX, 'my-electron-app');
+  const w = codeWindow(app, 'main.js', 3);
+  assert.ok(w && w.lines.length > 1 && w.start === 1);
+  assert.ok(!JSON.stringify(w).includes('AbCdEfGhIjKlMnOpQrStUvWxYz0123456789'), 'the full key must never be served');
+  assert.equal(codeWindow(app, '../evil-pkg/index.js', 1), null);
+  assert.equal(codeWindow(app, join(FX, 'evil-pkg', 'index.js'), 1), null);
+});
