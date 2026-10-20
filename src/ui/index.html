@@ -117,10 +117,58 @@ svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .sw.notable{opacity:.45}.sw.glance{background:#2F5BFF;opacity:1}.sw.hold{opacity:1}
 .sw.cleared{background:#fff;opacity:1;box-shadow:inset 0 0 0 1px color-mix(in oklab,currentColor 35%,transparent)}
 .dhint{font-size:12.5px;opacity:.6;margin-top:-4px}
-.tip{position:absolute;z-index:5;pointer-events:none;padding:7px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.35;white-space:nowrap;
-  transform:translate(-50%,-100%);opacity:0;transition:opacity .15s;box-shadow:0 8px 20px -8px rgba(0,0,0,.4)}
-.tip.on{opacity:1}
-.tip b{display:block;font:500 12.5px var(--mono)}
+/* the peek: a three-second replay of what the watch found in one item */
+.peek{position:fixed;z-index:72;left:0;top:0;width:340px;max-width:calc(100% - 24px);border-radius:22px;overflow:hidden;background:var(--card);color:var(--ink);border:1px solid var(--line);
+  box-shadow:0 34px 70px -26px rgba(8,13,26,.6),0 2px 6px rgba(8,13,26,.08);opacity:0;transform:translateY(10px) scale(.94);transform-origin:var(--ox,50%) var(--oy,100%);pointer-events:none;
+  transition:opacity .2s,transform .4s var(--spring),left .28s var(--enter),top .28s var(--enter)}
+.peek.on{opacity:1;transform:none}
+.peek.pinned{pointer-events:auto}
+.stage{position:relative;height:178px;overflow:hidden;color:#EAF0FA;background:radial-gradient(120% 100% at 50% 0%,#24365F 0%,#0B1220 72%)}
+.stage::before{content:"";position:absolute;inset:0;opacity:.55;background:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/22px 22px;
+  -webkit-mask:radial-gradient(90% 80% at 50% 60%,#000,transparent);mask:radial-gradient(90% 80% at 50% 60%,#000,transparent)}
+.stage .cam{position:absolute;inset:0;animation:ken 3.6s cubic-bezier(.2,0,.2,1) both}
+@keyframes ken{from{transform:scale(1.08) translateY(4px)}to{transform:scale(1)}}
+.stage .box{position:absolute;left:50%;bottom:10px;width:262px;transform:translateX(-50%);animation:boxin .7s var(--spring) both}
+@keyframes boxin{from{opacity:0;transform:translate(-50%,22px) scale(.92)}}
+.stage .beam{animation:beam .95s cubic-bezier(.45,0,.2,1) .2s both}
+@keyframes beam{0%{opacity:0;transform:translateX(0)}12%,82%{opacity:1}100%{opacity:0;transform:translateX(196px)}}
+.stage .xray{animation:xray 1.2s ease-out .2s both}
+@keyframes xray{0%{opacity:0}40%{opacity:.32}100%{opacity:0}}
+.stage .live{position:absolute;left:14px;top:12px;display:flex;align-items:center;gap:6px;font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#C9D4E8}
+.stage .live i{width:7px;height:7px;border-radius:50%;background:#7FD4FF;box-shadow:0 0 0 3px rgba(127,212,255,.2);animation:lamp 1.2s ease-in-out infinite}
+@keyframes lamp{50%{opacity:.35}}
+.powers{position:absolute;top:34px;left:0;right:0;display:flex;justify-content:center;gap:7px}
+.powers .pi{width:30px;height:30px;border-radius:10px;animation:popin .5s var(--bounce) both;animation-delay:calc(1s + var(--n) * .11s)}
+@keyframes popin{from{opacity:0;transform:translateY(14px) scale(.5)}}
+.pstamp{position:absolute;right:14px;top:12px;font:800 15px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border:3px double currentColor;border-radius:8px;
+  transform:rotate(-8deg);filter:url(#ink);animation:stampin .55s var(--bounce) 2.75s both}
+@keyframes stampin{from{opacity:0;transform:rotate(-8deg) scale(2)}}
+.pstamp.hold{color:#FFCB2F}.pstamp.glance{color:#93ABFF}.pstamp.cleared{color:#fff}.pstamp.notable,.pstamp.quiet{color:#A6B1C2}
+.ptime{display:grid;grid-template-columns:.9fr .85fr .95fr .6fr;gap:3px;padding:12px 16px 0}
+.ptime i{position:relative;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.ptime i::after{content:"";position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0);animation:chap var(--d) linear var(--s) forwards}
+@keyframes chap{to{transform:scaleX(1)}}
+.pchap{display:grid;grid-template-columns:.9fr .85fr .95fr .6fr;gap:3px;padding:5px 16px 0;font:500 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.pchap span{animation:lit .2s var(--s) forwards}
+@keyframes lit{to{color:var(--ink)}}
+.pinfo{display:grid;gap:8px;padding:12px 16px 15px}
+.phead{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.phead .nm{font:500 14.5px/1.2 var(--mono);margin-right:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcap{font-size:13.5px;line-height:1.4;color:var(--muted);animation:fadeup .45s var(--enter) var(--s) both}
+.pcap b{color:var(--ink);font-weight:650}
+.pcap.pf{color:var(--ink);font-weight:600;font-size:14px}
+@keyframes fadeup{from{opacity:0;transform:translateY(7px)}}
+.ptype{display:flex;gap:8px;font:12px/1.45 var(--mono);background:var(--well);border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.ptype .at{color:var(--faint);white-space:nowrap}
+.ptype code{font:inherit;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:0;animation:type 1s steps(36,end) 1.95s forwards}
+@keyframes type{to{max-width:100%}}
+.pv{display:flex;align-items:center;gap:7px;color:var(--ink)}
+.pv svg{width:14px;height:14px;fill:currentColor;flex:none}
+.pv svg.i{fill:none}
+.pv .sp{flex:1}
+.phint{flex:none}
+.pv b{white-space:nowrap}
+.popen{height:34px;padding:0 14px;font-size:13.5px}
 
 /* the sloth: soft 3D, pill eyes, moods shown only through the eyes and mouth */
 .sloth{width:200px;height:190px;overflow:visible;justify-self:center;cursor:pointer;border-radius:30px}
@@ -378,7 +426,7 @@ html:has(body.touring){overflow:hidden}
 .tdots i.on{width:18px;background:var(--ink)}
 body.boot,body.boot *{transition:none!important}  /* the first paint lands in its colours; later changes animate */
 @media (max-width:420px){#again{width:40px;padding:0;gap:0;font-size:0}}  /* icon only on small phones, the title still names it */
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+@media (prefers-reduced-motion:reduce){.peek *{animation-delay:0s!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body data-v="night" class="boot">
@@ -452,8 +500,7 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
       <div class="dhead"><p class="kicker">the cargo<button class="xi" data-explain="cargo" aria-label="What is the cargo?">i</button></p><span class="aboard"><b class="num" id="aboard">0</b>aboard</span></div>
       <svg class="ship" id="ship" viewBox="0 0 280 80" role="img" aria-label="Everything aboard"></svg>
       <p class="dleg" id="dleg"></p>
-      <p class="dhint">one container per thing you installed. point at one, or tap it, to see what it is.</p>
-      <div class="tip" id="tip"></div>
+      <p class="dhint">one container per thing you installed. point at one for a replay of what the watch found; click to open it.</p>
     </aside>
   </div></div>
   <div class="tiles" id="tiles"><div class="card sk"></div><div class="card sk"></div><div class="card sk"></div></div>
@@ -483,6 +530,7 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
   <div class="when" id="footmeta"></div>
 </div></footer>
 <div id="pop" role="tooltip"></div>
+<div id="peek" class="peek" aria-hidden="true"></div>
 <div id="tourblock"></div><div id="spot"></div><div id="tourcard" role="dialog" aria-modal="true" aria-label="How to read this page"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastmsg"></span><button id="toastundo" hidden>undo</button></div>
 
@@ -705,8 +753,8 @@ const EXPLAIN = {
   help: () => ({ t: 'how to read this page', b: 'a 30-second tour of the report. take it again any time.' }),
   verdict: () => ({ t: 'the verdict', b: '<span>what last night’s watch decided, in three words.</span><span><b>held in port:</b> something does more than it says. look before you ship.</span><span><b>ready, after a glance:</b> nothing serious, a few things worth a look.</span><span><b>cleared to sail:</b> nothing needs you.</span>' }),
   skipper: () => ({ t: 'the skipper', b: `<span class="say">“${skipperLine()}”</span><span>his face is the verdict at a glance:</span><div class="moods">${MOODS.map(([m, w]) => `<span class="${$('#sloth').dataset.mood === m ? 'on' : ''}">${miniFace(m)}<b>${m}</b>${w}</span>`).join('')}</div><span class="fline"><span><i class="fq"></i>Q flag: held in port</span><span><i class="fp"></i>Blue Peter: ready to sail</span></span>` }),
-  clearance: () => ({ t: 'clearance', b: `<span>one block for each of the <b>${G.filter(needs).length} things</b> that need you, worst first.</span><span><b>striped</b> is on hold, <b>faint</b> is worth a glance, <b>solid</b> is cleared. fill every block and you’re cleared to sail.</span><span>point at a block to see which one it is. tap it to open it.</span>` }),
-  cargo: () => ({ t: 'the cargo', b: '<span>everything this project brings aboard, one container each: packages from your lockfile, agent skills, MCP servers and your own build.</span><span>quiet cargo sits low and faint. flagged cargo is stacked on top: <b>blue</b> to glance at, <b>dark</b> on hold, <b>white</b> cleared.</span><span>point at a container to name it. tap it to open it.</span>' }),
+  clearance: () => ({ t: 'clearance', b: `<span>one block for each of the <b>${G.filter(needs).length} things</b> that need you, worst first.</span><span><b>striped</b> is on hold, <b>faint</b> is worth a glance, <b>solid</b> is cleared. fill every block and you’re cleared to sail.</span><span>point at a block for a replay of what was found in it. click to open it.</span>` }),
+  cargo: () => ({ t: 'the cargo', b: '<span>everything this project brings aboard, one container each: packages from your lockfile, agent skills, MCP servers and your own build.</span><span>quiet cargo sits low and faint. flagged cargo is stacked on top: <b>blue</b> to glance at, <b>dark</b> on hold, <b>white</b> cleared.</span><span>point at a container for a replay of what was found in it. click to open it.</span>' }),
   read: () => ({ t: 'read overnight', b: '<span>how many things slowship read in this project. the same bytes installed in two places count once.</span><span>tap a kind to list just those in the manifest.</span>' }),
   touch: () => ({ t: 'what they can touch', b: '<span>what the code can actually do, read from the code itself, not from its description.</span><span>none of it is bad on its own: a downloader makes network calls. tap a row to see which ones.</span>' }),
   watch: () => ({ t: 'the watch', b: '<span>how long the local model spent reading, and what it skipped because the bytes hadn’t changed.</span><span>tomorrow’s watch only reads what’s new. nothing is uploaded.</span>' }),
@@ -748,8 +796,9 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-explain]');
   if (el && el.id !== 'help') { popFor === el && popPinned ? hidePop() : showPop(el, explainOf(el), true); return; }
   if (popPinned && !pop.contains(e.target)) hidePop();
+  if (peek.classList.contains('pinned') && !peek.contains(e.target)) hidePeek();
 });
-addEventListener('scroll', () => { if (popFor && tour < 0) hidePop(); }, { passive: true });
+addEventListener('scroll', () => { if (popFor && tour < 0) hidePop(); if (peekFor && (!peek.classList.contains('pinned') || Math.abs(scrollY - peekY) > 80)) hidePeek(); }, { passive: true });  // a pinned peek survives a thumb's nudge
 
 // the skipper reacts when you poke him, and answers with the keyboard too
 $('#sloth').addEventListener('click', () => { const sl = $('#sloth'); if (!REDUCED) { sl.classList.remove('boing'); void sl.offsetWidth; sl.classList.add('boing'); } });
@@ -764,10 +813,6 @@ function openItem(i) {
   row.querySelector('.tog').focus({ preventScroll: true });
   row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
 }
-const segItem = t => { const k = t.closest?.('#meter i')?.dataset.k; return k && G.find(x => x.fp === k); };
-$('#meter').addEventListener('pointerover', e => { const i = segItem(e.target); if (i && !popPinned) showPop(e.target, { t: esc(label(i)), b: `<span>${KIND[i.kind]} · ${ST[stateOf(i)]}. tap to open it.</span>` }); });
-$('#meter').addEventListener('pointerleave', () => { if (!popPinned) hidePop(); });
-$('#meter').addEventListener('click', e => { const i = segItem(e.target); if (i) { hidePop(); openItem(i); } });
 
 // the tour: six stops, each spotlit, each explained once
 const TOUR = [['.ticket h1', 'verdict'], ['#sloth', 'skipper'], ['#meter', 'clearance'], ['.deck', 'cargo'], ['#tiles .card:nth-child(2)', 'touch'], ['#rows .head, #rows .calm', 'needs']];
@@ -968,26 +1013,95 @@ addEventListener('pointermove', e => {
   const r = $('#sloth').getBoundingClientRect(), dx = (e.clientX - (r.left + r.width / 2)) / innerWidth, dy = (e.clientY - (r.top + r.height / 2)) / innerHeight;
   $('#eyes').style.transform = `translate(${Math.max(-3.5, Math.min(3.5, dx * 12))}px, ${Math.max(-2.5, Math.min(2.5, dy * 8))}px)`;
 }, { passive: true });
-// the cargo answers a pointer: its name on hover, the item itself on click
-$('#ship').addEventListener('pointerover', e => {
-  const c = e.target.closest('.c'), i = c && G.find(x => x.fp === c.dataset.fp); if (!i) return;
-  const r = c.getBoundingClientRect(), box = $('.deck').getBoundingClientRect(), tip = $('#tip');
-  tip.innerHTML = `<b>${esc(label(i))}</b>${KIND[i.kind]} · ${ST[c.classList[1]]}`;
-  tip.style.left = `${Math.max(80, Math.min(box.width - 80, r.left + r.width / 2 - box.left))}px`; tip.style.top = `${r.top - box.top - 6}px`; tip.classList.add('on');
-});
-$('#ship').addEventListener('pointerleave', () => $('#tip').classList.remove('on'));
-$('#ship').addEventListener('click', e => {
-  const c = e.target.closest('.c'), i = c && G.find(x => x.fp === c.dataset.fp); if (!i) return;
-  const row = $(`#rows .row[data-fp="${CSS.escape(i.fp)}"]`);
-  if (row) { if (!row.classList.contains('open')) row.querySelector('.tog').click(); row.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' }); row.querySelector('.tog').focus({ preventScroll: true }); }
-  else { S.q = label(i); $('#q').value = S.q; S.cap = null; setFilter('all'); jump(); }
-});
+// ---------- the peek: point at cargo or a clearance block for a short replay of its watch ----------
+const STAMP = { hold: 'on hold', glance: 'glance', cleared: 'cleared', notable: 'noted', quiet: 'quiet' };
+const BOX = {  // front, top, side, ink: the container wears its verdict
+  hold: ['#FFCB2F', '#FFE385', '#D29B00', '#0E1726'], glance: ['#2F5BFF', '#6F8CFF', '#1C38B8', '#FFFFFF'], cleared: ['#EEF2F8', '#FFFFFF', '#C3CCDA', '#0E1726'],
+  notable: ['#68778D', '#8795AA', '#4A576B', '#FFFFFF'], quiet: ['#4F5D72', '#6B7A90', '#38434F', '#E3E9F2'],
+};
+const CODE = { npm: 'PKG', skill: 'SKL', mcp: 'MCP', app: 'APP' };
+const short = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
+function boxSVG(i, st) {
+  const [f, t, sd, ink] = BOX[st], at = i.kind === 'npm' ? label(i).lastIndexOf('@') : -1;
+  const name = at > 0 ? label(i).slice(0, at) : label(i), ver = at > 0 ? label(i).slice(at + 1) : '';
+  const ribs = Array.from({ length: 17 }, (_, k) => `M${49 + k * 9.4} 54v56`).join('');
+  return `<svg class="box" viewBox="0 0 262 132" aria-hidden="true">
+    <defs><linearGradient id="bmg" x1="0" x2="1"><stop offset="0" stop-color="#9FD0FF" stop-opacity="0"/><stop offset=".5" stop-color="#E6F4FF" stop-opacity=".95"/><stop offset="1" stop-color="#9FD0FF" stop-opacity="0"/></linearGradient></defs>
+    <ellipse cx="128" cy="124" rx="112" ry="7" fill="#000" opacity=".45"/>
+    <path d="M40 52 L66 32 H234 L208 52Z" fill="${t}"/><path d="M208 52 L234 32 V98 L208 118Z" fill="${sd}"/>
+    <rect x="40" y="52" width="168" height="66" fill="${f}"/>
+    <path d="${ribs}" stroke="#000" stroke-opacity=".13" stroke-width="2.2"/>
+    <path d="M190 56v58M199 56v58" stroke="#000" stroke-opacity=".22" stroke-width="2"/>
+    <rect x="40" y="52" width="168" height="66" fill="none" stroke="#000" stroke-opacity=".28" stroke-width="2"/>
+    <text x="51" y="70" fill="${ink}" font-family="IBM Plex Mono" font-size="9.5" font-weight="500" opacity=".78" letter-spacing=".8">${CODE[i.kind]}${ver ? ' · ' + esc(short(ver, 12)) : ''}</text>
+    <text x="51" y="101" fill="${ink}" font-family="Unbounded" font-size="${name.length > 11 ? 12 : 15}" font-weight="700" letter-spacing="-.6">${esc(short(name, 16))}</text>
+    <rect class="xray" x="40" y="52" width="168" height="66" fill="#CFE6FF"/>
+    <rect class="beam" x="30" y="24" width="14" height="100" fill="url(#bmg)"/>
+  </svg>`;
+}
+const CH = [['scan', 0, .95], ['powers', .95, .85], ['finding', 1.8, .95], ['verdict', 2.75, .6]];
+function peekHTML(i, pinned) {
+  const st = stateOf(i), pw = TOUCH.filter(t => touches(i, t)).slice(0, 6);
+  const f = i.findings.find(needs) ?? i.findings.find(x => x.level === 'notable');
+  const ev = f ? evidence(i, f) : [], line = ev[0], said = ev.find(e => e.why);
+  const words = { expected: 'as described', unexpected: 'not in the description', unclear: 'unsure' }[said?.label];
+  const icons = pw.length ? pw : [['check', 'nothing notable']];
+  return `<div class="stage"><div class="cam">${boxSVG(i, st)}</div>
+      <span class="live"><i></i>replaying the watch</span>
+      <div class="powers">${icons.map((t, n) => `<span class="pi" style="--n:${n}" title="${t[1]}">${IC[t[0]]}</span>`).join('')}</div>
+      <span class="pstamp ${st}">${STAMP[st]}</span></div>
+    <div class="ptime">${CH.map(([, at, d]) => `<i style="--s:${at}s;--d:${d}s"></i>`).join('')}</div>
+    <div class="pchap">${CH.map(([n, at]) => `<span style="--s:${at}s">${n}</span>`).join('')}</div>
+    <div class="pinfo">
+      <div class="phead"><span class="nm">${esc(label(i))}</span><span class="chip">${KIND[i.kind]}</span>${i.also.length ? `<span class="chip">${i.also.length + 1} places</span>` : ''}</div>
+      <p class="pcap" style="--s:1s">${pw.length ? `can touch: <b>${pw.map(t => t[1]).join(' · ')}</b>` : 'touches nothing notable'}</p>
+      ${f ? `<p class="pcap pf" style="--s:1.8s">${sayHTML(f)}</p>${line ? `<div class="ptype pcap" style="--s:1.85s"><span class="at">${esc(line.file === '(REA)' ? 'REA' : line.file + (line.line ? ':' + line.line : ''))}</span><code>${esc(line.code || line.detail)}</code></div>` : ''}`
+        : '<p class="pcap" style="--s:1.8s">read every file it ships: nothing to look at.</p>'}
+      <p class="pcap pv" style="--s:2.8s">${said ? `${SPARK}<b>${esc((S.run.model || 'model').split(':')[0])}</b>&nbsp;· ${words}` : `${IC.lock}read, never run`}<span class="sp"></span>${pinned ? '<button class="btn go popen">open it</button>' : '<kbd class="phint" title="click to open it">click</kbd>'}</p>
+    </div>`;
+}
+const peek = $('#peek');
+let peekFor = null, peekItem = null, peekT, touchy = false, peekY = 0;
+addEventListener('pointerdown', e => { touchy = e.pointerType !== 'mouse'; }, { capture: true, passive: true });
+function showPeek(anchor, i, pinned = false) {
+  clearTimeout(peekT); hidePop();
+  const was = peek.classList.contains('on');
+  peekFor = anchor; peekItem = i; peekY = scrollY;
+  peek.innerHTML = peekHTML(i, pinned);
+  peek.classList.toggle('pinned', pinned);
+  const r = anchor.getBoundingClientRect(), pw = peek.offsetWidth, ph = peek.offsetHeight;
+  const above = r.top - ph - 14 > 8, x = Math.max(12, Math.min(innerWidth - pw - 12, r.left + r.width / 2 - pw / 2));
+  const y = above ? r.top - ph - 12 : Math.min(innerHeight - ph - 8, r.bottom + 12);
+  if (!was) peek.style.transition = 'opacity .2s,transform .4s var(--spring)';  // appear in place, glide after
+  peek.style.left = x + 'px'; peek.style.top = y + 'px';
+  peek.style.setProperty('--ox', `${r.left + r.width / 2 - x}px`); peek.style.setProperty('--oy', above ? '100%' : '0%');
+  if (!was) { void peek.offsetWidth; peek.style.transition = ''; peek.classList.add('on'); }
+}
+function hidePeek() { clearTimeout(peekT); peek.classList.remove('on', 'pinned'); peekFor = peekItem = null; }
+// hover previews (after a breath, so a sweep across the deck doesn't strobe), click opens, a tap on a phone previews first
+function wirePeek(host, pick) {
+  host.addEventListener('pointerover', e => {
+    if (e.pointerType !== 'mouse' || peek.classList.contains('pinned') || tour >= 0) return;
+    const el = pick(e.target), i = el && G.find(x => x.fp === (el.dataset.fp || el.dataset.k)); if (!i || el === peekFor) return;
+    clearTimeout(peekT); peekT = setTimeout(() => showPeek(el, i), peek.classList.contains('on') ? 70 : 160);
+  });
+  host.addEventListener('pointerleave', () => { if (!peek.classList.contains('pinned')) { clearTimeout(peekT); peekT = setTimeout(hidePeek, 120); } });
+  host.addEventListener('click', e => {
+    const el = pick(e.target), i = el && G.find(x => x.fp === (el.dataset.fp || el.dataset.k)); if (!i) return;
+    e.stopPropagation();
+    if (touchy && peekFor !== el) return showPeek(el, i, true);
+    hidePeek(); openItem(i);
+  });
+}
+wirePeek($('#ship'), t => t.closest?.('.c'));
+wirePeek($('#meter'), t => t.closest?.('#meter i'));
+peek.addEventListener('click', e => { if (e.target.closest('.popen') && peekItem) { const i = peekItem; hidePeek(); openItem(i); } });
 addEventListener('scroll', () => $('#bar').classList.toggle('scrolled', scrollY > 8), { passive: true });
 
 // keyboard: j/k move, a clears, enter opens, / searches
 addEventListener('keydown', e => {
   if (tour >= 0) { const k = e.key; if (k === 'Escape') tourEnd(); else if (k === 'ArrowRight') tourGo(tour + 1); else if (k === 'ArrowLeft') tourGo(tour - 1); return; }
-  if (e.key === 'Escape' && popFor) { hidePop(); return; }
+  if (e.key === 'Escape' && (popFor || peekFor)) { hidePop(); hidePeek(); return; }
   if (e.target.matches?.('input')) { if (e.key === 'Escape') e.target.blur(); return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const list = $$('#rows .row:not(.gone)');
