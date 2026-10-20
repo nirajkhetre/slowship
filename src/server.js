@@ -8,7 +8,7 @@ import { worst } from './policy.js';
 
 const UI = join(import.meta.dirname, 'ui');
 const LAST = join(HOME, 'last-run.json');
-const FONTS = new Set(['Fraunces.ttf', 'SchibstedGrotesk.ttf', 'IBMPlexMono-Regular.ttf', 'IBMPlexMono-Medium.ttf']);
+const FONTS = new Set(['Unbounded.ttf', 'SchibstedGrotesk.ttf', 'IBMPlexMono-Regular.ttf', 'IBMPlexMono-Medium.ttf']);
 
 export const saveRun = (run, options) => writeFileSync(LAST, JSON.stringify({ ...run, options, finished: new Date().toISOString() }));
 const lastRun = () => (existsSync(LAST) ? JSON.parse(readFileSync(LAST, 'utf8')) : null);

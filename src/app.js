@@ -101,9 +101,9 @@ export function reaFacts(summary) {
   const out = [], add = (cap, detail) => out.push({ cap, detail, file: '(REA)', line: 0, scope: 'rea#0', code: '' });
   const ipc = summary.ipc ?? {};
   if (ipc.main_handlers > 0 && !summary.sender_validation_observations)
-    add('ipc-unchecked', `${ipc.main_handlers} IPC handler(s) in the main process, and REA saw none check who sent the message`);
-  if (summary.exposed_api_members > 0) add('bridge', `${summary.exposed_api_members} function(s) exposed to web pages through contextBridge`);
-  if (summary.native_addon_bindings > 0) add('native', `${summary.native_addon_bindings} native addon(s): compiled code slowship can't read`);
+    add('ipc-unchecked', `${ipc.main_handlers} IPC handler${ipc.main_handlers === 1 ? '' : 's'} in the main process, and REA saw none check who sent the message`);
+  if (summary.exposed_api_members > 0) add('bridge', `${summary.exposed_api_members} function${summary.exposed_api_members === 1 ? '' : 's'} exposed to web pages through contextBridge`);
+  if (summary.native_addon_bindings > 0) add('native', `${summary.native_addon_bindings} native addon${summary.native_addon_bindings === 1 ? '' : 's'}: compiled code slowship can't read`);
   return out;
 }
 
