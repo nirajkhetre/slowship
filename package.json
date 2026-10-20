@@ -1,0 +1,21 @@
+{
+  "name": "slowship",
+  "version": "0.1.0",
+  "description": "Ship safe, slowly. A local overnight check of your app, its packages, and your agent's skills and MCP servers: does each one do what it says?",
+  "type": "module",
+  "bin": {
+    "slowship": "bin/slowship.js"
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "acorn": "^8.19.0",
+    "acorn-loose": "^8.5.2",
+    "acorn-walk": "^8.3.5"
+  }
+}
