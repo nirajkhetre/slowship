@@ -198,26 +198,12 @@ svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .tiles{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:14px;margin-top:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:22px 24px;box-shadow:0 1px 2px rgba(14,23,38,.04)}
 .card .kicker{color:var(--muted)}
-.big{font:750 46px/1 var(--display);letter-spacing:-.05em;margin:16px 0 6px}
-.big small{font:500 15px var(--sans);letter-spacing:0;color:var(--muted);margin-left:6px}
-.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin:14px 0 12px}
-.stack i{display:block;height:100%;background:var(--ink)}
-.legend{display:grid;gap:2px}
+.legend{display:grid;gap:2px;min-width:0}
 .lg{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;padding:6px 8px;margin:0 -8px;border-radius:10px;border:0;background:none;text-align:left;cursor:pointer;font-size:14.5px;transition:background .2s}
-.lg:hover,.lg[aria-pressed=true]{background:var(--well)}
-.lg i{width:10px;height:10px;border-radius:3px;background:var(--ink)}
+.lg:hover,.lg.hot,.lg[aria-pressed=true]{background:var(--well)}
+.lg i{width:10px;height:10px;border-radius:3px;transition:transform .35s var(--bounce)}
+.lg.hot i{transform:scale(1.35)}
 .lg b{font:500 13px var(--mono);color:var(--muted)}
-.foot{margin-top:10px;font-size:13px;color:var(--faint)}
-.touch{display:grid;gap:4px;margin-top:14px}
-.tr{display:grid;grid-template-columns:32px 1fr 40px;grid-template-rows:auto auto;column-gap:12px;align-items:center;padding:7px 8px;margin:0 -8px;border:0;border-radius:12px;background:none;text-align:left;cursor:pointer;transition:background .2s}
-.tr:hover,.tr[aria-pressed=true]{background:var(--well)}
-.tr .pi{grid-row:1/3}
-.tr span{font-size:14.5px;font-weight:600}
-.tr b{font:500 13px var(--mono);text-align:right;color:var(--muted)}
-.tr .bar2{grid-column:2/4;height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:5px}
-.tr .bar2 i{display:block;height:100%;background:var(--ink);border-radius:2px;transform-origin:left;animation:grow 1s var(--enter) both}
-@keyframes grow{from{transform:scaleX(0)}}
-.tr[aria-pressed=true] .bar2 i{background:var(--accent)}
 /* porcelain icon tiles: neutral at rest, the accent when chosen */
 .pi{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:var(--ink);
   background:linear-gradient(180deg,#fff,#ECE8DF);box-shadow:inset 0 1px 0 #fff,inset 0 -2px 0 rgba(14,23,38,.07),0 1px 2px rgba(14,23,38,.14),0 0 0 1px rgba(14,23,38,.07)}
@@ -227,8 +213,93 @@ svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 :root[data-theme=dark] .pi{background:linear-gradient(180deg,#22304A,#172238);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 1px 2px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.05)}
 .badge{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:7px 11px;border-radius:999px;background:var(--well);font:500 12.5px var(--mono);color:var(--ink)}
 .badge svg{width:14px;height:14px}
-.lines{display:grid;gap:7px;margin-top:6px;font-size:14px;color:var(--muted)}
-.lines b{color:var(--ink);font-weight:650}
+/* the three tiles: each draws its own data, and each answers a pointer */
+.card.glow{position:relative;isolation:isolate;container-type:inline-size;transition:transform .5s var(--spring),box-shadow .4s}
+.card.glow:hover{transform:translateY(-3px);box-shadow:0 24px 50px -30px rgba(14,23,38,.45)}
+.card.glow::before,.card.glow::after{content:"";position:absolute;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .45s}
+.card.glow::before{inset:0;z-index:-1;background:radial-gradient(280px circle at var(--mx,50%) var(--my,0%),color-mix(in oklab,var(--accent) 16%,transparent),transparent 65%)}
+.card.glow::after{inset:-1px;padding:1.5px;background:radial-gradient(220px circle at var(--mx,50%) var(--my,0%),color-mix(in oklab,var(--accent) 90%,var(--ink)),transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.card.glow:hover::before,.card.glow:hover::after{opacity:1}
+/* odometer numbers: every digit is a column of 0-9 that rolls into place */
+.odo{display:inline-flex;align-items:baseline;font-variant-numeric:tabular-nums}
+.odo .dg{display:inline-block;height:1em;overflow:hidden;line-height:1em}
+.odo .dg>span{display:flex;flex-direction:column;transition:transform 1s var(--spring)}
+.odo .dg i{display:block;height:1em;line-height:1em;font-style:normal}
+.odo .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+/* read overnight: the ring */
+.ringwrap{display:grid;grid-template-columns:124px minmax(0,1fr);gap:18px;align-items:center;margin-top:16px}
+.ring{position:relative;width:124px;height:124px}
+.ring svg{width:100%;height:100%;overflow:visible}
+.ring .track{fill:none;stroke:var(--line);stroke-width:13}
+.ring .arc{fill:none;stroke-width:13;stroke-linecap:round;transform:rotate(-90deg);transform-origin:60px 60px;cursor:pointer;transition:stroke-width .4s var(--spring),opacity .3s}
+.ring .halo{stroke:var(--ink);stroke-width:16;pointer-events:none}
+.tiles.intro .ring .arc{animation:arcIn 1.2s var(--enter) var(--d,0ms) both}
+@keyframes arcIn{from{stroke-dasharray:0 302}}
+.ring.focus .arc{opacity:.2}
+.ring.focus .arc.on{opacity:1;stroke-width:18}
+.ring.focus .halo.on{stroke-width:21}
+.rc{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;text-align:center;pointer-events:none}
+.rn{font:750 27px/1 var(--display);letter-spacing:-.05em}
+.rc small{font-size:12px;color:var(--muted);margin-top:4px;transition:opacity .2s}
+.mchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+.mchip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line2);background:none;font:500 12px var(--mono);color:var(--muted);cursor:pointer;transition:background .2s,color .2s,transform .35s var(--bounce)}
+.mchip:hover{background:var(--well);color:var(--ink);transform:translateY(-1px)}
+.mchip svg{width:13px;height:13px}
+@container (max-width:262px){.ringwrap{grid-template-columns:1fr;justify-items:center}.ringwrap .legend{width:100%}}
+/* what they can touch: the power signature */
+.sigwrap{display:grid;grid-template-columns:172px minmax(0,1fr);gap:18px;align-items:center;margin-top:8px}
+.radar{position:relative;width:172px;height:172px;margin:6px 0}
+.radar svg{width:100%;height:100%;overflow:visible}
+.rg{fill:none;stroke:var(--line);stroke-width:1}
+.ax{stroke:var(--line);stroke-width:1;transition:stroke .25s,stroke-width .25s}
+.ax.on{stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 3}
+.shape{fill:color-mix(in oklab,var(--accent) 32%,transparent);stroke:var(--ink);stroke-width:1.8;stroke-linejoin:round}
+.tiles.intro .shape{animation:sigIn 1.2s var(--spring) .15s both}
+@keyframes sigIn{from{transform:scale(0) rotate(-40deg);opacity:0}}
+.vx{fill:var(--ink);cursor:pointer;transition:r .35s var(--spring),fill .25s}
+.vx.on{r:6;fill:var(--accent);stroke:var(--ink);stroke-width:1.6}
+.sigwrap.focus .shape{fill:color-mix(in oklab,var(--accent) 22%,transparent)}
+.rpi{position:absolute;width:24px;height:24px;border-radius:9px;transform:translate(-50%,-50%);border:0;padding:0;cursor:pointer;transition:transform .4s var(--bounce)}
+.rpi svg{width:14px;height:14px}
+.rpi.hot{transform:translate(-50%,-50%) scale(1.22)}
+.rpi[aria-pressed=true]{background:linear-gradient(180deg,color-mix(in oklab,var(--accent) 55%,#fff),var(--accent));color:var(--accent-ink)}
+.tiles.intro .rpi{animation:rpiIn .55s var(--bounce) both;animation-delay:calc(.45s + var(--n) * 70ms)}
+@keyframes rpiIn{from{opacity:0;transform:translate(-50%,-50%) scale(.3)}}
+.pws{display:grid;gap:1px;min-width:0}
+.pw{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 0fr;column-gap:10px;padding:6px 10px;margin:0 -10px;border:0;border-radius:11px;background:none;text-align:left;cursor:pointer;
+  transition:background .2s,grid-template-rows .4s var(--enter)}
+.pw .pl{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pw b{font:500 13px var(--mono);color:var(--muted);align-self:center}
+.pw .who{grid-column:1/-1;overflow:hidden;min-height:0}
+.pw .who span{display:block;padding-top:3px;font:500 11.5px/1.35 var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pw.hot,.pw[aria-pressed=true]{background:var(--well);grid-template-rows:auto 1fr}
+.sigcap{margin-top:10px;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+@container (max-width:360px){.sigwrap{grid-template-columns:1fr;justify-items:center}.sigwrap .pws{width:100%}}
+/* the watch: how slowship stayed fast */
+.wbig{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+.wt{font:750 40px/1 var(--display);letter-spacing:-.05em}
+.wbig small{font-size:13.5px;color:var(--muted)}
+.flowcap{font-size:13px;color:var(--muted);margin-top:6px}
+.flowcap b{color:var(--ink);font-weight:650}
+.flow{display:block;width:100%;height:auto;margin-top:6px;overflow:visible}
+.flow .src,.flow .tb{fill:var(--ink)}
+.flow .st{cursor:help;transition:opacity .3s}
+.flow:hover .st{opacity:.32}
+.flow .st:hover{opacity:1}
+.flow .band{transition:filter .3s}
+.flow .st:hover .band{filter:brightness(1.05) saturate(1.2)}
+.flow .st-skip .band{fill:color-mix(in oklab,var(--ink) 16%,transparent)}
+.flow .st-rules .band{fill:color-mix(in oklab,var(--ink) 26%,transparent)}
+.flow .st-model .band{fill:url(#flowG)}
+.flow .dots{fill:none;stroke:var(--card);stroke-linecap:round;stroke-dasharray:.1 9;animation:stream 1.4s linear infinite;opacity:.9}
+.flow .st-model .dots{animation-duration:.9s}
+@keyframes stream{to{stroke-dashoffset:-9.1}}
+.flow .zero{fill:none;stroke:var(--line2);stroke-dasharray:3 4}
+.flow .tn{font:750 13px var(--display);letter-spacing:-.04em;fill:var(--ink)}
+.flow .tl{font:500 10.5px var(--mono);fill:var(--muted)}
+.tiles.intro .flow .band{animation:bandIn 1.1s var(--enter) var(--d,0ms) both}
+@keyframes bandIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 
 /* ---------- sections ---------- */
 main{padding:58px 0 20px}
@@ -702,29 +773,127 @@ function ticket() {
 }
 
 // ---------- tiles ----------
-function tiles() {
-  const r = S.run, s = r.stats || {};
-  const kinds = [['npm', 'packages'], ['skill', 'skills'], ['mcp', 'MCP servers'], ['app', 'your build']].map(([k, l]) => [k, l, G.filter(i => i.kind === k).length]).filter(x => x[2]);
-  const shades = [100, 62, 38, 20], unreadN = (r.unread || []).length, dupes = r.items.length - G.length;
-  const read = `<div class="card"><p class="kicker">read overnight${info('read')}</p><div class="big num">${G.length}<small>things</small></div>
-    <div class="stack">${kinds.map(([, , n], j) => `<i style="flex:${n};opacity:${shades[j] / 100}"></i>`).join('')}</div>
-    <div class="legend">${kinds.map(([k, l, n], j) => `<button class="lg" data-f="${k}" aria-pressed="${S.filter === k}"><i style="opacity:${shades[j] / 100}"></i><span>${l}</span><b>${n}</b></button>`).join('')}</div>
-    ${dupes || unreadN ? `<p class="foot">${[dupes ? `${dupes} were the same bytes in two places, read once` : '', unreadN ? `${unreadN} couldn’t be read (see below)` : ''].filter(Boolean).join(' · ')}</p>` : ''}</div>`;
-  const rows = TOUCH.map(t => [t, G.filter(i => touches(i, t)).length]).filter(([, n]) => n);
-  const max = Math.max(1, ...rows.map(([, n]) => n));
-  const touch = `<div class="card"><p class="kicker">what they can touch${info('touch')}</p>
-    <div class="touch">${rows.map(([t, n], j) => `<button class="tr" data-cap="${t[0]}" aria-pressed="${S.cap === t[0]}"><span class="pi">${IC[t[0]]}</span><span>${t[1]}</span><b>${n}</b><span class="bar2"><i style="width:${n / max * 100}%;animation-delay:${j * 60}ms"></i></span></button>`).join('')}</div></div>`;
-  const allCached = !s.judged && s.cached;
-  const watch = `<div class="card"><p class="kicker">the watch${info('watch')}</p>
-    ${r.model ? (allCached
-      ? `<div class="big num">${s.cached}<small>already read</small></div><div class="lines"><span>nothing new since the last watch, so ${esc(r.model.split(':')[0])} had nothing to read.</span><span>a changed package is read again, automatically.</span></div>`
-      : `<div class="big num">${fmtDur(s.ms || 0)}</div><div class="lines"><span><b>${esc(r.model)}</b> judged ${s.judged} on this laptop</span><span><b>${s.total - s.judged - s.cached}</b> needed no model at all</span>${s.cached ? `<span><b>${s.cached}</b> skipped: same bytes already read</span>` : ''}</div>`)
-      : `<div class="big num">rules</div><div class="lines"><span>no local model was running, so nothing was compared with its description.</span><span>start Ollama for the full watch.</span></div>`}
-    <span class="badge">${IC.lock}read, never run · uploads none</span></div>`;
-  $('#tiles').innerHTML = read + touch + watch;
-  $$('#tiles .lg').forEach(b => b.onclick = () => { setFilter(S.filter === b.dataset.f ? 'all' : b.dataset.f); jump(); });
-  $$('#tiles .tr').forEach(b => b.onclick = () => { S.cap = S.cap === b.dataset.cap ? null : b.dataset.cap; S.shown = 60; tiles(); table(); jump(); });
+// numbers roll like an odometer: each digit is a column of 0-9 that slides into place
+function odo(el, text, roll = true) {
+  text = String(text);
+  if (!el || el.dataset.t === text) return;
+  const shape = text.replace(/\d/g, '0');
+  if (el.dataset.shape !== shape) {
+    el.innerHTML = `<span class="sr">${esc(text)}</span>` + [...text].map(c => /\d/.test(c) ? `<span class="dg" aria-hidden="true"><span>${[...'0123456789'].map(d => `<i>${d}</i>`).join('')}</span></span>` : `<span aria-hidden="true">${esc(c)}</span>`).join('');
+    el.dataset.shape = shape;
+    if (!roll) el.querySelectorAll('.dg>span').forEach(c => c.style.transition = 'none');
+    void el.offsetWidth;
+  }
+  const cols = el.querySelectorAll('.dg>span');
+  [...text].filter(c => /\d/.test(c)).forEach((c, k) => { cols[k].style.transitionDelay = roll ? `${k * 45}ms` : '0ms'; cols[k].style.transform = `translateY(-${+c * 10}%)`; });
+  el.querySelector('.sr').textContent = text;
+  el.dataset.t = text;
+  if (!roll) requestAnimationFrame(() => cols.forEach(c => c.style.transition = ''));
 }
+const KINDS = [['npm', 'packages'], ['skill', 'skills'], ['mcp', 'MCP servers'], ['app', 'your build']];
+const SHADE = { npm: 'var(--ink)', skill: 'color-mix(in oklab,var(--ink) 52%,transparent)', mcp: 'color-mix(in oklab,var(--ink) 30%,transparent)', app: 'var(--accent)' };
+function tiles() {
+  const r = S.run, s = r.stats || {}, intro = !S.drawn, mname = (r.model || 'model').split(':')[0];
+  S.drawn = true;
+  $('#tiles').classList.toggle('intro', intro && !REDUCED);
+
+  // read overnight: a ring of what came aboard, by kind
+  const kinds = KINDS.map(([k, l]) => [k, l, G.filter(i => i.kind === k).length]).filter(x => x[2]);
+  const C = 2 * Math.PI * 48, gap = kinds.length > 1 ? 15 : 0, unreadN = (r.unread || []).length, dupes = r.items.length - G.length;
+  let off = 0;
+  const arcs = kinds.map(([k, , n], j) => {
+    const f = n / G.length, len = Math.max(.01, f * C - gap), st = `stroke-dasharray:${len.toFixed(2)} ${C.toFixed(2)};stroke-dashoffset:${(-off - gap / 2).toFixed(2)};--d:${j * 140}ms`;
+    off += f * C;
+    return (k === 'app' ? `<circle class="arc halo" data-k="app" r="48" cx="60" cy="60" style="${st}"/>` : '') + `<circle class="arc" data-k="${k}" r="48" cx="60" cy="60" stroke="${SHADE[k]}" style="${st}"/>`;
+  }).join('');
+  const read = `<div class="card glow"><p class="kicker">read overnight${info('read')}</p>
+    <div class="ringwrap"><div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" r="48" cx="60" cy="60"/>${arcs}</svg>
+      <div class="rc"><span class="odo rn" id="ringN"></span><small id="ringL">things</small></div></div>
+      <div class="legend">${kinds.map(([k, l, n]) => `<button class="lg" data-f="${k}" aria-pressed="${S.filter === k}"><i style="background:${SHADE[k]}${k === 'app' ? ';box-shadow:0 0 0 1.5px var(--ink)' : ''}"></i><span>${l}</span><b>${n}</b></button>`).join('')}</div></div>
+    ${dupes || unreadN ? `<div class="mchips">${dupes ? `<span class="mchip" data-explain="dupes">${IC.copy}${dupes} merged</span>` : ''}${unreadN ? `<button class="mchip" id="tounread">${IC.x}${unreadN} unreadable</button>` : ''}</div>` : ''}</div>`;
+
+  // what they can touch: the project's power signature
+  const sig = TOUCH.map(t => [t, G.filter(i => touches(i, t))]).filter(([, l]) => l.length);
+  const max = Math.max(1, ...sig.map(([, l]) => l.length)), n = sig.length, R = 62;
+  const at = (j, rad) => { const a = -Math.PI / 2 + j * 2 * Math.PI / n; return [Math.cos(a) * rad, Math.sin(a) * rad]; };
+  const val = l => 12 + Math.pow(l.length / max, .6) * (R - 12);  // a gentle curve, so a single risky item still shows
+  const poly = f => sig.map((_, j) => at(j, f(j)).map(v => v.toFixed(1)).join(',')).join(' ');
+  const radar = n >= 3 ? `<div><div class="radar"><svg viewBox="-100 -100 200 200" aria-hidden="true">
+      ${[1 / 3, 2 / 3, 1].map(k => `<polygon class="rg" points="${poly(() => R * k)}"/>`).join('')}
+      ${sig.map(([t], j) => { const [x, y] = at(j, R); return `<line class="ax" data-cap="${t[0]}" x1="0" y1="0" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join('')}
+      <polygon class="shape" points="${poly(j => val(sig[j][1]))}"/>
+      ${sig.map(([t, l], j) => { const [x, y] = at(j, val(l)); return `<circle class="vx" data-cap="${t[0]}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2"/>`; }).join('')}</svg>
+      ${sig.map(([t], j) => { const [x, y] = at(j, R + 26); return `<button class="pi rpi" data-cap="${t[0]}" style="left:${((x + 100) / 2).toFixed(1)}%;top:${((y + 100) / 2).toFixed(1)}%;--n:${j}" aria-label="${t[1]}" aria-pressed="${S.cap === t[0]}">${IC[t[0]]}</button>`; }).join('')}
+    </div><p class="sigcap">your power signature</p></div>` : '';
+  const who = l => [...l].sort((a, b) => ORDER[b.level] - ORDER[a.level] || label(a).localeCompare(label(b)));
+  const touch = `<div class="card glow"><p class="kicker">what they can touch${info('touch')}</p>
+    <div class="sigwrap">${radar}<div class="pws">${sig.map(([t, l]) => { const w = who(l); return `<button class="pw" data-cap="${t[0]}" aria-pressed="${S.cap === t[0]}"><span class="pl">${t[1]}</span><b>${l.length}</b><span class="who"><span>${w.slice(0, 2).map(i => esc(label(i))).join(', ')}${w.length > 2 ? ` +${w.length - 2}` : ''}</span></span></button>`; }).join('')}</div></div></div>`;
+
+  // the watch: everything found, and the three ways through it
+  const tot = s.total || 0, cached = s.cached || 0, judged = s.judged || 0, rules = Math.max(0, tot - cached - judged);
+  const streams = [['skip', cached, 'already read'], ['rules', rules, 'rules only'], ['model', judged, mname]];
+  const H = 112, GAP = 20, CY = 78, hs = streams.map(([, v]) => v ? Math.max(3, v / Math.max(1, tot) * H) : 0);
+  const sum = hs.reduce((a, b) => a + b, 0);
+  let sy = CY - sum / 2, ty = CY - (sum + GAP * (streams.length - 1)) / 2;
+  const bands = streams.map(([id, v, name], j) => {
+    const h = hs[j], a0 = sy, b0 = ty, mid = b0 + Math.max(h, 2) / 2;
+    sy += h; ty += Math.max(h, 2) + GAP;
+    const shape = h ? `<path class="band" style="--d:${j * 160}ms" d="M14 ${a0} C96 ${a0} 96 ${b0} 178 ${b0} L178 ${b0 + h} C96 ${b0 + h} 96 ${a0 + h} 14 ${a0 + h}Z"/>${h >= 5 ? `<path class="dots" style="stroke-width:${Math.min(3.2, h - 2).toFixed(1)}" d="M14 ${a0 + h / 2} C96 ${a0 + h / 2} 96 ${b0 + h / 2} 178 ${b0 + h / 2}"/>` : ''}`
+      : `<path class="zero" d="M14 ${a0} C96 ${a0} 96 ${b0 + 1} 178 ${b0 + 1}"/>`;
+    return `<g class="st st-${id}" data-explain="flow-${id}">${shape}<rect class="tb" x="178" y="${b0}" width="7" height="${Math.max(h, 2)}" rx="2"/>
+      <text x="194" y="${mid + 4.5}"><tspan class="tn">${v}</tspan><tspan class="tl" dx="6">${esc(name)}</tspan></text></g>`;
+  }).join('');
+  const big = judged ? fmtDur(s.ms || 0) : '0 s';
+  const watch = `<div class="card glow"><p class="kicker">the watch${info('watch')}</p>
+    <div class="wbig"><span class="odo wt" id="wT"></span><small>${judged ? `${esc(mname)} thinking time` : r.model ? 'of thinking: nothing new to read' : 'rules only tonight'}</small></div>
+    ${tot ? `<p class="flowcap"><b>${tot}</b> found, three ways through. point at one.</p>
+    <svg class="flow" viewBox="0 0 300 156" role="img" aria-label="${streams.map(([, v, l]) => `${v} ${l}`).join(', ')}">
+      <defs><linearGradient id="flowG" x1="0" x2="1"><stop offset="0" stop-color="var(--ink)" stop-opacity=".55"/><stop offset="1" stop-color="var(--accent)"/></linearGradient></defs>
+      <rect class="src" x="6" y="${CY - sum / 2}" width="8" height="${sum}" rx="3"/>${bands}</svg>` : ''}
+    <span class="badge">${IC.lock}read, never run · uploads none</span></div>`;
+
+  $('#tiles').innerHTML = read + touch + watch;
+  $('#ringN').style.fontSize = `${[27, 27, 27, 27, 22, 18][String(G.length).length] ?? 16}px`;  // the number always fits the ring's hole
+  odo($('#ringN'), G.length, intro); odo($('#wT'), big, intro);
+}
+// the ring and the signature follow the pointer; a click filters the manifest
+function ringFocus(k) {
+  const ring = $('#tiles .ring'); if (!ring) return;
+  ring.classList.toggle('focus', !!k);
+  $$('#tiles .arc').forEach(a => a.classList.toggle('on', a.dataset.k === k));
+  $$('#tiles .lg').forEach(b => b.classList.toggle('hot', b.dataset.f === k));
+  odo($('#ringN'), k ? G.filter(i => i.kind === k).length : G.length);
+  $('#ringL').textContent = k ? KINDS.find(x => x[0] === k)[1] : 'things';
+}
+function sigFocus(c) {
+  const w = $('#tiles .sigwrap'); if (!w) return;
+  w.classList.toggle('focus', !!c);
+  $$('#tiles .sigwrap [data-cap]').forEach(el => el.classList.toggle(el.matches('.pw,.rpi') ? 'hot' : 'on', el.dataset.cap === c));
+}
+const T = $('#tiles');
+const hoverTile = e => {
+  const k = e.target.closest?.('.arc,.lg'); if (k) ringFocus(k.dataset.k || k.dataset.f);
+  const c = e.target.closest?.('.sigwrap [data-cap]'); if (c) sigFocus(c.dataset.cap);
+};
+T.addEventListener('pointerover', hoverTile);
+T.addEventListener('focusin', hoverTile);
+T.addEventListener('pointerout', e => {
+  if (e.target.closest?.('.ringwrap') && !e.relatedTarget?.closest?.('.ringwrap')) ringFocus(null);
+  if (e.target.closest?.('.sigwrap') && !e.relatedTarget?.closest?.('.sigwrap')) sigFocus(S.cap);
+});
+T.addEventListener('click', e => {
+  const k = e.target.closest('.arc,.lg');
+  if (k) { const f = k.dataset.k || k.dataset.f; setFilter(S.filter === f ? 'all' : f); jump(); return; }
+  const c = e.target.closest('.sigwrap [data-cap]');
+  if (c) { S.cap = S.cap === c.dataset.cap ? null : c.dataset.cap; S.shown = 60; tiles(); table(); jump(); return; }
+  if (e.target.closest('#tounread')) $('#unreadsec').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+});
+// a soft light follows the pointer across each tile, and its edge catches it
+T.addEventListener('pointermove', e => {
+  const card = e.target.closest?.('.card'); if (!card) return;
+  const b = card.getBoundingClientRect();
+  card.style.setProperty('--mx', `${e.clientX - b.left}px`); card.style.setProperty('--my', `${e.clientY - b.top}px`);
+}, { passive: true });
 const info = k => `<button class="xi" data-explain="${k}" aria-label="What is this?">i</button>`;
 
 // ---------- explanations: one sentence for every part, in the skipper's harbour words ----------
@@ -755,12 +924,16 @@ const EXPLAIN = {
   skipper: () => ({ t: 'the skipper', b: `<span class="say">“${skipperLine()}”</span><span>his face is the verdict at a glance:</span><div class="moods">${MOODS.map(([m, w]) => `<span class="${$('#sloth').dataset.mood === m ? 'on' : ''}">${miniFace(m)}<b>${m}</b>${w}</span>`).join('')}</div><span class="fline"><span><i class="fq"></i>Q flag: held in port</span><span><i class="fp"></i>Blue Peter: ready to sail</span></span>` }),
   clearance: () => ({ t: 'clearance', b: `<span>one block for each of the <b>${G.filter(needs).length} things</b> that need you, worst first.</span><span><b>striped</b> is on hold, <b>faint</b> is worth a glance, <b>solid</b> is cleared. fill every block and you’re cleared to sail.</span><span>point at a block for a replay of what was found in it. click to open it.</span>` }),
   cargo: () => ({ t: 'the cargo', b: '<span>everything this project brings aboard, one container each: packages from your lockfile, agent skills, MCP servers and your own build.</span><span>quiet cargo sits low and faint. flagged cargo is stacked on top: <b>blue</b> to glance at, <b>dark</b> on hold, <b>white</b> cleared.</span><span>point at a container for a replay of what was found in it. click to open it.</span>' }),
-  read: () => ({ t: 'read overnight', b: '<span>how many things slowship read in this project. the same bytes installed in two places count once.</span><span>tap a kind to list just those in the manifest.</span>' }),
-  touch: () => ({ t: 'what they can touch', b: '<span>what the code can actually do, read from the code itself, not from its description.</span><span>none of it is bad on its own: a downloader makes network calls. tap a row to see which ones.</span>' }),
-  watch: () => ({ t: 'the watch', b: '<span>how long the local model spent reading, and what it skipped because the bytes hadn’t changed.</span><span>tomorrow’s watch only reads what’s new. nothing is uploaded.</span>' }),
+  read: () => ({ t: 'read overnight', b: '<span>everything slowship read in this project, by kind. the same bytes installed in two places count once.</span><span>point at a slice to count it. tap it to list just those in the manifest.</span>' }),
+  touch: () => ({ t: 'what they can touch', b: '<span>what the code can actually do, read from the code itself, not from its description. the shape is your project’s power signature: the further a point reaches, the more things have that power.</span><span>none of it is bad on its own: a downloader makes network calls. point at a power to see who has it; tap to list them.</span>' }),
+  watch: () => ({ t: 'the watch', b: '<span>how slowship stayed fast: everything it found takes one of three ways through. same bytes as before are skipped, most things need only its rules, and only the few worth a second opinion go to the local model.</span><span>tomorrow’s watch only reads what’s new. nothing is uploaded.</span>' }),
   reader: () => ({ t: 'the reader', b: S.run?.model ? `<span><b>${esc(S.run.model)}</b> runs on this laptop through Ollama. it compares what code does with what its description says.</span><span>it can raise a flag, but only patterns found in the code can hold the ship.</span>` : '<span>no local model ran, so slowship used rules only. start Ollama and run again for the full watch.</span>' }),
   needs: () => ({ t: 'before you sail', b: '<span>the things to look at, worst first. open one for the evidence: file, line, the code, and what the model thought.</span><span>if you know why it’s there, clear it. slowship won’t ask again until that code changes.</span>' }),
   manifest: () => ({ t: 'the manifest', b: '<span>every item aboard and what it can touch. filter by kind or power, or search.</span><span>anything you cleared can be taken back here.</span>' }),
+  dupes: () => ({ t: 'merged', b: '<span>the same bytes installed in two places are read once and counted once. nothing is skipped: it’s the same code.</span>' }),
+  'flow-skip': () => ({ t: 'already read', b: `<span><b>${S.run.stats?.cached ?? 0} things</b> had exactly the same bytes as something already read, tonight or on an earlier night, so they took no time at all.</span>` }),
+  'flow-rules': () => { const st = S.run.stats || {}; return { t: 'rules only', b: `<span><b>${Math.max(0, (st.total || 0) - (st.cached || 0) - (st.judged || 0))} things</b> were read by slowship’s own rules, and nothing in them needed a second opinion, so the model was never asked.</span>` }; },
+  'flow-model': () => { const st = S.run.stats || {}, m = esc((S.run.model || 'the model').split(':')[0]); return { t: `${m} judged`, b: st.judged ? `<span><b>${st.judged} things</b> had something worth a second opinion. ${m} compared what the code does with what its description says, on this laptop, in ${fmtDur(st.ms || 0)}.</span>` : `<span>nothing tonight needed a second opinion, so ${m} wasn’t asked.</span>` }; },
   unread: () => ({ t: 'what we couldn’t read', b: '<span>where the watch didn’t look, so a quiet report never pretends to be proof.</span>' }),
 };
 const pop = $('#pop');
