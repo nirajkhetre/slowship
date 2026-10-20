@@ -37,7 +37,7 @@ export async function checkItems(items, { model = true, onItem = () => {} } = {}
     const approved = state.approved[it.key] === it.fp;
     const diff = approved ? null : newSince(state, `${it.kind}:${it.name}`, r.caps);
     run.items.push({ ...r, key: it.key, name: it.name, kind: it.kind, fp: it.fp, approved, diff });  // same bytes, other place: same result
-    onItem(run.items.at(-1));
+    onItem(run.items.at(-1), items.length);
   }
   save(state);
   run.level = worst(run.items.filter(i => !i.approved).map(i => i.level));

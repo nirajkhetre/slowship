@@ -102,3 +102,22 @@ test('unpacking a tarball never writes outside the quarantine folder', async () 
   assert.equal(readFileSync(join(dest, 'ok.js'), 'utf8'), 'ok');
   assert.ok(!existsSync(join(dest, '..', 'escape.js')) && !existsSync(join(dest, '..', '..', 'escape.js')));
 });
+
+test('the morning report answers only this machine, and only JSON from its own page', async () => {
+  const { serve } = await import('../src/server.js');
+  const { request } = await import('node:http');
+  const { once } = await import('node:events');
+  const port = 47000 + Math.floor(Math.random() * 1000), server = serve(port), host = `localhost:${port}`;
+  const req = (method, path, headers, body) => new Promise((ok, no) => {
+    const r = request({ host: '127.0.0.1', port, method, path, headers }, res => { res.resume(); ok(res.statusCode); });
+    r.on('error', no); r.end(body);
+  });
+  await once(server, 'listening');
+  try {
+    assert.equal(await req('GET', '/', { host: `evil.example:${port}` }), 403);  // DNS rebinding
+    assert.equal(await req('GET', '/', { host }), 200);
+    assert.equal(await req('GET', '/fonts/..%2Fserver.js', { host }), 404);
+    assert.equal(await req('POST', '/api/approve', { host, origin: 'http://evil.example', 'content-type': 'application/json' }, '{}'), 403);
+    assert.equal(await req('POST', '/api/approve', { host, 'content-type': 'text/plain' }, '{}'), 415);  // a plain cross-site form
+  } finally { server.close(); }
+});
