@@ -592,8 +592,8 @@ function tiles() {
   const allCached = !s.judged && s.cached;
   const watch = `<div class="card"><p class="kicker">the watch</p>
     ${r.model ? (allCached
-      ? `<div class="big num">${s.cached}<small>unchanged</small></div><div class="lines"><span>nothing new since the last watch, so ${esc(r.model.split(':')[0])} had nothing to read.</span><span>a changed package is read again, automatically.</span></div>`
-      : `<div class="big num">${fmtDur(s.ms || 0)}</div><div class="lines"><span><b>${esc(r.model)}</b> judged ${s.judged} on this laptop</span><span><b>${s.total - s.judged - s.cached}</b> needed no model at all</span>${s.cached ? `<span><b>${s.cached}</b> unchanged, skipped</span>` : ''}</div>`)
+      ? `<div class="big num">${s.cached}<small>already read</small></div><div class="lines"><span>nothing new since the last watch, so ${esc(r.model.split(':')[0])} had nothing to read.</span><span>a changed package is read again, automatically.</span></div>`
+      : `<div class="big num">${fmtDur(s.ms || 0)}</div><div class="lines"><span><b>${esc(r.model)}</b> judged ${s.judged} on this laptop</span><span><b>${s.total - s.judged - s.cached}</b> needed no model at all</span>${s.cached ? `<span><b>${s.cached}</b> skipped: same bytes already read</span>` : ''}</div>`)
       : `<div class="big num">rules</div><div class="lines"><span>no local model was running, so nothing was compared with its description.</span><span>start Ollama for the full watch.</span></div>`}
     <span class="badge">${IC.lock}read, never run · uploads none</span></div>`;
   $('#tiles').innerHTML = read + touch + watch;
