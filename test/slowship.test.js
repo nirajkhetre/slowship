@@ -75,3 +75,30 @@ test('an MCP package name that could reach a shell is refused before anything ru
   assert.equal(resolveServer({ command: 'C:/tools/server.exe', args: [] }).readable, false);
   assert.equal(resolveServer({ url: 'https://example.invalid/mcp', args: [] }).readable, false);
 });
+
+test('your own build: a shipped key is held and never printed in full', async () => {
+  const { appFacts } = await import('../src/app.js');
+  const r = appFacts(join(FX, 'my-electron-app'), { rea: false });
+  const v = verdict(r);
+  assert.equal(v.level, 'hold');
+  const kinds = v.findings.map(f => f.kind);
+  for (const k of ['electron-open', 'secret', 'env-file', 'electron-websec-off', 'devtools', 'sourcemap']) assert.ok(kinds.includes(k), k);
+  assert.ok(!JSON.stringify(r.facts).includes('AbCdEfGhIjKlMnOpQrStUvWxYz0123456789'), 'the full key must never appear');
+});
+
+test('unpacking a tarball never writes outside the quarantine folder', async () => {
+  const { untar } = await import('../src/agents.js');
+  const { gzipSync } = await import('node:zlib');
+  const { mkdtempSync, existsSync, readFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const entry = (name, data) => {
+    const h = Buffer.alloc(512);
+    h.write(name, 0); h.write('0000644\0', 100); h.write(data.length.toString(8).padStart(11, '0') + '\0', 124); h.write('0', 156); h.write('ustar\0', 257);
+    let sum = 0; h.fill(' ', 148, 156); for (const b of h) sum += b; h.write(sum.toString(8).padStart(6, '0') + '\0 ', 148);
+    return Buffer.concat([h, Buffer.from(data), Buffer.alloc((512 - data.length % 512) % 512)]);
+  };
+  const dest = join(mkdtempSync(join(tmpdir(), 'slowship-')), 'q');
+  untar(gzipSync(Buffer.concat([entry('package/ok.js', 'ok'), entry('package/../../escape.js', 'bad'), Buffer.alloc(1024)])), dest);
+  assert.equal(readFileSync(join(dest, 'ok.js'), 'utf8'), 'ok');
+  assert.ok(!existsSync(join(dest, '..', 'escape.js')) && !existsSync(join(dest, '..', '..', 'escape.js')));
+});

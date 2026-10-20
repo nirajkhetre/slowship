@@ -1,7 +1,11 @@
 // Severity is decided here, in plain code, from what the code can do. The model's labels can raise attention
 // ("this isn't what it says it does") but can never lower a dangerous combination: text in a README can't talk it down.
 const RISK = {
-  'hidden-chars': 3, conceal: 3, override: 2, obfuscated: 1, code: 2, exec: 2, net: 2, 'install-script': 2,
+  'hidden-chars': 3, conceal: 3, override: 2, obfuscated: 1,
+  // your own build
+  secret: 3, 'secret-maybe': 2, 'secret-public': 1, 'env-file': 2, sourcemap: 1, devtools: 1, 'open-external': 1,
+  'electron-node': 2, 'electron-isolation-off': 2, 'electron-sandbox-off': 1, 'electron-websec-off': 2,
+  'ipc-unchecked': 2, bridge: 0, native: 0, code: 2, exec: 2, net: 2, 'install-script': 2,
   'fs-write': 1, 'env-secret': 1, 'secret-path': 1, 'persist-path': 1, 'dynamic-load': 1, imports: 0,
   decode: 0, 'fs-read': 0, fs: 0, os: 0, env: 0, url: 0,
 };
@@ -20,6 +24,8 @@ const COMBOS = [
     says: 'decodes hidden data and runs it as code in the same function' },
   { id: 'persistence', level: 3, within: 'near', needs: [['persist-path'], ['fs-write']],
     says: 'writes to a place that makes code start again on its own (shell profile, startup folder, SSH keys)' },
+  { id: 'electron-open', level: 3, within: 'file', needs: [['electron-node'], ['electron-isolation-off']],
+    says: 'a window with Node.js on and isolation off: any page it loads can run code on your users\' computers' },
   { id: 'install-runs', level: 2, within: 'package', needs: [['install-script'], ['exec', 'net']],
     says: 'runs code at install time that downloads or starts programs' },
 ];

@@ -1,9 +1,10 @@
 // Your agent's supply chain: installed skills (instructions + scripts) and configured MCP servers.
 // A skill is read as both code and instructions, because a skill attacks through either, or through the two together.
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { basename, dirname, extname, join, relative } from 'node:path';
+import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 import { dirFacts, fileFacts } from './facts.js';
 import { HOME } from './state.js';
 
@@ -153,6 +154,29 @@ export function resolveServer(s, { fetch = true } = {}) {
   return { readable: false, why: `${basename(s.command || '?')} is a compiled program: its source can't be read here` };
 }
 
+/** Unpack an npm .tgz in Node (no system tar: GNU tar reads "D:\…" as a host name). Drops the leading "package/"
+ *  and refuses any entry that would land outside `dest` (a malicious tarball can try "../../" paths). */
+export function untar(tgz, dest) {
+  const buf = gunzipSync(tgz), root = resolve(dest);
+  let longName = null;
+  for (let off = 0; off + 512 <= buf.length;) {
+    const h = buf.subarray(off, off + 512);
+    if (h.every(b => b === 0)) break;
+    const field = (a, b) => h.subarray(a, b).toString('utf8').replace(/\0.*$/s, '');
+    const size = parseInt(field(124, 136).trim() || '0', 8), type = field(156, 157) || '0';
+    const body = buf.subarray(off + 512, off + 512 + size);
+    off += 512 + Math.ceil(size / 512) * 512;
+    if (type === 'x') { longName = body.toString('utf8').match(/\d+ path=(.*)\n/)?.[1] ?? null; continue; }  // pax long path
+    const name = longName ?? [field(345, 500), field(0, 100)].filter(Boolean).join('/');
+    longName = null;
+    if (type !== '0' && type !== '') continue;  // regular files only: no links, devices or directories needed
+    const rel = name.replace(/^[^/]+\//, ''), target = resolve(root, rel);
+    if (!rel || !target.startsWith(root + sep)) continue;
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, body);
+  }
+}
+
 /** Fetch an npm package's tarball into a quarantine folder. npm pack downloads; it never runs install scripts. */
 function quarantine(spec) {
   // npm.cmd needs a shell on Windows, so only a plain package spec may reach it: name, optional scope, optional version
@@ -161,9 +185,13 @@ function quarantine(spec) {
   if (existsSync(join(dir, 'package.json'))) return { readable: true, dir };
   try {
     mkdirSync(dir, { recursive: true });
-    const tgz = execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['pack', spec, '--silent', '--ignore-scripts'],
-      { cwd: root, encoding: 'utf8', timeout: 120_000, shell: process.platform === 'win32' }).trim().split(/\r?\n/).pop();
-    execFileSync('tar', ['-xzf', join(root, tgz), '-C', dir, '--strip-components=1'], { timeout: 120_000 });
+    // No shell anywhere: on Windows npm is a .cmd wrapper, so run npm's own JavaScript with this Node instead.
+    const npmCli = join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
+    const [bin, pre] = process.platform === 'win32' ? [process.execPath, [npmCli]] : ['npm', []];
+    if (process.platform === 'win32' && !existsSync(npmCli)) return { readable: false, why: `couldn't find npm next to node to fetch ${spec}` };
+    const out = execFileSync(bin, [...pre, 'pack', spec, '--silent', '--ignore-scripts'], { cwd: root, encoding: 'utf8', timeout: 120_000 });
+    const tgz = out.trim().split(/\r?\n/).pop();
+    untar(readFileSync(join(root, tgz)), dir);
     return { readable: true, dir };
   } catch (e) {
     return { readable: false, why: `couldn't fetch ${spec}: ${String(e.message).split('\n')[0].slice(0, 80)}` };

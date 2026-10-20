@@ -17,7 +17,7 @@ export function terminal(run) {
   const s = run.stats, lines = [];
   lines.push('', color(VERDICT[run.level] ?? VERDICT.info), '');
   for (const i of open) {
-    const label = i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.kind === 'skill' ? `skill ${i.name}  ${C.dim(i.key.split('@').slice(1).join('@'))}` : `MCP server ${i.key.replace(/^mcp:/, '')}`;
+    const label = i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.kind === 'skill' ? `skill ${i.name}  ${C.dim(i.key.split('@').slice(1).join('@'))}` : i.kind === 'app' ? `your build ${i.name}` : `MCP server ${i.key.replace(/^mcp:/, '')}`;
     lines.push(`${i.level === 'hold' ? C.hold('hold  ') : C.review('review')} ${C.b(label)}`);
     if (i.diff?.added?.length) lines.push(C.dim(`       new since ${i.diff.version.replace(/^npm:/, '')} you approved: ${i.diff.added.join(', ')}`));
     for (const f of i.findings.filter(f => f.level === 'hold' || f.level === 'review').slice(0, 3)) {

@@ -1,11 +1,12 @@
 // One run: find everything, skip what's unchanged, read the rest, ask the model only where there is something to judge.
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { condense, dirFacts } from './facts.js';
 import { available, judge, MODEL } from './judge.js';
 import { assess, combos, keysOf, risk, worst } from './policy.js';
 import { claimOf, npmPackages } from './inventory.js';
 import { findMcpServers, findSkills, resolveServer, skillFacts } from './agents.js';
+import { appFacts } from './app.js';
 import { fingerprint, load, newSince, save } from './state.js';
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
@@ -21,7 +22,7 @@ export async function checkItems(items, { model = true, onItem = () => {} } = {}
       const found = combos(facts), short = condense(facts, 40, keysOf(found), risk);
       let labels = {}, judged = null;
       const wanted = short.some(f => !['fs', 'os', 'env', 'url', 'fs-read', 'decode', 'imports'].includes(f.cap));
-      if (useModel && wanted) {
+      if (useModel && wanted && !it.noModel) {
         judged = await judge(it.name, it.claim, short);  // nothing worth judging → no model call at all
         if (judged) { labels = judged.labels; run.stats.judged++; run.stats.ms += judged.ms; run.stats.tokens += judged.tokens; }
       } else run.stats.quiet++;
@@ -44,8 +45,11 @@ export async function checkItems(items, { model = true, onItem = () => {} } = {}
 }
 
 /** Everything in one pass: the project's packages, then the agent's skills and MCP servers on this machine. */
-export async function scanProject(project, { packages = true, agents = true, fetch = true, ...opts } = {}) {
+export async function scanProject(project, { packages = true, agents = true, fetch = true, app = null, ...opts } = {}) {
   const items = [], warnings = [], unread = [];
+  if (app) items.push({  // your own build: rules only, there is no third-party claim to compare against
+    kind: 'app', key: `app:${app}`, name: basename(app), dir: app, claim: '', fp: `app-${fingerprint(app)}`, noModel: true, read: () => appFacts(app),
+  });
   if (packages) {
     const npm = npmPackages(project);
     warnings.push(...npm.warnings);
