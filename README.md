@@ -85,7 +85,7 @@ These are measured on one real project folder: the 174 dependencies of REA's own
 | Sent to the local model | 51, in 4 min 32 s of model time |
 | Re-run with nothing changed | about 4 s |
 | Code that runs, actually read | 3,827 of 3,828 files (99.97%); 454 test and example files left out on purpose |
-| Verdict | held: the test build (an inert fixture with a fake key and risky Electron settings). 12 more worth a glance, 0 holds among real packages and skills |
+| Verdict | held: the test build (an inert fixture with a fake key and risky Electron settings). 11 more worth a glance, 0 holds among real packages and skills |
 
 A precision and recall evaluation against known-malicious samples is in progress (`eval/`). Numbers will appear here only once they're measured.
 
@@ -122,6 +122,8 @@ The exit code is `2` when the verdict is "held", so it can gate CI. The nightly 
 
 ```bash
 npm test
+node site/record.mjs <project>   # record one real watch for the web demo (public packages + the inert fixtures only)
+node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
 There are 14 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards and schedule quoting. The test fixtures are inert and point at `.invalid` domains.
