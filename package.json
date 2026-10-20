@@ -2,17 +2,42 @@
   "name": "slowship",
   "version": "0.1.0",
   "description": "Ship safe, slowly. A local overnight check of your app, its packages, and your agent's skills and MCP servers: does each one do what it says?",
+  "keywords": [
+    "security",
+    "supply-chain",
+    "npm",
+    "mcp",
+    "agent-skills",
+    "local-llm",
+    "gemma",
+    "ollama",
+    "static-analysis"
+  ],
+  "homepage": "https://github.com/nirajkhetre/slowship#readme",
+  "bugs": {
+    "url": "https://github.com/nirajkhetre/slowship/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nirajkhetre/slowship.git"
+  },
+  "license": "MIT",
   "type": "module",
   "bin": {
     "slowship": "bin/slowship.js"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22.19"
   },
   "scripts": {
     "test": "node --test test/slowship.test.js"
   },
-  "license": "MIT",
   "dependencies": {
     "acorn": "^8.19.0",
     "acorn-loose": "^8.5.2",
