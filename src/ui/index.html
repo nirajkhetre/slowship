@@ -779,7 +779,7 @@ function odo(el, text, roll = true) {
   if (!el || el.dataset.t === text) return;
   const shape = text.replace(/\d/g, '0');
   if (el.dataset.shape !== shape) {
-    el.innerHTML = `<span class="sr">${esc(text)}</span>` + [...text].map(c => /\d/.test(c) ? `<span class="dg" aria-hidden="true"><span>${[...'0123456789'].map(d => `<i>${d}</i>`).join('')}</span></span>` : `<span aria-hidden="true">${esc(c)}</span>`).join('');
+    el.innerHTML = `<span class="sr">${esc(text)}</span>` + [...text].map(c => /\d/.test(c) ? `<span class="dg" aria-hidden="true"><span>${[...'0123456789'].map(d => `<i>${d}</i>`).join('')}</span></span>` : `<span aria-hidden="true">${c === ' ' ? '&nbsp;' : esc(c)}</span>`).join('');
     el.dataset.shape = shape;
     if (!roll) el.querySelectorAll('.dg>span').forEach(c => c.style.transition = 'none');
     void el.offsetWidth;
