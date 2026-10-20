@@ -10,7 +10,7 @@
     "node": ">=22.19"
   },
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/slowship.test.js"
   },
   "license": "MIT",
   "dependencies": {

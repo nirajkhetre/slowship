@@ -1,0 +1,1 @@
+{ "name": "tiny-date-fmt", "version": "1.0.0", "description": "Formats dates as YYYY-MM-DD. Zero dependencies, no I/O.", "main": "index.js" }

@@ -1,7 +1,7 @@
 // Severity is decided here, in plain code, from what the code can do. The model's labels can raise attention
 // ("this isn't what it says it does") but can never lower a dangerous combination: text in a README can't talk it down.
 const RISK = {
-  'hidden-chars': 3, obfuscated: 1, code: 2, exec: 2, net: 2, 'install-script': 2,
+  'hidden-chars': 3, conceal: 3, override: 2, obfuscated: 1, code: 2, exec: 2, net: 2, 'install-script': 2,
   'fs-write': 1, 'env-secret': 1, 'secret-path': 1, 'persist-path': 1, 'dynamic-load': 1, imports: 0,
   decode: 0, 'fs-read': 0, fs: 0, os: 0, env: 0, url: 0,
 };
@@ -10,8 +10,12 @@ const RISK = {
 // ('scope'), the same function or within 60 lines ('near'), or anywhere in the package. In a 40,000-line bundle
 // "same file" means nothing, so tightening this is what keeps big, legitimate bundles quiet.
 const COMBOS = [
-  { id: 'exfil', level: 3, within: 'near', needs: [['secret-path', 'env-secret'], ['net']],
-    says: 'reads credentials or secrets and sends network requests from the same file' },
+  { id: 'exfil', level: 3, within: 'near', needs: [['secret-path'], ['net']],
+    says: 'reads credential files and sends network requests right next to it' },
+  // A token from the environment next to a request is often just a CLI using its own API key, and also exactly how
+  // token-stealing worms work. Code says review; it becomes hold only when the model finds it isn't the stated job.
+  { id: 'token-net', level: 2, raise: true, within: 'near', needs: [['env-secret'], ['net']],
+    says: 'reads a secret token from the environment and sends network requests right next to it' },
   { id: 'hidden-code', level: 3, within: 'scope', needs: [['decode', 'obfuscated'], ['code']],
     says: 'decodes hidden data and runs it as code in the same function' },
   { id: 'persistence', level: 3, within: 'near', needs: [['persist-path'], ['fs-write']],
@@ -53,8 +57,11 @@ export function combos(raw) {
 /** short: condensed facts (with ids); found: combos(raw); labels: {id: {label, why}} from the model (may be empty). */
 export function assess(short, found, labels = {}) {
   const findings = [];
-  for (const { combo, keys } of found)
-    findings.push({ kind: combo.id, level: combo.level, says: combo.says, evidence: short.filter(f => keys.has(factKey(f))).map(f => f.id) });
+  for (const { combo, keys } of found) {
+    const evidence = short.filter(f => keys.has(factKey(f))).map(f => f.id);
+    const raised = combo.raise && evidence.some(id => labels[id]?.label === 'unexpected');
+    findings.push({ kind: combo.id, level: raised ? 3 : combo.level, says: combo.says, evidence });
+  }
   const used = new Set(findings.flatMap(f => f.evidence));
   for (const f of short) {
     if (used.has(f.id)) continue;

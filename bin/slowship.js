@@ -10,11 +10,13 @@ const flag = name => { const i = args.indexOf(name); return i >= 0 ? (args.splic
 const opt = name => { const i = args.indexOf(name); return i >= 0 ? args.splice(i, 2)[1] : null; };
 
 const noModel = flag('--no-model'), json = opt('--json'), approveWhat = opt('--approve');
+const onlyPackages = flag('--packages-only'), onlyAgents = flag('--agents-only'), offline = flag('--offline');
 const [cmd = 'scan', target = '.'] = args[0] === 'scan' ? args : ['scan', ...args];
 if (cmd !== 'scan' || flag('--help') || flag('-h')) {
-  console.log(`slowship [dir] [--no-model] [--json out.json] [--approve <name|notable|review>]
+  console.log(`slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--json out.json] [--approve <name|notable|review>]
 
-  Checks every installed package in dir (default: here): does each one do what it says?
+  Checks every installed package in dir (default: here), and your AI agent's skills and MCP servers:
+  does each one do what it says?
   Reads code, never runs it. Uses a local model through Ollama when it's there (SLOWSHIP_MODEL, default gemma4:e2b).
   --approve marks current results as seen, so they stop asking until the code changes.`);
   process.exit(cmd === 'scan' ? 0 : 1);
@@ -23,7 +25,7 @@ if (cmd !== 'scan' || flag('--help') || flag('-h')) {
 const project = resolve(target);
 let n = 0;
 const run = await scanProject(project, {
-  model: !noModel,
+  model: !noModel, packages: !onlyAgents, agents: !onlyPackages, fetch: !offline,
   onItem: () => process.stderr.isTTY && process.stderr.write(`\rreading ${++n} packages…`),
 });
 if (process.stderr.isTTY) process.stderr.write('\r\x1b[K');
