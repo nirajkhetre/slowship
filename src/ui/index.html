@@ -70,13 +70,10 @@ svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .btn[disabled]{opacity:.5;pointer-events:none}
 .ib{width:40px;padding:0}
 
-/* ---------- the ticket: the verdict, its stub, and the sloth who skippers it ---------- */
+/* ---------- the verdict: what the watch decided, the sloth who skippers it, and the cargo it read ---------- */
 .hero{padding:26px 0 0}
-.tkwrap{filter:drop-shadow(0 26px 34px rgba(14,23,38,.16)) drop-shadow(0 2px 3px rgba(14,23,38,.08))}
-.ticket{--stub:300px;position:relative;display:grid;grid-template-columns:minmax(0,1fr) var(--stub);border-radius:32px;background:var(--tk);color:var(--tk-ink);
-  transition:background-color .9s var(--enter),color .9s var(--enter);
-  -webkit-mask:radial-gradient(circle 15px at calc(100% - var(--stub)) 0,#0000 96%,#000),radial-gradient(circle 15px at calc(100% - var(--stub)) 100%,#0000 96%,#000);
-  -webkit-mask-composite:source-in;mask:radial-gradient(circle 15px at calc(100% - var(--stub)) 0,#0000 96%,#000),radial-gradient(circle 15px at calc(100% - var(--stub)) 100%,#0000 96%,#000);mask-composite:intersect}
+.ticket{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 350px;border-radius:32px;background:var(--tk);color:var(--tk-ink);
+  box-shadow:0 30px 60px -34px rgba(14,23,38,.45),0 2px 4px rgba(14,23,38,.06);transition:background-color .9s var(--enter),color .9s var(--enter)}
 .tmain{display:grid;grid-template-columns:200px minmax(0,1fr);gap:26px;align-items:center;padding:34px 36px 34px 24px;min-height:330px}
 .tmain .kicker{opacity:.72}
 .ticket h1{font:750 clamp(38px,5.2vw,66px)/1 var(--display);letter-spacing:-.055em;margin:14px 0 14px;text-wrap:balance}
@@ -93,18 +90,37 @@ svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .meter.progress{display:block;border-radius:6px;background:color-mix(in oklab,currentColor 16%,transparent);overflow:hidden}
 .meter.progress b{display:block;height:100%;border-radius:6px;background:currentColor;transition:width .5s var(--enter)}
 .mlabel{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font:500 12.5px/1.3 var(--mono);opacity:.78}
-.stub{position:relative;display:flex;flex-direction:column;gap:16px;padding:30px 30px 26px;border-left:2px dashed color-mix(in oklab,var(--tk-ink) 32%,transparent)}
-.stub .kicker{opacity:.72}
-.stub dl{display:grid;gap:9px}
-.stub dl div{display:flex;justify-content:space-between;gap:12px;font-size:14px;border-bottom:1px solid color-mix(in oklab,var(--tk-ink) 14%,transparent);padding-bottom:8px}
-.stub dt{opacity:.7}
-.stub dd{font:500 13.5px var(--mono);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
-.stamp{align-self:flex-start;font:800 26px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;padding:10px 14px;border:3.5px double currentColor;border-radius:10px;
-  transform:rotate(-7deg);opacity:.86;filter:url(#ink);margin-top:auto}
-.stamp.land{animation:land .6s var(--bounce)}
-@keyframes land{from{opacity:0;transform:rotate(-7deg) scale(1.9)}}
-.barcode{width:100%;height:30px;opacity:.82}
-.barcode rect{fill:currentColor}
+/* the cargo: one container per thing aboard, coloured by what the watch found */
+.deck{position:relative;margin:14px;padding:20px 20px 16px;border-radius:24px;background:color-mix(in oklab,var(--tk-ink) 7%,transparent);display:flex;flex-direction:column;gap:12px;min-width:0}
+.dhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.dhead .kicker{opacity:.72}
+.aboard{font-size:14px;opacity:.85}
+.aboard b{font:750 24px/1 var(--display);letter-spacing:-.04em;margin-right:5px}
+.ship{display:block;width:100%;height:auto;overflow:hidden;margin-top:auto}
+.ship .vessel{transform-box:fill-box;transform-origin:50% 100%;animation:sail 6s ease-in-out infinite}
+@keyframes sail{50%{transform:translateY(1.5px) rotate(.5deg)}}
+.ship .c{fill:currentColor;opacity:.2;cursor:pointer;transition:opacity .4s,fill .4s}
+.ship .c.notable{opacity:.45}
+.ship .c.glance{fill:#2F5BFF;opacity:1}
+.ship .c.hold{opacity:1;stroke:#fff;stroke-width:1.2;animation:beacon 1.6s ease-in-out infinite}
+.ship .c.cleared{fill:#fff;opacity:.95}
+.ship .c.wait{opacity:.07}
+.ship .c:hover{opacity:1;stroke:currentColor;stroke-width:1.2}
+@keyframes beacon{50%{opacity:.3}}
+.ship .hull{fill:currentColor}
+.ship .win{fill:var(--tk);transition:fill .9s}
+.ship .sea{fill:none;stroke:currentColor;stroke-opacity:.32;stroke-width:1.5;animation:swell 4s linear infinite}
+@keyframes swell{to{transform:translateX(-20px)}}
+.dleg{display:flex;flex-wrap:wrap;gap:6px 12px;font:500 12px/1.3 var(--mono);opacity:.85}
+.dleg span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:7px;border-radius:2px;background:currentColor;opacity:.2}
+.sw.notable{opacity:.45}.sw.glance{background:#2F5BFF;opacity:1}.sw.hold{opacity:1}
+.sw.cleared{background:#fff;opacity:1;box-shadow:inset 0 0 0 1px color-mix(in oklab,currentColor 35%,transparent)}
+.dhint{font-size:12.5px;opacity:.6;margin-top:-4px}
+.tip{position:absolute;z-index:5;pointer-events:none;padding:7px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.35;white-space:nowrap;
+  transform:translate(-50%,-100%);opacity:0;transition:opacity .15s;box-shadow:0 8px 20px -8px rgba(0,0,0,.4)}
+.tip.on{opacity:1}
+.tip b{display:block;font:500 12.5px var(--mono)}
 
 /* the sloth: soft 3D, pill eyes, moods shown only through the eyes and mouth */
 .sloth{width:200px;height:190px;overflow:visible;justify-self:center}
@@ -289,13 +305,8 @@ footer b{display:block;font:700 22px/1.2 var(--display);letter-spacing:-.05em;co
 body.empty .tiles,body.empty #manifest,body.empty #notedsec,body.empty .sh .hint,body.empty #needcount{display:none}
 
 @media (max-width:900px){
-  .ticket{grid-template-columns:minmax(0,1fr);-webkit-mask:none;mask:none}
-  .stub{min-width:0}
-  .stub{border-left:0;border-top:2px dashed color-mix(in oklab,var(--tk-ink) 32%,transparent);display:grid;grid-template-columns:1fr auto;align-items:end;gap:14px 20px}
-  .stub .kicker,.stub dl{grid-column:1/-1}
-  .stub dl{grid-template-columns:1fr 1fr;column-gap:18px}
-  .stamp{margin-top:0}
-  .barcode{width:160px}
+  .ticket{grid-template-columns:minmax(0,1fr)}
+  .deck{margin:0 14px 14px}
   .tiles{grid-template-columns:1fr 1fr}
   .tiles .card:nth-child(2){grid-column:1/-1;grid-row:1}
 }
@@ -304,7 +315,7 @@ body.empty .tiles,body.empty #manifest,body.empty #notedsec,body.empty .sh .hint
   .tmain{grid-template-columns:1fr;padding:22px 22px 26px;gap:4px;min-height:0}
   .sloth{width:132px;height:126px;justify-self:end;margin:-6px -6px -30px 0;order:-1}
   .ticket h1{margin-top:12px}
-  .stub{padding:22px}
+  .deck{padding:16px}
   .tiles{grid-template-columns:1fr}
   .head{grid-template-columns:24px minmax(0,1fr);padding:14px 14px 14px 16px;row-gap:8px}
   .head .go{grid-column:2;justify-self:start;height:36px}
@@ -390,11 +401,12 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
         <p class="mlabel" id="mlabel"></p>
       </div>
     </div>
-    <aside class="stub" aria-label="Port clearance">
-      <p class="kicker">port clearance</p>
-      <dl id="stubdl"></dl>
-      <div class="stamp" id="stamp">waiting</div>
-      <svg class="barcode" id="barcode" viewBox="0 0 220 30" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <aside class="deck" aria-label="Everything aboard">
+      <div class="dhead"><p class="kicker">the cargo</p><span class="aboard"><b class="num" id="aboard">0</b>aboard</span></div>
+      <svg class="ship" id="ship" viewBox="0 0 280 80" role="img" aria-label="Everything aboard"></svg>
+      <p class="dleg" id="dleg"></p>
+      <p class="dhint">one container per thing you installed. point at one, or tap it, to see what it is.</p>
+      <div class="tip" id="tip"></div>
     </aside>
   </div></div>
   <div class="tiles" id="tiles"><div class="card sk"></div><div class="card sk"></div><div class="card sk"></div></div>
@@ -508,12 +520,37 @@ function swapIn(el, html) {
 }
 
 // ---------- the ticket ----------
-const barcode = seed => {  // decorative, but drawn from this run, so every morning's ticket is its own
-  let h = 2166136261, x = 0, out = '';
-  for (const c of seed) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  for (let n = 0; x < 220; n++) { h = Math.imul(h ^ (h >>> 15), 2246822507); const w = 1 + ((h >>> 28) % 3); if (n % 2 === 0) out += `<rect x="${x}" y="0" width="${w}" height="30"/>`; x += w + 1 + ((h >>> 25) & 1); }
-  return out;
-};
+// ---------- the cargo: one container per thing aboard ----------
+const CARGO = { npm: 0, skill: 1, mcp: 2, app: 3 };
+const ST = { hold: 'on hold', glance: 'to glance at', cleared: 'cleared', notable: 'notable', quiet: 'quiet', wait: 'not read yet' };
+const stateOf = i => i.approved && needs(i) ? 'cleared' : ({ hold: 'hold', review: 'glance', notable: 'notable' })[i.level] ?? 'quiet';
+const hull = (d, flag) => `<g class="hull">
+  <path d="M250 ${d} V${d - 30} a3 3 0 0 1 3 -3 h16 a3 3 0 0 1 3 3 V${d}Z"/>
+  <rect class="win" x="254" y="${d - 25}" width="14" height="3.5" rx="1"/><rect class="win" x="254" y="${d - 18}" width="14" height="2.5" rx="1" opacity=".6"/>
+  <rect x="259.5" y="${d - 46}" width="2" height="16" rx="1"/>
+  ${flag ? `<rect x="261.5" y="${d - 46}" width="12" height="8.5" rx="1.2" fill="${flag}" stroke="currentColor" stroke-width="1.2"/>${flag === '#2F5BFF' ? `<rect x="265.5" y="${d - 43.4}" width="4" height="3.3" fill="#fff"/>` : ''}` : ''}
+  <path d="M2 ${d - 8} L17 ${d - 3} V${d + 1} H276 L269 ${d + 21} H24 Q9 ${d + 12} 2 ${d - 8}Z"/>
+  <path d="M17 ${d + 9} H271" fill="none" stroke="var(--tk)" stroke-width="1.5" opacity=".55"/></g>`;
+function cargo(v) {
+  // quiet cargo at the bottom, flagged cargo stacked on top where the eye lands first
+  const rank = i => ({ quiet: 0, notable: 1, cleared: 2, glance: 3, hold: 4 })[stateOf(i)];
+  const list = [...G].sort((a, b) => rank(a) - rank(b) || CARGO[a.kind] - CARGO[b.kind] || label(a).localeCompare(label(b)));
+  const n = list.length, flag = { hold: '#FFCB2F', review: '#2F5BFF', clear: '#2F5BFF' }[v];
+  // ponytail: one rect per item, fine to a few thousand; group by package scope beyond that
+  const h = Math.max(2.5, Math.min(12, Math.floor(Math.sqrt(226 * 84 / (2 * Math.max(n, 1))) * 2) / 2)), w = h * 2;
+  const cols = Math.max(1, Math.floor(226 / w)), rows = Math.ceil(n / cols), d = Math.max(54, 10 + rows * h);
+  const loaded = v === 'watch' ? Math.floor((S.watch?.total ? S.watch.done / S.watch.total : 0) * n) : n;
+  const boxes = list.map((i, j) => `<rect class="c ${j < loaded ? stateOf(i) : 'wait'}" data-fp="${esc(i.fp)}" x="${19 + (j % cols) * w + .5}" y="${d - (Math.floor(j / cols) + 1) * h + .5}" width="${w - 1}" height="${h - 1}" rx="${Math.min(1.5, h / 4)}"/>`).join('');
+  const ship = $('#ship');
+  ship.setAttribute('viewBox', `0 0 280 ${d + 26}`);
+  ship.innerHTML = `<g class="vessel">${boxes}${hull(d, flag)}</g><path class="sea" d="M-20 ${d + 17} ${'q5 -3 10 0 t10 0 '.repeat(16)}"/>`;
+  $('#aboard').textContent = n;
+  const count = s => ship.querySelectorAll('.c.' + s).length;
+  const parts = ['hold', 'glance', 'cleared', 'notable', 'quiet'].filter(count);
+  $('#dleg').innerHTML = v === 'watch' ? `<span><i class="sw"></i>${loaded} of ${n} loaded</span>`
+    : n ? parts.map(s => `<span><i class="sw ${s}"></i>${count(s)} ${ST[s]}</span>`).join('') : '<span>nothing aboard yet</span>';
+  ship.setAttribute('aria-label', n ? `${n} things aboard: ${parts.map(s => `${count(s)} ${ST[s]}`).join(', ')}` : 'nothing aboard yet');
+}
 function verdict() {
   if (S.watch) return 'watch';
   const r = S.run;
@@ -533,7 +570,8 @@ function ticket() {
   const holds = open.filter(i => i.level === 'hold').length, glances = open.filter(i => i.level === 'review').length;
   const notable = G.filter(i => !i.approved && i.level === 'notable').length;
   const d = r?.finished ? new Date(r.finished) : new Date();
-  $('#kicker').textContent = `morning report · ${d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}`;
+  const vessel = (r?.options?.project ?? '').split(/[\\/]/).filter(Boolean).pop();
+  $('#kicker').textContent = `morning report${vessel ? ' · ' + vessel : ''} · ${d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}`;
   const H = {
     hold: ['held in port.', `<b>${pl(holds, 'thing does', 'things do')}</b> more than ${holds === 1 ? 'it says' : 'they say'}. clear ${holds === 1 ? 'it' : 'them'} to sail${glances ? `, then glance at ${glances} more` : ''}.`],
     review: ['ready, after a glance.', `nothing crossed a hold line. <b>${pl(glances, 'thing is', 'things are')}</b> worth a look before you ship.`],
@@ -561,17 +599,7 @@ function ticket() {
       : '<span>nothing to clear</span>';
   }
 
-  const project = (r?.options?.project ?? '').split(/[\\/]/).filter(Boolean).pop() ?? '';
-  $('#stubdl').innerHTML = r ? [
-    ['vessel', project || 'this project'],
-    ['read', pl(G.length, 'thing')],
-    ['reader', r.model ? r.model : 'rules only'],
-    ['uploads', 'none'],
-  ].map(([k, val]) => `<div><dt>${k}</dt><dd title="${esc(val)}">${esc(val)}</dd></div>`).join('')
-    : '<div><dt>vessel</dt><dd>—</dd></div><div><dt>uploads</dt><dd>none</dd></div>';
-  const st = $('#stamp'), word = { hold: 'held', review: 'glance', clear: 'cleared', watch: 'on watch' }[v] ?? 'waiting';
-  if (st.textContent !== word) { st.textContent = word; if (prev && !REDUCED) { st.classList.remove('land'); void st.offsetWidth; st.classList.add('land'); } }
-  $('#barcode').innerHTML = barcode(`${r?.finished ?? ''}${r?.options?.project ?? ''}`);
+  cargo(v);
   $('#when').textContent = r?.finished ? `watched ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
   $('#who').lastChild.textContent = r ? (r.model ? `${r.model.split(':')[0]} · on this laptop` : 'rules only · no model') : 'on this laptop';
 }
@@ -769,6 +797,20 @@ addEventListener('pointermove', e => {
   const r = $('#sloth').getBoundingClientRect(), dx = (e.clientX - (r.left + r.width / 2)) / innerWidth, dy = (e.clientY - (r.top + r.height / 2)) / innerHeight;
   $('#eyes').style.transform = `translate(${Math.max(-3.5, Math.min(3.5, dx * 12))}px, ${Math.max(-2.5, Math.min(2.5, dy * 8))}px)`;
 }, { passive: true });
+// the cargo answers a pointer: its name on hover, the item itself on click
+$('#ship').addEventListener('pointerover', e => {
+  const c = e.target.closest('.c'), i = c && G.find(x => x.fp === c.dataset.fp); if (!i) return;
+  const r = c.getBoundingClientRect(), box = $('.deck').getBoundingClientRect(), tip = $('#tip');
+  tip.innerHTML = `<b>${esc(label(i))}</b>${KIND[i.kind]} · ${ST[c.classList[1]]}`;
+  tip.style.left = `${Math.max(80, Math.min(box.width - 80, r.left + r.width / 2 - box.left))}px`; tip.style.top = `${r.top - box.top - 6}px`; tip.classList.add('on');
+});
+$('#ship').addEventListener('pointerleave', () => $('#tip').classList.remove('on'));
+$('#ship').addEventListener('click', e => {
+  const c = e.target.closest('.c'), i = c && G.find(x => x.fp === c.dataset.fp); if (!i) return;
+  const row = $(`#rows .row[data-fp="${CSS.escape(i.fp)}"]`);
+  if (row) { if (!row.classList.contains('open')) row.querySelector('.tog').click(); row.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' }); row.querySelector('.tog').focus({ preventScroll: true }); }
+  else { S.q = label(i); $('#q').value = S.q; S.cap = null; setFilter('all'); jump(); }
+});
 addEventListener('scroll', () => $('#bar').classList.toggle('scrolled', scrollY > 8), { passive: true });
 
 // keyboard: j/k move, a clears, enter opens, / searches
