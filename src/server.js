@@ -80,10 +80,21 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
     if (url.pathname === '/api/scan') {
       if (watch && !watch.finished) return send(res, 409, { error: 'already watching' });
       const o = run?.options ?? {};
-      watch = { done: 0, total: 0, started: Date.now() };
-      scanProject(o.project ?? process.cwd(), { ...o, onItem: (_, n) => { watch.done++; watch.total = n ?? watch.total; } })
-        .then(r => { saveRun(r, o); watch.finished = Date.now(); })
-        .catch(e => { watch.error = String(e.message).slice(0, 200); watch.finished = Date.now(); });
+      // a live picture of the watch: the stage, what is being read right now, how each item was settled, the last few
+      const w = watch = { stage: 'finding', done: 0, total: 0, started: Date.now(), now: null, counts: { cached: 0, rules: 0, model: 0, flagged: 0 }, ms: 0, log: [] };
+      const name = i => i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.name;
+      scanProject(o.project ?? process.cwd(), {
+        ...o,
+        onStep: s => { w.stage = 'reading'; w.now = { name: name(s), kind: s.kind, phase: s.phase }; },
+        onItem: (item, n, { how = 'rules', ms = 0 } = {}) => {
+          w.stage = 'reading'; w.done++; w.total = n ?? w.total; w.counts[how]++; w.ms += ms;
+          if (['review', 'hold'].includes(item.level) && !item.approved) w.counts.flagged++;
+          w.log.unshift({ n: w.done, name: name(item), kind: item.kind, how, ms, level: item.approved ? 'cleared' : item.level });
+          w.log.length = Math.min(w.log.length, 12);
+        },
+      })
+        .then(r => { saveRun(r, o); w.stage = 'done'; w.now = null; w.finished = Date.now(); })
+        .catch(e => { w.error = String(e.message).slice(0, 200); w.stage = 'done'; w.finished = Date.now(); });
       return send(res, 202, watch);
     }
     return send(res, 404, { error: 'not found' });

@@ -10,21 +10,23 @@ import { appFacts } from './app.js';
 import { fingerprint, load, newSince, save } from './state.js';
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
-export async function checkItems(items, { model = true, onItem = () => {} } = {}) {
+export async function checkItems(items, { model = true, onItem = () => {}, onStep = () => {} } = {}) {
   const state = load(), useModel = model && await available();
   const run = { model: useModel ? MODEL : null, items: [], stats: { total: items.length, cached: 0, judged: 0, quiet: 0, ms: 0, tokens: 0 } };
   for (const it of items) {
     const cached = state.results[it.fp];
-    let r;
+    let r, how = 'cached', ms = 0;  // how this one was settled, for anyone watching live
     if (cached && (cached.model || !cached.wanted || !useModel)) { r = cached; run.stats.cached++; }
     else {
+      onStep({ phase: 'read', key: it.key, name: it.name, kind: it.kind });
       const { facts, coverage } = it.read ? it.read() : dirFacts(it.dir, { manifest: it.manifest });
       const found = combos(facts), short = condense(facts, 40, keysOf(found), risk);
       let labels = {}, judged = null;
       const wanted = short.some(f => !['fs', 'os', 'env', 'url', 'fs-read', 'decode', 'imports'].includes(f.cap));
       if (useModel && wanted && !it.noModel) {
+        onStep({ phase: 'judge', key: it.key, name: it.name, kind: it.kind });
         judged = await judge(it.name, it.claim, short);  // nothing worth judging → no model call at all
-        if (judged) { labels = judged.labels; run.stats.judged++; run.stats.ms += judged.ms; run.stats.tokens += judged.tokens; }
+        if (judged) { labels = judged.labels; run.stats.judged++; run.stats.ms += judged.ms; run.stats.tokens += judged.tokens; ms = judged.ms; }
       } else run.stats.quiet++;
       const a = assess(short, found, labels);
       r = {
@@ -33,11 +35,12 @@ export async function checkItems(items, { model = true, onItem = () => {} } = {}
         caps: [...new Set(short.map(f => f.cap))], model: judged ? MODEL : null, wanted, at: new Date().toISOString(),
       };
       state.results[it.fp] = r;
+      how = judged ? 'model' : 'rules';
     }
     const approved = state.approved[it.key] === it.fp;
     const diff = approved ? null : newSince(state, `${it.kind}:${it.name}`, r.caps);
     run.items.push({ ...r, key: it.key, name: it.name, kind: it.kind, fp: it.fp, dir: it.dir, claim: (it.claim || '').slice(0, 320), approved, diff });  // same bytes, other place: same result
-    onItem(run.items.at(-1), items.length);
+    onItem(run.items.at(-1), items.length, { how, ms });
   }
   save(state);
   run.level = worst(run.items.filter(i => !i.approved).map(i => i.level));

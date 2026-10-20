@@ -637,8 +637,92 @@ html:has(body.touring){overflow:hidden}
 .tdots i{width:6px;height:6px;border-radius:3px;background:var(--line2);transition:width .4s var(--spring),background .3s}
 .tdots i.on{width:18px;background:var(--ink)}
 body.boot,body.boot *{transition:none!important}  /* the first paint lands in its colours; later changes animate */
-@media (max-width:420px){#again{width:40px;padding:0;gap:0;font-size:0}}  /* icon only on small phones, the title still names it */
 @media (prefers-reduced-motion:reduce){.peek *{animation-delay:0s!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+/* ---------- run again: a button that becomes the watch while it runs ---------- */
+.runbtn{position:relative;display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 16px 0 7px;border:0;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:650;font-size:14.5px;cursor:pointer;
+  overflow:hidden;isolation:isolate;white-space:nowrap;transition:background .45s,color .45s,transform .35s var(--bounce),box-shadow .3s}
+.runbtn:hover{transform:translateY(-1px);box-shadow:0 10px 24px -12px rgba(14,23,38,.5)}
+.runbtn:active{transform:scale(.97)}
+.runbtn::before{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .4s;
+  background:linear-gradient(110deg,transparent 28%,color-mix(in oklab,var(--accent) 34%,transparent) 50%,transparent 72%) 0 0/260% 100%}
+.runbtn[data-state=run]::before{opacity:1;animation:sheen 2s linear infinite}
+@keyframes sheen{from{background-position:130% 0}to{background-position:-130% 0}}
+.rring{position:relative;display:grid;place-items:center;width:28px;height:28px;flex:none}
+.rring .rr{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.rring .rt{fill:none;stroke:color-mix(in oklab,var(--bg) 20%,transparent);stroke-width:3}
+.rring .rv{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:0 82;transition:stroke-dasharray .6s var(--enter)}
+.rring .rt,.rring .rv{opacity:0;transition:opacity .35s,stroke-dasharray .6s var(--enter)}
+.runbtn[data-state=run] .rt,.runbtn[data-state=run] .rv{opacity:1}
+.rring .ricon,.rring .rcheck{width:15px;height:15px;transition:transform .55s var(--spring),opacity .3s}
+.rring .rcheck{position:absolute;opacity:0;transform:scale(.4)}
+.runbtn:hover .ricon{transform:rotate(200deg)}
+.runbtn[data-state=run] .ricon{animation:spin 1.2s linear infinite}
+.runbtn[data-state=done] .ricon{opacity:0;transform:scale(.4)}
+.runbtn[data-state=done] .rcheck{opacity:1;transform:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rtx{display:grid;text-align:left;line-height:1.15;min-width:0}
+.r1{font-weight:650}
+.r2{font:500 11px/1.3 var(--mono);opacity:.72;max-width:0;max-height:0;overflow:hidden;text-overflow:ellipsis;transition:max-width .55s var(--spring),max-height .4s}
+.runbtn[data-state=run] .r2{max-width:220px;max-height:16px}
+.r2.tick{animation:tick .35s var(--enter)}
+@keyframes tick{from{opacity:0;transform:translateY(7px)}}
+.rtime{font:500 11.5px var(--mono);opacity:0;max-width:0;overflow:hidden;transition:max-width .45s var(--spring),opacity .3s}
+.runbtn[data-state=run] .rtime{opacity:.75;max-width:52px}
+.runbtn[data-state=done]{background:var(--peter);color:#fff}
+.runbtn[data-state=run] .r1{font-size:13px}
+@media (max-width:420px){.runbtn{padding:0 6px}.runbtn .rtx,.runbtn .rtime{display:none}}  /* icon and ring only on small phones */
+
+/* the watch, live: what's being read right now, the pipeline filling, each item as it settles */
+.wpanel{position:fixed;z-index:64;top:72px;right:max(16px,calc((100vw - 1140px) / 2));width:min(400px,calc(100% - 32px));border-radius:24px;background:var(--card);color:var(--ink);border:1px solid var(--line);
+  box-shadow:0 36px 80px -30px rgba(8,13,26,.55);opacity:0;transform:translateY(-10px) scale(.96);transform-origin:calc(100% - 60px) 0;pointer-events:none;transition:opacity .25s,transform .45s var(--spring);overflow:hidden}
+.wpanel.on{opacity:1;transform:none;pointer-events:auto}
+.wph{display:flex;align-items:center;gap:8px;padding:14px 16px 0}
+.wph .kicker{color:var(--muted)}
+.wph .live{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 color-mix(in oklab,var(--accent) 60%,transparent);animation:ping 1.6s ease-out infinite}
+.wpanel.done .wph .live{animation:none;background:var(--peter)}
+@keyframes ping{70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.wph .sp{flex:1}
+.wph .mono{font-size:12px;color:var(--muted)}
+.wpx{width:28px;height:28px;border-radius:8px;border:0;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.wpx:hover{background:var(--well);color:var(--ink)}
+.wpx svg{width:15px;height:15px}
+.wpnow{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center;padding:12px 16px 4px}
+.wpnow .mf{width:44px;height:44px}
+.wpnow p{font-size:14px;line-height:1.4;min-height:40px;display:flex;align-items:center}
+.wpnow p span{animation:tick .35s var(--enter)}
+.wpnow p svg{width:14px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:4px}
+.wpnow .mono{font-size:13px;word-break:break-all}
+.wpbar{position:relative;height:6px;margin:10px 16px 0;border-radius:3px;background:var(--line);overflow:hidden}
+.wpbar i{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--ink);transition:width .55s var(--enter)}
+.wpbar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--card) 55%,transparent),transparent) 0 0/40% 100% no-repeat;animation:barsheen 1.3s linear infinite}
+.wpanel.done .wpbar i::after{display:none}
+@keyframes barsheen{from{background-position:-60% 0}to{background-position:160% 0}}
+.wpcount{display:flex;justify-content:space-between;padding:6px 16px 0;font:500 11.5px var(--mono);color:var(--muted)}
+.wpipe{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px 16px 4px}
+.wps{display:grid;gap:4px;justify-items:start;padding:9px 10px;border-radius:14px;background:var(--well);border:1px solid var(--line);transition:border-color .3s,background .3s}
+.wps.bump{border-color:var(--ink)}
+.wps svg{width:14px;height:14px}
+.wps .odo{font:750 18px/1 var(--display);letter-spacing:-.04em}
+.wps small{font-size:11px;line-height:1.2;color:var(--muted)}
+.wps.model svg{fill:currentColor;stroke:none}
+.wplog{display:grid;padding:8px 8px 10px;max-height:236px;overflow:hidden;-webkit-mask:linear-gradient(#000 70%,transparent);mask:linear-gradient(#000 70%,transparent)}
+.wl{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:6px 8px;border-radius:10px;font-size:12.5px}
+.wl.new{animation:logIn .45s var(--spring) both}
+@keyframes logIn{from{opacity:0;transform:translateY(-12px) scale(.98)}}
+.wl .wli{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--well)}
+.wl .wli svg{width:12px;height:12px}
+.wl.model .wli{background:var(--ink);color:var(--bg)}
+.wl.model .wli svg{fill:currentColor;stroke:none}
+.wl .wln{font:500 12.5px var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wl .wlh{font:500 11px var(--mono);color:var(--muted);white-space:nowrap}
+.wl .pill2{font-size:10.5px;padding:4px 7px}
+.wpdone{padding:2px 16px 14px;font-size:13.5px;color:var(--muted)}
+.wpdone b{color:var(--ink)}
+/* the skipper reads along while the watch runs */
+.sloth[data-mood=reading] .e-pill{animation:read 2.2s ease-in-out infinite}
+@keyframes read{0%,100%{transform:translate(-3px,2px)}45%{transform:translate(3px,2px)}50%{transform:translate(3px,2px)}95%{transform:translate(-3px,2px)}}
+.mf .scan{animation:readmini 2.2s ease-in-out infinite}
+@keyframes readmini{0%,100%{transform:translateX(-1.2px)}50%{transform:translateX(1.2px)}}
 </style>
 </head>
 <body data-v="night" class="boot">
@@ -651,7 +735,9 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
   <span class="pill" id="who" data-explain="reader"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l1.8 5.5L19.5 10l-5.7 1.6L12 17l-1.8-5.4L4.5 10l5.7-1.5z"/></svg><span>reading…</span></span>
   <span class="sp"></span>
   <span class="when" id="when"></span>
-  <button class="btn ink" id="again" title="Read everything again (unchanged things are skipped)"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>run again</button>
+  <button class="runbtn" id="again" data-state="idle" title="Read everything again (unchanged things are skipped)" aria-haspopup="dialog">
+    <span class="rring"><svg class="rr" viewBox="0 0 30 30" aria-hidden="true"><circle class="rt" cx="15" cy="15" r="13"/><circle class="rv" cx="15" cy="15" r="13"/></svg><svg class="i ricon" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg><svg class="i rcheck" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+    <span class="rtx"><span class="r1">run again</span><span class="r2"></span></span><span class="rtime"></span></button>
   <button class="btn ib" id="help" aria-label="How to read this page" title="how to read this page"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4"/><circle cx="12" cy="16.6" r=".6" fill="currentColor"/></svg></button>
   <button class="btn ib" id="theme" aria-label="Theme: system"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
 </div></header>
@@ -742,6 +828,7 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
   <div class="when" id="footmeta"></div>
 </div></footer>
 <div id="pop" role="tooltip"></div>
+<div class="wpanel" id="wpanel" role="dialog" aria-label="The watch, live" aria-hidden="true"></div>
 <div class="sheet" id="sheet" aria-hidden="true"><div class="scrim" data-close></div><aside class="panel" role="dialog" aria-modal="true" aria-label="Details"><button class="btn ib sx" data-close aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button><div id="sheetbody"></div></aside></div>
 <div id="peek" class="peek" aria-hidden="true"></div>
 <div id="tourblock"></div><div id="spot"></div><div id="tourcard" role="dialog" aria-modal="true" aria-label="How to read this page"></div>
@@ -871,7 +958,7 @@ function ticket() {
   const v = verdict(), prev = S.v, r = S.run && !S.run.empty ? S.run : null;
   S.v = v;
   document.body.dataset.v = { watch: 'night', error: 'night' }[v] ?? v;
-  const sl = $('#sloth'), mood = { hold: 'worried', review: 'calm', clear: 'happy' }[v] ?? 'sleepy';
+  const sl = $('#sloth'), mood = { hold: 'worried', review: 'calm', clear: 'happy', watch: 'reading' }[v] ?? 'sleepy';
   if (sl.dataset.mood !== mood) { sl.dataset.mood = mood; if (prev && !REDUCED) { sl.classList.remove('boing'); void sl.offsetWidth; sl.classList.add('boing'); } }
   $('#flagQ').classList.toggle('down', v !== 'hold');
   $('#flagP').classList.toggle('down', v !== 'review' && v !== 'clear');
@@ -887,10 +974,11 @@ function ticket() {
     review: ['ready, after a glance.', `nothing crossed a hold line. <b>${pl(glances, 'thing is', 'things are')}</b> worth a look before you ship.`],
     clear: ['cleared to sail.', notable ? `nothing needs you. ${pl(notable, 'thing uses', 'things use')} notable powers, listed below; none past a line.` : 'nothing needs you this morning.'],
     night: ['no watch yet.', 'run <b>npx slowship</b> in your project tonight. it reads everything, runs nothing, and leaves the verdict here by morning.'],
-    watch: ['keeping watch.', S.watch?.total ? `reading <b>${S.watch.done} of ${S.watch.total}</b>. anything unchanged since last time takes no time at all.` : 'finding everything to read…'],
+    watch: ['keeping watch.', S.watch?.total ? `read <b>${S.watch.done} of ${S.watch.total}</b>${S.watch.now ? `, now <span class="mono">${esc(S.watch.now.name)}</span>` : ''}. ${S.watch.now?.phase === 'judge' ? `${esc((S.run?.model || 'gemma4').split(':')[0])} is comparing it with what it says it does.` : 'anything unchanged since last time takes no time at all.'}` : 'finding everything aboard…'],
     error: ['lost the harbour radio.', 'the report server isn’t answering. run <b>npx slowship ui</b> and reload.'],
   }[v];
-  swapIn($('#headline'), H[0]); swapIn($('#sub'), H[1]);
+  swapIn($('#headline'), H[0]);
+  if (v === 'watch') $('#sub').innerHTML = H[1]; else swapIn($('#sub'), H[1]);  // live text updates in place, it doesn't blur in every half second
 
   const m = $('#meter');
   if (v === 'watch') {
@@ -1044,6 +1132,7 @@ const EYES = {
   sleepy: '<path d="M9.3 17q1.7 1.7 3.4 0M19.3 17q1.7 1.7 3.4 0" stroke="#0B1220" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
   worried: '<rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/><path d="M8.6 13.3l3.6-1.3M23.4 13.3l-3.6-1.3" stroke="#4C3321" stroke-width="1.2" stroke-linecap="round"/>',
   calm: '<rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/>',
+  reading: '<g class="scan"><rect x="10.2" y="16.2" width="2" height="3" rx="1" fill="#0B1220"/><rect x="19.8" y="16.2" width="2" height="3" rx="1" fill="#0B1220"/></g>',
   happy: '<path d="M9.4 17.6q1.8-2.6 3.6 0M19 17.6q1.8-2.6 3.6 0" stroke="#0B1220" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
 };
 const miniFace = m => `<svg class="mf" viewBox="0 0 32 32"><circle cx="16" cy="17" r="14" fill="#B98E63"/><ellipse cx="16" cy="19" rx="11" ry="9.2" fill="#F7E7CF"/>
@@ -1473,18 +1562,99 @@ function toast(html, undo) {
 }
 
 // run the watch again, with its progress on the ticket
-$('#again').onclick = async () => {
-  try { await api('/api/scan', {}); } catch (e) { return toast(`couldn’t start the watch: ${esc(e.message)}`); }
-  S.watch = { done: 0, total: 0 }; $('#again').disabled = true; ticket();
+// ---------- the watch, live: the run button becomes the watch, and a panel shows the work as it happens ----------
+const RUN = $('#again'), WP = $('#wpanel');
+const HOW = {
+  cached: ['already read', IC.undo, 'same bytes as before: no time'],
+  rules: ['rules only', IC.code, 'read by slowship’s own rules'],
+  model: ['gemma4', SPARK, 'compared with its description'],
+  flagged: ['flagged', SEV.hold, 'does more than it says'],
+};
+let watchT = null, clockT = null, lastN = 0;
+const clock = ms => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
+const model = () => esc((S.run?.model || 'gemma4').split(':')[0]);
+function runState(state, w) {
+  RUN.dataset.state = state;
+  const r1 = RUN.querySelector('.r1'), r2 = RUN.querySelector('.r2');
+  if (state === 'idle') { r1.textContent = 'run again'; r2.textContent = ''; RUN.title = 'Read everything again (unchanged things are skipped)'; return; }
+  if (state === 'done') { r1.textContent = w?.error ? 'the watch stopped' : `done · ${clock(w.finished - w.started)}`; r2.textContent = ''; return; }
+  const pct = w.total ? w.done / w.total : 0;
+  r1.textContent = w.stage === 'finding' ? 'finding cargo…' : `keeping watch · ${w.done}/${w.total}`;
+  const now = w.now ? (w.now.phase === 'judge' ? `✦ ${w.now.name}` : w.now.name) : w.log[0]?.name ?? '';
+  if (r2.textContent !== now) { r2.textContent = now; r2.classList.remove('tick'); void r2.offsetWidth; r2.classList.add('tick'); }
+  RUN.querySelector('.rv').style.strokeDasharray = `${(pct * 82).toFixed(1)} 82`;
+  RUN.title = 'The watch is running: tap to see it live';
+}
+// the panel is built once and then only its moving parts change, so numbers roll and new rows slide in
+function panelSkeleton() {
+  WP.innerHTML = `<div class="wph"><i class="live"></i><span class="kicker" id="wpk">the watch · live</span><span class="sp"></span><span class="mono" id="wpt">0:00</span><button class="wpx" data-wpclose aria-label="Close">${IC.x}</button></div>
+    <div class="wpnow">${miniFace('reading')}<p id="wpnow"></p></div>
+    <div class="wpbar"><i id="wpbar" style="width:0"></i></div><div class="wpcount"><span id="wpc">…</span><span id="wpp">0%</span></div>
+    <div class="wpipe">${Object.entries(HOW).map(([k, [l, ic, tip]]) => `<div class="wps ${k}" id="wps-${k}" title="${tip}">${ic}<span class="odo" id="wpn-${k}"></span><small>${k === 'model' ? model() : l}</small></div>`).join('')}</div>
+    <div class="wplog" id="wplog" aria-live="off"></div><div class="wpdone" id="wpdone" hidden></div>`;
+  Object.keys(HOW).forEach(k => odo($(`#wpn-${k}`), 0, false));
+  lastN = 0;
+}
+function panelUpdate(w) {
+  if (!$('#wpnow')) panelSkeleton();
+  const pct = w.total ? Math.round(w.done / w.total * 100) : 0, done = !!w.finished;
+  WP.classList.toggle('done', done);
+  $('#wpk').textContent = done ? (w.error ? 'the watch · stopped' : 'the watch · done') : 'the watch · live';
+  const now = done ? (w.error ? `<span>${esc(w.error)}</span>` : `<span>all <b>${w.total}</b> read. the report below is fresh.</span>`)
+    : w.stage === 'finding' ? '<span>finding everything aboard: packages, skills, MCP servers, your build…</span>'
+    : w.now?.phase === 'judge' ? `<span>${SPARK}<b>${model()}</b> is comparing <span class="mono">${esc(w.now.name)}</span> with what it says it does…</span>`
+    : w.now ? `<span>parsing <span class="mono">${esc(w.now.name)}</span>, never running it</span>` : `<span>skipping what hasn’t changed since last time…</span>`;
+  const nowEl = $('#wpnow'); if (nowEl.dataset.v !== now) { nowEl.innerHTML = now; nowEl.dataset.v = now; }
+  $('#wpbar').style.width = (done ? 100 : pct) + '%';
+  $('#wpc').textContent = w.total ? `${w.done} of ${w.total}` : 'counting…';
+  $('#wpp').textContent = `${done ? 100 : pct}%`;
+  for (const k of Object.keys(HOW)) {
+    const el = $(`#wpn-${k}`), v = String(w.counts?.[k] ?? 0);
+    if (el.dataset.t !== v) { odo(el, v); const box = $(`#wps-${k}`); box.classList.remove('bump'); void box.offsetWidth; box.classList.add('bump'); setTimeout(() => box.classList.remove('bump'), 400); }
+  }
+  const fresh = (w.log || []).filter(l => l.n > lastN).reverse();
+  const log = $('#wplog');
+  for (const l of fresh) {
+    const st = l.level === 'cleared' ? 'cleared' : { hold: 'hold', review: 'glance', notable: 'notable' }[l.level] ?? 'quiet';
+    log.insertAdjacentHTML('afterbegin', `<div class="wl ${l.how} new"><span class="wli">${HOW[l.how][1]}</span><span class="wln">${esc(l.name)}</span><span class="wlh">${l.how === 'model' ? `${(l.ms / 1000).toFixed(1)} s` : HOW[l.how][0]}</span><span class="pill2 ${st}">${ST[st]}</span></div>`);
+  }
+  if (fresh.length) lastN = fresh.at(-1).n;
+  while (log.children.length > 9) log.lastElementChild.remove();
+  const dn = $('#wpdone');
+  dn.hidden = !done || !!w.error;
+  if (done && !w.error) dn.innerHTML = `done in <b>${clock(w.finished - w.started)}</b>: ${w.counts.cached} already read, ${w.counts.rules} by rules, <b>${w.counts.model}</b> judged by ${model()}${w.ms ? ` in ${fmtDur(w.ms)}` : ''}.`;
+}
+const openPanel = () => { WP.classList.add('on'); WP.setAttribute('aria-hidden', 'false'); };
+const closePanel = () => { WP.classList.remove('on'); WP.setAttribute('aria-hidden', 'true'); };
+WP.addEventListener('click', e => { if (e.target.closest('[data-wpclose]')) closePanel(); });
+document.addEventListener('click', e => { if (WP.classList.contains('on') && !WP.contains(e.target) && !RUN.contains(e.target)) closePanel(); });
+
+function follow(w) {
+  S.watch = w; ticket(); runState('run', w); panelUpdate(w);
+  clearInterval(clockT);
+  clockT = setInterval(() => { const t = clock(Date.now() - w.started); RUN.querySelector('.rtime').textContent = t; const el = $('#wpt'); if (el) el.textContent = t; }, 500);
   const poll = async () => {
-    const w = await api('/api/watch').catch(() => ({}));
-    if (w.finished || w.idle) {
-      S.watch = null; $('#again').disabled = false;
-      if (w.error) { ticket(); return toast(`the watch stopped: ${esc(w.error)}`); }
-      load(await api('/api/run')); toast('the watch is done. here’s this morning’s report.');
-    } else { S.watch = w; ticket(); setTimeout(poll, 600); }
+    const n = await api('/api/watch').catch(() => null);
+    if (!n || n.idle) { watchT = setTimeout(poll, 1500); return; }
+    if (n.finished) {
+      clearInterval(clockT); S.watch = null; panelUpdate(n); runState('done', n);
+      $('#wpt').textContent = clock(n.finished - n.started);
+      if (n.error) { ticket(); toast(`the watch stopped: ${esc(n.error)}`); }
+      else { load(await api('/api/run')); toast('the watch is done. here’s this morning’s report.'); }
+      setTimeout(() => { runState('idle'); if (!WP.matches(':hover')) closePanel(); }, 3200);
+      return;
+    }
+    S.watch = n; ticket(); runState('run', n); panelUpdate(n);
+    watchT = setTimeout(poll, 500);
   };
-  poll();
+  clearTimeout(watchT); poll();
+}
+RUN.onclick = async () => {
+  if (RUN.dataset.state === 'run') { WP.classList.contains('on') ? closePanel() : openPanel(); return; }
+  if (RUN.dataset.state === 'done') { openPanel(); return; }
+  let w;
+  try { w = await api('/api/scan', {}); } catch (e) { return toast(`couldn’t start the watch: ${esc(e.message)}`); }
+  panelSkeleton(); openPanel(); follow(w);
 };
 
 // theme: system → light → dark
@@ -1588,6 +1758,7 @@ addEventListener('scroll', () => $('#bar').classList.toggle('scrolled', scrollY 
 // keyboard: j/k move, a clears, enter opens, / searches
 addEventListener('keydown', e => {
   if (tour >= 0) { const k = e.key; if (k === 'Escape') tourEnd(); else if (k === 'ArrowRight') tourGo(tour + 1); else if (k === 'ArrowLeft') tourGo(tour - 1); return; }
+  if (e.key === 'Escape' && $('#wpanel').classList.contains('on')) { $('#wpanel').classList.remove('on'); return; }
   if (e.key === 'Escape' && (popFor || peekFor)) { hidePop(); hidePeek(); return; }
   if (e.key === 'Escape' && $('#sheet').classList.contains('on')) { closeSheet(); return; }
   if (e.target.matches?.('input')) { if (e.key === 'Escape') e.target.blur(); return; }
@@ -1611,6 +1782,7 @@ matchMedia('(min-width: 980px)').addEventListener('change', () => { if (S.run &&
   try { load(await api('/api/run')); }
   catch { S.run = { empty: true, error: true }; render(); }
   requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('boot')));
+  api('/api/watch').then(w => { if (w.started && !w.finished) { panelSkeleton(); follow(w); } }).catch(() => {});
   const seen = (() => { try { return localStorage.getItem('slowship-tour'); } catch { return '1'; } })();
   if (!S.run?.empty && !seen) setTimeout(() => tourGo(0), 900);
   else setTimeout(() => {
