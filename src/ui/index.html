@@ -123,7 +123,9 @@ svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stro
 .tip b{display:block;font:500 12.5px var(--mono)}
 
 /* the sloth: soft 3D, pill eyes, moods shown only through the eyes and mouth */
-.sloth{width:200px;height:190px;overflow:visible;justify-self:center}
+.sloth{width:200px;height:190px;overflow:visible;justify-self:center;cursor:pointer;border-radius:30px}
+.sloth:focus-visible{outline:2.5px solid currentColor;outline-offset:2px}
+.sloth:hover .jelly{animation-duration:2.4s}
 .sloth .jelly{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 4.8s ease-in-out infinite}
 @keyframes breathe{50%{transform:scale(1.012,.99)}}
 .sloth.boing .jelly{animation:boing .8s var(--enter)}
@@ -331,7 +333,51 @@ body.empty .tiles,body.empty #manifest,body.empty #notedsec,body.empty .sh .hint
   .nrow{grid-template-columns:1fr;gap:2px}
   .sh .hint{display:none}
 }
+/* explanations: every part of the page can say what it is */
+.xi{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:8px;border-radius:50%;border:1.5px solid color-mix(in oklab,currentColor 38%,transparent);background:none;color:inherit;
+  font:600 11px/1 var(--mono);letter-spacing:0;text-transform:none;vertical-align:1px;cursor:pointer;opacity:.75;transition:opacity .2s,transform .35s var(--bounce),background .2s}
+.xi:hover,.xi:focus-visible{opacity:1;transform:scale(1.15);background:color-mix(in oklab,currentColor 12%,transparent)}
+#pop{position:fixed;z-index:70;left:0;top:0;width:max-content;max-width:min(340px,calc(100% - 24px));padding:15px 17px;border-radius:18px;background:var(--card);color:var(--ink);border:1px solid var(--line);
+  box-shadow:0 26px 54px -18px rgba(8,13,26,.5);opacity:0;transform:translateY(6px) scale(.97);pointer-events:none;transition:opacity .18s,transform .3s var(--spring)}
+#pop.on{opacity:1;transform:none;pointer-events:auto}
+#pop::before{content:"";position:absolute;left:var(--ax,50%);width:12px;height:12px;background:var(--card);border:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+#pop[data-side=below]::before{top:-7px;border-right:0;border-bottom:0}
+#pop[data-side=above]::before{bottom:-7px;border-left:0;border-top:0}
+.pt{display:block;font:700 15.5px/1.2 var(--display);letter-spacing:-.045em;margin-bottom:7px}
+.pb{font-size:14px;line-height:1.5;color:var(--muted);display:grid;gap:8px}
+.pb b{color:var(--ink);font-weight:650}
+.say{font-size:15.5px;color:var(--ink);line-height:1.4}
+.moods{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:2px}
+.moods span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 3px 7px;border-radius:12px;text-align:center;font-size:11px;line-height:1.25;color:var(--muted)}
+.moods span.on{background:var(--well);box-shadow:inset 0 0 0 1.5px var(--ink);color:var(--ink)}
+.moods b{font-size:12px;color:var(--ink)}
+.mf{width:36px;height:36px;margin-bottom:2px}
+.fline{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px}
+.fline span{display:inline-flex;align-items:center;gap:6px}
+.fq,.fp{display:inline-block;width:17px;height:12px;border-radius:2px;box-shadow:inset 0 0 0 1.5px #0E1726}
+.fq{background:#FFCB2F}.fp{background:linear-gradient(#fff,#fff) center/7px 5px no-repeat,#2F5BFF}
+.meter i{cursor:pointer}
+.meter i:hover{transform:scaleY(1.45)}
+.row.flash{animation:flash 1.4s var(--enter)}
+@keyframes flash{0%,35%{background:color-mix(in oklab,var(--accent) 22%,transparent)}}
+/* the first-visit tour: a spotlight, a card, and the skipper's voice */
+#spot{position:fixed;z-index:61;border-radius:26px;box-shadow:0 0 0 200vmax rgba(8,13,26,.62);pointer-events:none;opacity:0;
+  transition:left .55s var(--spring),top .55s var(--spring),width .55s var(--spring),height .55s var(--spring),opacity .3s}
+#tourblock{position:fixed;inset:0;z-index:60;display:none}
+#tourcard{position:fixed;z-index:62;left:0;top:0;width:min(390px,calc(100% - 24px));padding:18px 20px 16px;border-radius:22px;background:var(--card);color:var(--ink);
+  box-shadow:0 30px 70px -20px rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .3s,left .5s var(--spring),top .5s var(--spring)}
+body.touring #spot,body.touring #tourcard{opacity:1}
+body.touring #tourcard{pointer-events:auto}
+body.touring #tourblock{display:block}
+html:has(body.touring){overflow:hidden}
+#tourcard .kicker{color:var(--muted);margin-bottom:10px}
+.tacts{display:flex;align-items:center;gap:8px;margin-top:16px}
+.tacts .sp{flex:1}
+.tdots{display:flex;gap:5px;margin-top:14px;justify-content:center}
+.tdots i{width:6px;height:6px;border-radius:3px;background:var(--line2);transition:width .4s var(--spring),background .3s}
+.tdots i.on{width:18px;background:var(--ink)}
 body.boot,body.boot *{transition:none!important}  /* the first paint lands in its colours; later changes animate */
+@media (max-width:420px){#again{width:40px;padding:0;gap:0;font-size:0}}  /* icon only on small phones, the title still names it */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -342,17 +388,18 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
 
 <header class="bar" id="bar"><div class="wrap">
   <span class="mark">slowship<i></i></span>
-  <span class="pill" id="who"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l1.8 5.5L19.5 10l-5.7 1.6L12 17l-1.8-5.4L4.5 10l5.7-1.5z"/></svg><span>reading…</span></span>
+  <span class="pill" id="who" data-explain="reader"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l1.8 5.5L19.5 10l-5.7 1.6L12 17l-1.8-5.4L4.5 10l5.7-1.5z"/></svg><span>reading…</span></span>
   <span class="sp"></span>
   <span class="when" id="when"></span>
   <button class="btn ink" id="again" title="Read everything again (unchanged things are skipped)"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>run again</button>
+  <button class="btn ib" id="help" aria-label="How to read this page" title="how to read this page"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4"/><circle cx="12" cy="16.6" r=".6" fill="currentColor"/></svg></button>
   <button class="btn ib" id="theme" aria-label="Theme: system"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
 </div></header>
 
 <section class="wrap hero" aria-label="Verdict">
   <div class="tkwrap"><div class="ticket" id="ticket">
     <div class="tmain">
-      <svg class="sloth" id="sloth" viewBox="0 0 200 190" data-mood="sleepy" aria-hidden="true">
+      <svg class="sloth" id="sloth" viewBox="0 0 200 190" data-mood="sleepy" data-explain="skipper" role="button" tabindex="0" aria-label="The skipper: what his face means">
         <defs>
           <radialGradient id="sfur" cx=".34" cy=".26" r=".9"><stop offset="0" stop-color="#E6C9A3"/><stop offset=".5" stop-color="#B98E63"/><stop offset="1" stop-color="#76533A"/></radialGradient>
           <radialGradient id="sface" cx=".42" cy=".3" r=".8"><stop offset="0" stop-color="#FFF8EC"/><stop offset="1" stop-color="#E8D0AE"/></radialGradient>
@@ -394,7 +441,7 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
         </g>
       </svg>
       <div>
-        <p class="kicker" id="kicker">morning report</p>
+        <p class="kicker"><span id="kicker">morning report</span><button class="xi" data-explain="verdict" aria-label="What is the verdict?">i</button></p>
         <h1 id="headline">reading the manifest…</h1>
         <p class="sub" id="sub">one moment.</p>
         <div class="meter" id="meter" aria-hidden="true"></div>
@@ -402,7 +449,7 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
       </div>
     </div>
     <aside class="deck" aria-label="Everything aboard">
-      <div class="dhead"><p class="kicker">the cargo</p><span class="aboard"><b class="num" id="aboard">0</b>aboard</span></div>
+      <div class="dhead"><p class="kicker">the cargo<button class="xi" data-explain="cargo" aria-label="What is the cargo?">i</button></p><span class="aboard"><b class="num" id="aboard">0</b>aboard</span></div>
       <svg class="ship" id="ship" viewBox="0 0 280 80" role="img" aria-label="Everything aboard"></svg>
       <p class="dleg" id="dleg"></p>
       <p class="dhint">one container per thing you installed. point at one, or tap it, to see what it is.</p>
@@ -414,13 +461,13 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
 
 <main class="wrap">
   <section class="sec" aria-labelledby="needh">
-    <div class="sh"><h2 id="needh">before you sail</h2><span class="cnt" id="needcount">…</span>
+    <div class="sh"><h2 id="needh">before you sail</h2><button class="xi" data-explain="needs" aria-label="What is this list?">i</button><span class="cnt" id="needcount">…</span>
       <span class="hint"><kbd>J</kbd><kbd>K</kbd> move <kbd>A</kbd> clear <kbd>/</kbd> search</span></div>
     <div class="list" id="rows"></div>
   </section>
   <section class="sec" id="notedsec"></section>
   <section class="sec" id="manifest" aria-labelledby="manh">
-    <div class="sh"><h2 id="manh">the manifest</h2></div>
+    <div class="sh"><h2 id="manh">the manifest</h2><button class="xi" data-explain="manifest" aria-label="What is the manifest?">i</button></div>
     <p class="lede">everything the watch read, and what each one can touch. quiet means nothing needed you.</p>
     <div class="tools">
       <div class="seg" id="filters" role="group" aria-label="Show"><span class="thumb"></span></div>
@@ -435,6 +482,8 @@ body.boot,body.boot *{transition:none!important}  /* the first paint lands in it
   <div><b>read, never run.</b>slowship reads code; it never runs what it checks, and uploads nothing.</div>
   <div class="when" id="footmeta"></div>
 </div></footer>
+<div id="pop" role="tooltip"></div>
+<div id="tourblock"></div><div id="spot"></div><div id="tourcard" role="dialog" aria-modal="true" aria-label="How to read this page"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastmsg"></span><button id="toastundo" hidden>undo</button></div>
 
 <script>
@@ -595,8 +644,8 @@ function ticket() {
     const segs = [...need].sort((a, b) => ORDER[b.level] - ORDER[a.level]);
     m.innerHTML = segs.map(i => `<i data-k="${esc(i.fp)}" class="${i.approved ? 'done' + (!first && !was.has(i.fp) ? ' just' : '') : i.level}"></i>`).join('');
     $('#mlabel').innerHTML = !r ? '' : need.length
-      ? `<span>${done} of ${need.length} cleared</span>${holds ? `<span>${holds} on hold</span>` : ''}${glances ? `<span>${glances} to glance at</span>` : ''}`
-      : '<span>nothing to clear</span>';
+      ? `<span>clearance: ${done} of ${need.length}</span>${holds ? `<span>${holds} on hold</span>` : ''}${glances ? `<span>${glances} to glance at</span>` : ''}${info('clearance')}`
+      : `<span>nothing to clear</span>${info('clearance')}`;
   }
 
   cargo(v);
@@ -609,16 +658,16 @@ function tiles() {
   const r = S.run, s = r.stats || {};
   const kinds = [['npm', 'packages'], ['skill', 'skills'], ['mcp', 'MCP servers'], ['app', 'your build']].map(([k, l]) => [k, l, G.filter(i => i.kind === k).length]).filter(x => x[2]);
   const shades = [100, 62, 38, 20], unreadN = (r.unread || []).length, dupes = r.items.length - G.length;
-  const read = `<div class="card"><p class="kicker">read overnight</p><div class="big num">${G.length}<small>things</small></div>
+  const read = `<div class="card"><p class="kicker">read overnight${info('read')}</p><div class="big num">${G.length}<small>things</small></div>
     <div class="stack">${kinds.map(([, , n], j) => `<i style="flex:${n};opacity:${shades[j] / 100}"></i>`).join('')}</div>
     <div class="legend">${kinds.map(([k, l, n], j) => `<button class="lg" data-f="${k}" aria-pressed="${S.filter === k}"><i style="opacity:${shades[j] / 100}"></i><span>${l}</span><b>${n}</b></button>`).join('')}</div>
     ${dupes || unreadN ? `<p class="foot">${[dupes ? `${dupes} were the same bytes in two places, read once` : '', unreadN ? `${unreadN} couldn’t be read (see below)` : ''].filter(Boolean).join(' · ')}</p>` : ''}</div>`;
   const rows = TOUCH.map(t => [t, G.filter(i => touches(i, t)).length]).filter(([, n]) => n);
   const max = Math.max(1, ...rows.map(([, n]) => n));
-  const touch = `<div class="card"><p class="kicker">what they can touch</p>
+  const touch = `<div class="card"><p class="kicker">what they can touch${info('touch')}</p>
     <div class="touch">${rows.map(([t, n], j) => `<button class="tr" data-cap="${t[0]}" aria-pressed="${S.cap === t[0]}"><span class="pi">${IC[t[0]]}</span><span>${t[1]}</span><b>${n}</b><span class="bar2"><i style="width:${n / max * 100}%;animation-delay:${j * 60}ms"></i></span></button>`).join('')}</div></div>`;
   const allCached = !s.judged && s.cached;
-  const watch = `<div class="card"><p class="kicker">the watch</p>
+  const watch = `<div class="card"><p class="kicker">the watch${info('watch')}</p>
     ${r.model ? (allCached
       ? `<div class="big num">${s.cached}<small>already read</small></div><div class="lines"><span>nothing new since the last watch, so ${esc(r.model.split(':')[0])} had nothing to read.</span><span>a changed package is read again, automatically.</span></div>`
       : `<div class="big num">${fmtDur(s.ms || 0)}</div><div class="lines"><span><b>${esc(r.model)}</b> judged ${s.judged} on this laptop</span><span><b>${s.total - s.judged - s.cached}</b> needed no model at all</span>${s.cached ? `<span><b>${s.cached}</b> skipped: same bytes already read</span>` : ''}</div>`)
@@ -628,6 +677,128 @@ function tiles() {
   $$('#tiles .lg').forEach(b => b.onclick = () => { setFilter(S.filter === b.dataset.f ? 'all' : b.dataset.f); jump(); });
   $$('#tiles .tr').forEach(b => b.onclick = () => { S.cap = S.cap === b.dataset.cap ? null : b.dataset.cap; S.shown = 60; tiles(); table(); jump(); });
 }
+const info = k => `<button class="xi" data-explain="${k}" aria-label="What is this?">i</button>`;
+
+// ---------- explanations: one sentence for every part, in the skipper's harbour words ----------
+const MOODS = [['sleepy', 'no watch yet'], ['worried', 'something’s held'], ['calm', 'a few to glance at'], ['happy', 'cleared to sail']];
+const EYES = {
+  sleepy: '<path d="M9.3 17q1.7 1.7 3.4 0M19.3 17q1.7 1.7 3.4 0" stroke="#0B1220" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
+  worried: '<rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/><path d="M8.6 13.3l3.6-1.3M23.4 13.3l-3.6-1.3" stroke="#4C3321" stroke-width="1.2" stroke-linecap="round"/>',
+  calm: '<rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0B1220"/>',
+  happy: '<path d="M9.4 17.6q1.8-2.6 3.6 0M19 17.6q1.8-2.6 3.6 0" stroke="#0B1220" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
+};
+const miniFace = m => `<svg class="mf" viewBox="0 0 32 32"><circle cx="16" cy="17" r="14" fill="#B98E63"/><ellipse cx="16" cy="19" rx="11" ry="9.2" fill="#F7E7CF"/>
+  <ellipse cx="11.2" cy="17" rx="3.8" ry="3.1" fill="#6B4A33"/><ellipse cx="20.8" cy="17" rx="3.8" ry="3.1" fill="#6B4A33"/>${EYES[m]}<ellipse cx="16" cy="21.8" rx="1.7" ry="1.1" fill="#3A2618"/>
+  <path d="M7 9.5C8 3 24 3 25 9.5Z" fill="#17223A"/></svg>`;
+function skipperLine() {
+  const open = G.filter(i => !i.approved && needs(i)), holds = open.filter(i => i.level === 'hold');
+  return {
+    hold: holds.length === 1 ? `I’m keeping us in port: <b>${esc(label(holds[0]))}</b> does more than it says.` : `I’m keeping us in port: <b>${holds.length} things</b> do more than they say.`,
+    review: `nearly ready. glance at <b>${pl(open.length, 'thing')}</b>, then we sail.`,
+    clear: 'all clear. we sail whenever you ship.',
+    night: 'no watch yet. run <b>npx slowship</b> tonight and I’ll read everything.',
+    watch: `reading… <b>${S.watch?.done ?? 0} of ${S.watch?.total || '?'}</b>. nothing gets run.`,
+    error: 'I’ve lost the harbour radio. is the report server running?',
+  }[S.v] ?? '';
+}
+const EXPLAIN = {
+  help: () => ({ t: 'how to read this page', b: 'a 30-second tour of the report. take it again any time.' }),
+  verdict: () => ({ t: 'the verdict', b: '<span>what last night’s watch decided, in three words.</span><span><b>held in port:</b> something does more than it says. look before you ship.</span><span><b>ready, after a glance:</b> nothing serious, a few things worth a look.</span><span><b>cleared to sail:</b> nothing needs you.</span>' }),
+  skipper: () => ({ t: 'the skipper', b: `<span class="say">“${skipperLine()}”</span><span>his face is the verdict at a glance:</span><div class="moods">${MOODS.map(([m, w]) => `<span class="${$('#sloth').dataset.mood === m ? 'on' : ''}">${miniFace(m)}<b>${m}</b>${w}</span>`).join('')}</div><span class="fline"><span><i class="fq"></i>Q flag: held in port</span><span><i class="fp"></i>Blue Peter: ready to sail</span></span>` }),
+  clearance: () => ({ t: 'clearance', b: `<span>one block for each of the <b>${G.filter(needs).length} things</b> that need you, worst first.</span><span><b>striped</b> is on hold, <b>faint</b> is worth a glance, <b>solid</b> is cleared. fill every block and you’re cleared to sail.</span><span>point at a block to see which one it is. tap it to open it.</span>` }),
+  cargo: () => ({ t: 'the cargo', b: '<span>everything this project brings aboard, one container each: packages from your lockfile, agent skills, MCP servers and your own build.</span><span>quiet cargo sits low and faint. flagged cargo is stacked on top: <b>blue</b> to glance at, <b>dark</b> on hold, <b>white</b> cleared.</span><span>point at a container to name it. tap it to open it.</span>' }),
+  read: () => ({ t: 'read overnight', b: '<span>how many things slowship read in this project. the same bytes installed in two places count once.</span><span>tap a kind to list just those in the manifest.</span>' }),
+  touch: () => ({ t: 'what they can touch', b: '<span>what the code can actually do, read from the code itself, not from its description.</span><span>none of it is bad on its own: a downloader makes network calls. tap a row to see which ones.</span>' }),
+  watch: () => ({ t: 'the watch', b: '<span>how long the local model spent reading, and what it skipped because the bytes hadn’t changed.</span><span>tomorrow’s watch only reads what’s new. nothing is uploaded.</span>' }),
+  reader: () => ({ t: 'the reader', b: S.run?.model ? `<span><b>${esc(S.run.model)}</b> runs on this laptop through Ollama. it compares what code does with what its description says.</span><span>it can raise a flag, but only patterns found in the code can hold the ship.</span>` : '<span>no local model ran, so slowship used rules only. start Ollama and run again for the full watch.</span>' }),
+  needs: () => ({ t: 'before you sail', b: '<span>the things to look at, worst first. open one for the evidence: file, line, the code, and what the model thought.</span><span>if you know why it’s there, clear it. slowship won’t ask again until that code changes.</span>' }),
+  manifest: () => ({ t: 'the manifest', b: '<span>every item aboard and what it can touch. filter by kind or power, or search.</span><span>anything you cleared can be taken back here.</span>' }),
+  unread: () => ({ t: 'what we couldn’t read', b: '<span>where the watch didn’t look, so a quiet report never pretends to be proof.</span>' }),
+};
+const pop = $('#pop');
+let popFor = null, popPinned = false, popT;
+function showPop(anchor, e, pinned = false) {
+  clearTimeout(popT);
+  popFor = anchor; popPinned = pinned;
+  pop.innerHTML = `<b class="pt">${e.t}</b><div class="pb">${e.b}</div>`;
+  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  const below = r.bottom + ph + 16 < innerHeight || r.top < ph + 16;
+  const x = Math.max(12, Math.min(innerWidth - pw - 12, r.left + r.width / 2 - pw / 2));
+  pop.style.left = x + 'px'; pop.style.top = (below ? r.bottom + 12 : r.top - ph - 12) + 'px';
+  pop.dataset.side = below ? 'below' : 'above';
+  pop.style.setProperty('--ax', `${Math.max(18, Math.min(pw - 18, r.left + r.width / 2 - x))}px`);
+  pop.classList.add('on');
+}
+function hidePop() { clearTimeout(popT); pop.classList.remove('on'); popFor = null; popPinned = false; }
+const explainOf = el => EXPLAIN[el.dataset.explain]?.();
+// hover explains (mouse), a tap or click pins it, anywhere else closes it
+document.addEventListener('pointerover', e => {
+  if (e.pointerType !== 'mouse' || popPinned || tour >= 0) return;
+  const el = e.target.closest('[data-explain]');
+  if (!el || el === popFor || el.id === 'help') return;
+  clearTimeout(popT); popT = setTimeout(() => showPop(el, explainOf(el)), el.classList.contains('xi') ? 120 : 450);
+});
+document.addEventListener('pointerout', e => {
+  const el = e.target.closest('[data-explain]');
+  if (!el || popPinned || el.contains(e.relatedTarget)) return;
+  clearTimeout(popT); if (popFor === el) hidePop();
+});
+document.addEventListener('click', e => {
+  if (tour >= 0) return;
+  const el = e.target.closest('[data-explain]');
+  if (el && el.id !== 'help') { popFor === el && popPinned ? hidePop() : showPop(el, explainOf(el), true); return; }
+  if (popPinned && !pop.contains(e.target)) hidePop();
+});
+addEventListener('scroll', () => { if (popFor && tour < 0) hidePop(); }, { passive: true });
+
+// the skipper reacts when you poke him, and answers with the keyboard too
+$('#sloth').addEventListener('click', () => { const sl = $('#sloth'); if (!REDUCED) { sl.classList.remove('boing'); void sl.offsetWidth; sl.classList.add('boing'); } });
+$('#sloth').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#sloth').dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
+
+// every block of the clearance bar is a thing: point to name it, tap to open it
+function openItem(i) {
+  const row = $(`#rows .row[data-fp="${CSS.escape(i.fp)}"]`);
+  if (!row) { S.q = label(i); $('#q').value = S.q; S.cap = null; setFilter('all'); jump(); return; }
+  if (!row.classList.contains('open')) row.querySelector('.tog').click();
+  row.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
+  row.querySelector('.tog').focus({ preventScroll: true });
+  row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
+}
+const segItem = t => { const k = t.closest?.('#meter i')?.dataset.k; return k && G.find(x => x.fp === k); };
+$('#meter').addEventListener('pointerover', e => { const i = segItem(e.target); if (i && !popPinned) showPop(e.target, { t: esc(label(i)), b: `<span>${KIND[i.kind]} · ${ST[stateOf(i)]}. tap to open it.</span>` }); });
+$('#meter').addEventListener('pointerleave', () => { if (!popPinned) hidePop(); });
+$('#meter').addEventListener('click', e => { const i = segItem(e.target); if (i) { hidePop(); openItem(i); } });
+
+// the tour: six stops, each spotlit, each explained once
+const TOUR = [['.ticket h1', 'verdict'], ['#sloth', 'skipper'], ['#meter', 'clearance'], ['.deck', 'cargo'], ['#tiles .card:nth-child(2)', 'touch'], ['#rows .head, #rows .calm', 'needs']];
+let tour = -1;
+function tourGo(n) {
+  if (n >= TOUR.length) return tourEnd();
+  tour = Math.max(0, n); hidePop();
+  const [sel, key] = TOUR[tour], el = $(sel);
+  if (!el) return tourGo(tour + 1);
+  document.body.classList.add('touring');
+  const card = $('#tourcard'), last = tour === TOUR.length - 1, e = EXPLAIN[key](), pad = 12;
+  card.innerHTML = `<p class="kicker">${tour + 1} of ${TOUR.length}</p><b class="pt">${e.t}</b><div class="pb">${e.b}</div>
+    <div class="tacts"><button class="link" data-t="end">skip the tour</button><span class="sp"></span>${tour ? '<button class="btn" data-t="back">back</button>' : ''}<button class="btn ink" data-t="next">${last ? 'got it' : 'next'}</button></div>
+    <div class="tdots">${TOUR.map((_, j) => `<i class="${j === tour ? 'on' : ''}"></i>`).join('')}</div>`;
+  // the spotlight and its card move as one group, centred in the window under the top bar
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  let r = el.getBoundingClientRect();
+  const h = Math.max(40, Math.min(r.height, innerHeight - ch - 130));
+  scrollTo({ top: scrollY + r.top - pad - Math.max(76, (innerHeight - (h + pad * 2 + 16 + ch)) / 2), behavior: 'instant' });
+  r = el.getBoundingClientRect();
+  Object.assign($('#spot').style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: r.width + pad * 2 + 'px', height: h + pad * 2 + 'px' });
+  const below = r.top + h + pad + 16 + ch <= innerHeight - 8, above = r.top - pad - 16 - ch >= 8;
+  card.style.left = Math.max(12, Math.min(innerWidth - cw - 12, r.left + Math.min(r.width, 420) / 2 - cw / 2)) + 'px';
+  card.style.top = (below ? r.top + h + pad + 16 : above ? r.top - pad - 16 - ch : innerHeight - ch - 12) + 'px';
+  card.querySelector('[data-t=next]').focus({ preventScroll: true });
+}
+function tourEnd() { tour = -1; document.body.classList.remove('touring'); try { localStorage.setItem('slowship-tour', '1'); } catch {} }
+$('#tourcard').addEventListener('click', e => { const t = e.target.closest('[data-t]')?.dataset.t; if (t === 'next') tourGo(tour + 1); else if (t === 'back') tourGo(tour - 1); else if (t === 'end') tourEnd(); });
+$('#help').onclick = () => tourGo(0);
+addEventListener('resize', () => { if (tour >= 0) tourGo(tour); });
+
 const jump = () => $('#manifest').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
 
 // ---------- before you sail ----------
@@ -742,7 +913,7 @@ function unread() {
   if (lineLevel) u.push({ t: `${pl(lineLevel, 'skill')} with Python or shell`, w: 'read line by line, not with a full parser: narrower than JavaScript, so quiet means “nothing obvious”.' });
   if (r.options?.fetch && G.some(i => i.kind === 'mcp')) u.push({ t: 'MCP packages were downloaded', w: 'to read an npx server, slowship downloads it from npm into a quarantine folder. download only; it is never run.' });
   u.push({ t: 'anything at runtime', w: 'slowship reads code, it never runs it. code fetched or built while an app runs can’t be seen. no findings is not proof of nothing.' });
-  $('#unreadsec').innerHTML = `<div class="sh"><h2>what we couldn’t read</h2></div><p class="lede">an honest watch says where it didn’t look.</p>
+  $('#unreadsec').innerHTML = `<div class="sh"><h2>what we couldn’t read</h2>${info('unread')}</div><p class="lede">an honest watch says where it didn’t look.</p>
     <div class="unread">${u.map(x => `<div class="ur"><b>${esc(x.t)}</b><p>${esc(x.w)}</p></div>`).join('')}</div>`;
 }
 
@@ -815,6 +986,8 @@ addEventListener('scroll', () => $('#bar').classList.toggle('scrolled', scrollY 
 
 // keyboard: j/k move, a clears, enter opens, / searches
 addEventListener('keydown', e => {
+  if (tour >= 0) { const k = e.key; if (k === 'Escape') tourEnd(); else if (k === 'ArrowRight') tourGo(tour + 1); else if (k === 'ArrowLeft') tourGo(tour - 1); return; }
+  if (e.key === 'Escape' && popFor) { hidePop(); return; }
   if (e.target.matches?.('input')) { if (e.key === 'Escape') e.target.blur(); return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const list = $$('#rows .row:not(.gone)');
@@ -834,6 +1007,13 @@ addEventListener('resize', thumb);
   try { load(await api('/api/run')); }
   catch { S.run = { empty: true, error: true }; render(); }
   requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('boot')));
+  const seen = (() => { try { return localStorage.getItem('slowship-tour'); } catch { return '1'; } })();
+  if (!S.run?.empty && !seen) setTimeout(() => tourGo(0), 900);
+  else setTimeout(() => {
+    if (popFor || tour >= 0) return;
+    showPop($('#sloth'), { t: 'the skipper', b: `<span class="say">“${skipperLine()}”</span><span>tap him to learn his faces.</span>` });
+    popT = setTimeout(() => { if (popFor === $('#sloth') && !popPinned) hidePop(); }, 5000);
+  }, 1100);
 })();
 </script>
 </body>
