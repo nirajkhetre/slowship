@@ -58,7 +58,7 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 3. **Facts from the syntax tree.** An AST pass finds what the code can actually do: network calls, running programs, writing files, reading secrets, building code at runtime, install scripts, hidden characters. Each fact keeps its file and line.
 4. **Combinations, in code.** Some pairs mean more than their parts: a credential file read next to a network call, decoding then running code in the same function, a skill that tells your agent to keep something from you. Only these can **hold** the ship.
 5. **Claim against behaviour, on your laptop.** For anything worth a second opinion, the local model gets the item's own description and the short fact list (marked as untrusted data) and says, fact by fact, whether the description calls for it. It must cite fact ids that exist.
-6. **Severity stays in code.** The model can raise a single fact to "worth a glance". It can never lower a hold, and a README that tells AI scanners to approve everything gets nowhere.
+6. **Severity stays in code.** The model can move a single fact one step up or down, never past "worth a glance". Only a combination found in code can hold the ship, and the model can never lower one, so a README that tells AI scanners to approve everything gets nowhere.
 7. **The morning report.** One verdict, a short queue of what to look at, the real code around each finding, and an honest map of what couldn't be read.
 
 ## The morning report
@@ -87,7 +87,17 @@ These are measured on one real project folder: the 174 dependencies of REA's own
 | Code that runs, actually read | 3,827 of 3,828 files (99.97%); 454 test and example files left out on purpose |
 | Verdict | held: the test build (an inert fixture with a fake key and risky Electron settings). 11 more worth a glance, 0 holds among real packages and skills |
 
-A precision and recall evaluation against known-malicious samples is in progress (`eval/`). Numbers will appear here only once they're measured.
+### Against known malware
+
+Measured on 200 agent skills from [MalSkillBench](https://github.com/lxyeternal/MalSkillBench) (100 malicious, 100 benign, a fixed and reproducible subset). The full write-up, every miss explained and how to rerun it are in [eval/EVAL.md](eval/EVAL.md).
+
+| | rules only | rules + gemma4:e2b |
+|---|---|---|
+| **Held** | 12 of 100 malicious skills, 2 of 100 benign | 13 malicious, 3 benign |
+| **Held or worth a glance** | 53 malicious, 17 benign | 33–36 malicious, 8–9 benign (two runs) |
+| Benign npm packages flagged (REA's 174 dependencies) | 0 held, 18 worth a glance | 0 held, 3 worth a glance |
+
+Put plainly: a hold is usually right (12 of 14), but it catches about one malicious skill in eight. Most misses are attacks written as plain English in SKILL.md, or code inside a markdown code block, and slowship doesn't read those as code yet. The model cuts false alarms by half or more, and it also lets more attacks through, because those attacks come with a description written to make them look expected. Malicious npm packages haven't been measured yet.
 
 ## What it can't see
 
@@ -96,6 +106,8 @@ slowship reads code; it never runs it. So:
 - Code fetched or built while a program runs is invisible. It reports the capability ("downloads and runs code") but not the payload.
 - Compiled programs and native addons can't be read. They're listed, not guessed at.
 - Python and shell inside skills are read line by line, not with a full parser. Treat quiet there as "nothing obvious".
+- TypeScript isn't read yet, and code inside markdown code blocks isn't read as code.
+- Instructions in SKILL.md are checked for four narrow things: hiding something from you, ignoring other instructions, downloading and running a script, and sending your data somewhere. Other prompt injection passes unnoticed.
 - Files over 2 MB (usually generated bundles) are skipped and named.
 
 **No findings is not proof of nothing.** The report says so too.
