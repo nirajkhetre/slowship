@@ -132,6 +132,21 @@ test('code shown around a finding stays inside the item and never shows a secret
   assert.equal(codeWindow(app, join(FX, 'evil-pkg', 'index.js'), 1), null);
 });
 
+test('the folder picker lists folders only, marks projects, and refuses relative paths', async () => {
+  const { browse } = await import('../src/server.js');
+  const { mkdirSync, mkdtempSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const root = mkdtempSync(join(tmpdir(), 'slowship-browse-'));
+  mkdirSync(join(root, 'app')); writeFileSync(join(root, 'app', 'package-lock.json'), '{}');
+  mkdirSync(join(root, 'node_modules')); mkdirSync(join(root, '.git')); writeFileSync(join(root, 'secret.txt'), 'never listed');
+  const b = browse(root);
+  assert.deepEqual(b.entries.map(e => e.name), ['app']);
+  assert.equal(b.entries[0].lock, true);
+  assert.ok(!JSON.stringify(b).includes('never listed') && !JSON.stringify(b).includes('secret.txt'));
+  assert.equal(browse('relative/path'), null);
+  assert.ok(browse('').entries.length >= 2, 'home and at least one drive or /');
+});
+
 test('the nightly watch: quoted paths, a real time, and anything shell-like refused', async () => {
   const { windowsTask, cronLine, flagsOf } = await import('../src/schedule.js');
   const argv = ['C:/Program Files/nodejs/node.exe', 'C:/x/bin/slowship.js', 'D:/my project', ...flagsOf({ model: false, app: 'D:/build' })];

@@ -68,8 +68,8 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 - **The verdict.** *Held in port*, *ready after a glance* or *cleared to sail*, with one button for what to do next. Your project is drawn as a ship in harbour, with one container per thing aboard. It stays moored while something is held, and sails out once everything is clear.
 - **What it read.** Where everything came from: the project's lockfile, plus the skill folders and editor settings your AI agents use on this computer, plus your build.
 - **A review list with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. Clear it and the next one comes up.
-- **How it works, live.** Change the project, switch on the nightly watch, or run it now and watch it read.
-- **Everything aboard.** Filter by kind or by what the code can touch. An honest list of what couldn't be read sits underneath.
+- **A project switcher and Settings.** Switch to a recent project, or browse to any folder on this computer. Settings hold the nightly watch, what to read, your build folder, the model and the theme, and save as you change them.
+- **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run as the lighthouse sweeps the cargo.
 
 Colours come from nautical charts: magenta marks what's held (no red anywhere), amber what's worth a glance, green what's cleared. A `?` next to any part explains it, and a short tour runs on your first visit.
 

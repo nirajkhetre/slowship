@@ -1,8 +1,8 @@
 // The morning report, served on this machine only. Approve (and undo), run the watch again, read the last run.
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, realpathSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { isAbsolute, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { redactLine } from './app.js';
 import { Worker } from 'node:worker_threads';
 import { approve } from './scan.js';
@@ -11,7 +11,7 @@ import { HOME, load, save } from './state.js';
 import { worst } from './policy.js';
 
 const UI = join(import.meta.dirname, 'ui');
-const LAST = join(HOME, 'last-run.json');
+const LAST = join(HOME, 'last-run.json'), SETTINGS = join(HOME, 'settings.json');
 const FONTS = new Set(['Besley.ttf', 'AtkinsonHyperlegibleNext.ttf', 'AtkinsonHyperlegibleMono.ttf']);
 
 /** A folder the page asked to watch: an absolute path to a real directory on this machine, or null. */
@@ -26,8 +26,34 @@ export function folder(path) {
   } catch { return null; }
 }
 
-export const saveRun = (run, options) => writeFileSync(LAST, JSON.stringify({ ...run, options, finished: new Date().toISOString() }));
-const lastRun = () => (existsSync(LAST) ? JSON.parse(readFileSync(LAST, 'utf8')) : null);
+const readJSON = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };
+const lastRun = () => readJSON(LAST);
+/** What the next watch reads, and the projects watched lately. Set from the page; a run from the terminal updates it too. */
+export const settingsOf = () => readJSON(SETTINGS) ?? { options: lastRun()?.options ?? {}, recent: lastRun()?.options?.project ? [lastRun().options.project] : [] };
+function keepSettings(options) {
+  const was = settingsOf().recent ?? [], recent = options.project ? [options.project, ...was.filter(p => p !== options.project)].slice(0, 6) : was;
+  mkdirSync(HOME, { recursive: true });
+  writeFileSync(SETTINGS, JSON.stringify({ options, recent }, null, 1));
+  return { options, recent };
+}
+export const saveRun = (run, options) => { writeFileSync(LAST, JSON.stringify({ ...run, options, finished: new Date().toISOString() })); keepSettings(options); };
+
+/** One folder's subfolders for the page's folder picker: names, and whether each holds an npm project. Never a file's contents. */
+const entry = (path, name) => ({ path, name, lock: existsSync(join(path, 'package-lock.json')), pkg: existsSync(join(path, 'package.json')) });
+const SKIP = new Set(['node_modules', '$RECYCLE.BIN', 'System Volume Information']);
+export function browse(path) {
+  if (!path) {  // where to start: home, and every drive on Windows
+    const roots = process.platform === 'win32' ? [...'CDEFGHIJKLMNOPQRSTUVWXYZ'].map(d => d + ':\\').filter(existsSync) : ['/'];
+    return { dir: '', parent: null, entries: [entry(homedir(), 'Home'), ...roots.map(r => entry(r, r))] };
+  }
+  const f = folder(path);
+  if (!f) return null;
+  let names = [];
+  try { names = readdirSync(f.dir, { withFileTypes: true }).filter(d => d.isDirectory() && !d.name.startsWith('.') && !SKIP.has(d.name)).map(d => d.name); } catch {}
+  names.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  const up = dirname(f.dir);
+  return { ...f, parent: up === f.dir ? '' : up, entries: names.slice(0, 400).map(n => entry(join(f.dir, n), n)), more: Math.max(0, names.length - 400) };
+}
 
 /** The lines around one finding, from inside the item's own folder only, with secrets cut down. Null if it can't be shown. */
 export function codeWindow(dir, file, line, around = 4) {
@@ -73,6 +99,8 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
         return w ? send(res, 200, w) : send(res, 404, { error: 'no code' });
       }
       if (url.pathname === '/api/folder') { const f = folder(url.searchParams.get('path')); return f ? send(res, 200, f) : send(res, 404, { error: 'not a folder on this computer' }); }
+      if (url.pathname === '/api/browse') { const b = browse(url.searchParams.get('path') ?? ''); return b ? send(res, 200, b) : send(res, 404, { error: 'not a folder on this computer' }); }
+      if (url.pathname === '/api/settings') return send(res, 200, { ...settingsOf(), schedule: scheduleOf() });
       if (url.pathname === '/api/watch') return send(res, 200, watch ?? { idle: true });
       if (url.pathname === '/api/schedule') return send(res, 200, scheduleOf() ?? { off: true });
       return send(res, 404, { error: 'not found' });
@@ -93,22 +121,47 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       else { const s = load(); if (s.approved[item.key] === item.fp) delete s.approved[item.key]; save(s); }
       return send(res, 200, relevel(run));
     }
-    // nightly: the project and flags come from the last run, never from the page; the page only picks the hour
+    // settings for the next watch: each field is checked, folders must be real ones, and a nightly watch picks them up
+    if (url.pathname === '/api/settings') {
+      const cur = settingsOf().options ?? {}, o = { ...cur };
+      for (const k of ['model', 'packages', 'agents', 'fetch']) if (k in body) {
+        if (typeof body[k] !== 'boolean') return send(res, 400, { error: k + ' must be on or off' });
+        o[k] = body[k];
+      }
+      if ('project' in body) {
+        const f = folder(body.project);
+        if (!f) return send(res, 400, { error: 'that isn’t a folder on this computer' });
+        if (f.dir !== folder(cur.project)?.dir) delete o.app;  // a build folder belonged to the old project
+        o.project = f.dir;
+      }
+      if ('app' in body) {
+        if (body.app === null) delete o.app;
+        else { const f = folder(body.app); if (!f) return send(res, 400, { error: 'that isn’t a folder on this computer' }); o.app = f.dir; }
+      }
+      if (o.packages === false && o.agents === false) return send(res, 400, { error: 'slowship needs something to read: packages, or skills and MCP servers' });
+      const s = keepSettings(o), sc = scheduleOf();
+      try { if (sc && o.project) schedule({ project: o.project, at: sc.at, options: o }); }
+      catch (e) { return send(res, 400, { error: String(e.message).slice(0, 200) }); }
+      return send(res, 200, { ...s, schedule: scheduleOf() });
+    }
+    // nightly: the project and flags come from the settings, never from this request; it only picks the hour
     if (url.pathname === '/api/schedule') {
-      if (!run?.options) return send(res, 400, { error: 'run the watch once first' });
+      const o = settingsOf().options ?? {};
       if (body.on === false) { unschedule(); return send(res, 200, { off: true }); }
-      try { return send(res, 200, schedule({ project: run.options.project, at: String(body.at || '03:00'), options: run.options })); }
+      if (!o.project) return send(res, 400, { error: 'choose a project first' });
+      try { return send(res, 200, schedule({ project: o.project, at: String(body.at || '03:00'), options: o })); }
       catch (e) { return send(res, 400, { error: String(e.message).slice(0, 200) }); }
     }
     if (url.pathname === '/api/scan') {
       if (watch && !watch.finished) return send(res, 409, { error: 'already watching' });
-      let o = run?.options ?? {};
+      let o = settingsOf().options ?? {};
       // watching another project: its own packages, the same skills and MCP servers; a build folder belonged to the old one
       if (body.project !== undefined) {
         const f = folder(body.project);
         if (!f) return send(res, 400, { error: 'that isn’t a folder on this computer' });
         if (f.dir !== folder(o.project)?.dir) {
-          o = { ...o, project: f.dir, app: undefined };
+          o = { ...o, project: f.dir }; delete o.app;
+          keepSettings(o);
           const s = scheduleOf();
           if (s) schedule({ project: f.dir, at: s.at, options: o });  // the nightly watch follows the project
         }
