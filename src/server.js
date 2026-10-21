@@ -12,7 +12,19 @@ import { worst } from './policy.js';
 
 const UI = join(import.meta.dirname, 'ui');
 const LAST = join(HOME, 'last-run.json');
-const FONTS = new Set(['Unbounded.ttf', 'SchibstedGrotesk.ttf', 'IBMPlexMono-Regular.ttf', 'IBMPlexMono-Medium.ttf']);
+const FONTS = new Set(['Besley.ttf', 'AtkinsonHyperlegibleNext.ttf', 'AtkinsonHyperlegibleMono.ttf']);
+
+/** A folder the page asked to watch: an absolute path to a real directory on this machine, or null. */
+export function folder(path) {
+  if (typeof path !== 'string' || !path || path.length > 1000 || !isAbsolute(path)) return null;
+  try {
+    const dir = realpathSync(path);
+    if (!statSync(dir).isDirectory()) return null;
+    let name = dir.split(/[\\/]/).filter(Boolean).pop() ?? dir;
+    try { name = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')).name || name; } catch {}
+    return { dir, name, lock: existsSync(join(dir, 'package-lock.json')), pkg: existsSync(join(dir, 'package.json')) };
+  } catch { return null; }
+}
 
 export const saveRun = (run, options) => writeFileSync(LAST, JSON.stringify({ ...run, options, finished: new Date().toISOString() }));
 const lastRun = () => (existsSync(LAST) ? JSON.parse(readFileSync(LAST, 'utf8')) : null);
@@ -33,7 +45,7 @@ function relevel(run) {
   const state = load();
   for (const i of run.items) i.approved = state.approved[i.key] === i.fp;
   run.level = worst(run.items.filter(i => !i.approved).map(i => i.level));
-  return run;
+  return { ...run, home: homedir() };  // the page writes paths under it as ~
 }
 
 export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
@@ -54,12 +66,13 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       if (url.pathname === '/') return send(res, 200, readFileSync(join(UI, 'index.html')), 'text/html; charset=utf-8');
       if (url.pathname.startsWith('/fonts/') && FONTS.has(url.pathname.slice(7)))
         return send(res, 200, readFileSync(join(UI, 'fonts', url.pathname.slice(7))), 'font/ttf');
-      if (url.pathname === '/api/run') { const r = lastRun(); return send(res, 200, r ? { ...relevel(r), home: homedir() } : { empty: true }); }
+      if (url.pathname === '/api/run') { const r = lastRun(); return send(res, 200, r ? relevel(r) : { empty: true }); }
       if (url.pathname === '/api/code') {
         const item = lastRun()?.items.find(i => i.key === url.searchParams.get('key'));
         const w = codeWindow(item?.dir, url.searchParams.get('file'), Number(url.searchParams.get('line')));
         return w ? send(res, 200, w) : send(res, 404, { error: 'no code' });
       }
+      if (url.pathname === '/api/folder') { const f = folder(url.searchParams.get('path')); return f ? send(res, 200, f) : send(res, 404, { error: 'not a folder on this computer' }); }
       if (url.pathname === '/api/watch') return send(res, 200, watch ?? { idle: true });
       if (url.pathname === '/api/schedule') return send(res, 200, scheduleOf() ?? { off: true });
       return send(res, 404, { error: 'not found' });
@@ -89,7 +102,17 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
     }
     if (url.pathname === '/api/scan') {
       if (watch && !watch.finished) return send(res, 409, { error: 'already watching' });
-      const o = run?.options ?? {};
+      let o = run?.options ?? {};
+      // watching another project: its own packages, the same skills and MCP servers; a build folder belonged to the old one
+      if (body.project !== undefined) {
+        const f = folder(body.project);
+        if (!f) return send(res, 400, { error: 'that isn’t a folder on this computer' });
+        if (f.dir !== folder(o.project)?.dir) {
+          o = { ...o, project: f.dir, app: undefined };
+          const s = scheduleOf();
+          if (s) schedule({ project: f.dir, at: s.at, options: o });  // the nightly watch follows the project
+        }
+      }
       // a live picture of the watch: the stage, what is being read right now, how each item was settled, the last few
       const w = watch = { stage: 'finding', done: 0, total: 0, started: Date.now(), now: null, counts: { cached: 0, rules: 0, model: 0, flagged: 0 }, ms: 0, log: [] };
       const name = i => i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.name;

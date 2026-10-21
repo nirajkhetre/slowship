@@ -45,9 +45,13 @@
     if (path === '/api/run') return json(relevel(d.run));
     if (path === '/api/code') { const w = d.codes[`${u.searchParams.get('key')}|${u.searchParams.get('file')}|${u.searchParams.get('line')}`]; return w ? json(w) : json({ error: 'no code' }, 404); }
     if (path === '/api/approve' || path === '/api/unapprove') { path === '/api/approve' ? cleared.add(body.key) : cleared.delete(body.key); keep(); return json(relevel(d.run)); }
-    if (path === '/api/schedule') return init.method === 'POST' ? json({ error: 'this demo can’t schedule anything. install slowship to have it watch every night.' }, 400) : json({ off: true });
+    if (path === '/api/schedule') return init.method === 'POST' ? json({ error: 'this demo can’t schedule anything. Install slowship to have it watch every night' }, 400) : json({ off: true });
+    if (path === '/api/folder') return json({ error: 'this demo can’t look at folders on your computer. Install slowship to watch your own project' }, 404);
     if (path === '/api/watch') return json(replay ? snapshot() : { idle: true });
-    if (path === '/api/scan') { if (!replay || snapshot().finished) startReplay(d); return json(snapshot(), 202); }
+    if (path === '/api/scan') {
+      if (body.project && body.project !== d.run.options.project) return json({ error: 'this demo can only replay its recorded watch. Install slowship to watch your own project' }, 400);
+      if (!replay || snapshot().finished) startReplay(d); return json(snapshot(), 202);
+    }
     return json({ error: 'not found' }, 404);
   };
 })();

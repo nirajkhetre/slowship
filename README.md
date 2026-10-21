@@ -65,13 +65,13 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 
 `slowship ui` serves the report on `127.0.0.1` only.
 
-- **The verdict.** It changes colour with its signal flag: yellow Q when held, Blue Peter blue when you're cleared to sail.
-- **A review queue with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. Clear it and the next one comes up.
-- **The cargo.** One container per thing aboard, plus your project's power signature: what its code can touch.
-- **Run again.** A live view of the watch: what's being read right now, and whether rules or the model settled each item.
-- **A nightly switch.** One tap and it runs every night.
+- **The verdict.** *Held in port*, *ready after a glance* or *cleared to sail*, with one button for what to do next. Your project is drawn as a ship in harbour, with one container per thing aboard. It stays moored while something is held, and sails out once everything is clear.
+- **What it read.** Where everything came from: the project's lockfile, plus the skill folders and editor settings your AI agents use on this computer, plus your build.
+- **A review list with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. Clear it and the next one comes up.
+- **How it works, live.** Change the project, switch on the nightly watch, or run it now and watch it read.
+- **Everything aboard.** Filter by kind or by what the code can touch. An honest list of what couldn't be read sits underneath.
 
-Every part has an (i) button that explains it, and a short tour runs on your first visit.
+Colours come from nautical charts: magenta marks what's held (no red anywhere), amber what's worth a glance, green what's cleared. A `?` next to any part explains it, and a short tour runs on your first visit.
 
 ## Measured so far
 
@@ -145,7 +145,7 @@ There are 14 tests: held fixtures, prompt injection that can't lower a hold, par
 - [REA](https://github.com/morluto/rea) (MIT) maps the structure of Electron builds.
 - [acorn](https://github.com/acornjs/acorn) (MIT) parses JavaScript.
 - [Ollama](https://ollama.com) and Google's Gemma 4 (under the Gemma terms) are the local model.
-- Fonts (SIL Open Font License): [Unbounded](https://github.com/googlefonts/unbounded), [Schibsted Grotesk](https://github.com/schibsted/schibsted-grotesk) and [IBM Plex Mono](https://github.com/IBM/plex), bundled so the report makes no outside requests.
+- Fonts (SIL Open Font License): [Besley](https://github.com/indestructible-type/Besley) for the verdict, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else, drawn so that 0/O and 1/l/I can't be mistaken. They're bundled, so the report makes no outside requests.
 
 ## About this project
 
