@@ -119,7 +119,9 @@ kbd{font:600 11.5px/1 var(--mono);padding:3px 6px;border:1px solid var(--rule2);
 .chipbtn svg.i{width:16px;height:16px;color:var(--ink2)}
 .chipbtn.ghost{border-color:transparent;background:none}
 .chipbtn.ghost:hover{background:var(--shoal)}
-.bar .sp{flex:1}
+.bar .sp{flex:1 1 0;min-width:4px}
+.bar .wrap>*{flex:none}
+.bar .wrap>.chipbtn{flex:0 1 auto;min-width:0}
 
 /* run now: one control that is the watch, from the press to the finish */
 .runwrap{position:relative;display:inline-flex}
@@ -682,6 +684,7 @@ body.empty .scope,body.empty #reviewsec,body.empty #manifest,body.empty #unreads
   .cell:nth-child(n+3){border-top:1px solid var(--rule)}
 }
 @media (max-width:979px){
+  .chipbtn small{display:none}
   .review{grid-template-columns:1fr}
   .inspector{display:none}
   .review.done .inspector{display:block}
@@ -734,7 +737,7 @@ body.empty .scope,body.empty #reviewsec,body.empty #manifest,body.empty #unreads
   <a class="mark" href="#" aria-label="slowship"><svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="var(--ink)"/><rect x="8.5" y="7.5" width="5" height="4" rx=".8" fill="var(--paper)"/><rect class="mc" x="14.5" y="7.5" width="5" height="4" rx=".8"/><path d="M4 12.5h18l-2.6 6H6.8z" fill="var(--paper)"/></svg>slowship</a>
   <button class="chipbtn" id="projchip" data-proj title="The project slowship watches. Change it here."><svg class="i" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg><small>Watching</small><span id="projname">no project yet</span><svg class="i" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
   <span class="sp"></span>
-  <button class="chipbtn ghost" id="nextw" title="When the next watch runs"><svg class="i" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></svg><span id="nextwl">Nightly off</span></button>
+  <button class="chipbtn ghost" id="nextw" title="When the next watch runs"><svg class="i" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></svg><span id="nextwl">Nightly: off</span></button>
   <span class="runwrap"><button class="runbtn" id="again" data-state="idle" title="Read everything now. Unchanged things are skipped. (R)" aria-label="Run the watch now" aria-haspopup="dialog">
     <span class="rring" aria-hidden="true"><svg class="rr" viewBox="0 0 24 24"><circle class="rt" cx="12" cy="12" r="10.5"/><circle class="rv" cx="12" cy="12" r="10.5"/></svg>
       <svg class="i ricon" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/></svg><svg class="i rcheck" viewBox="0 0 24 24"><path class="ck" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
@@ -1082,7 +1085,7 @@ function bar() {
   const p = projOf();
   $('#projname').textContent = p ? baseName(p) : 'no project yet';
   $('#projchip').title = p ? `Watching ${p}. Click to change it.` : 'Choose a project to watch';
-  $('#nextwl').textContent = S.sched?.at ? `Next watch: ${nextLabel(S.sched.at)}` : 'Nightly watch off';
+  $('#nextwl').textContent = S.sched?.at ? `Next: ${nextLabel(S.sched.at)}` : 'Nightly: off';
 }
 
 // ---------- what it read: one cell per hold ----------
