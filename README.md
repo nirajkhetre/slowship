@@ -69,7 +69,7 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 - **What it read.** Where everything came from: the project's lockfile, plus the skill folders and editor settings your AI agents use on this computer, plus your build.
 - **A review list with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. Clear it and the next one comes up.
 - **A project switcher and Settings.** Switch to a recent project, or browse to any folder on this computer. Settings hold the nightly watch, what to read, your build folder, the model and the theme, and save as you change them.
-- **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run as the lighthouse sweeps the cargo.
+- **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run: the ship docks, a gantry scans each thing aboard, and every step from fingerprint to verdict lights up as it happens.
 
 Colours come from nautical charts: magenta marks what's held (no red anywhere), amber what's worth a glance, green what's cleared. A `?` next to any part explains it, and a short tour runs on your first visit.
 
@@ -138,7 +138,7 @@ node site/record.mjs <project>   # record one real watch for the web demo (publi
 node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
-There are 14 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards and schedule quoting. The test fixtures are inert and point at `.invalid` domains.
+There are 15 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker and schedule quoting. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 

@@ -844,7 +844,7 @@ dialog.proj[open]{animation:dlg .45s var(--spring)}
 
 /* ---------- the chart under everything, and a little grain, so the page has a surface ---------- */
 .chartbg{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
-.chartbg g{animation:chartdrift 90s ease-in-out infinite alternate}
+.chartbg .drift{animation:chartdrift 90s ease-in-out infinite alternate}
 @keyframes chartdrift{to{transform:translate(-46px,20px)}}
 .chartbg path{fill:none;stroke:var(--ink);stroke-opacity:.055;stroke-width:1.1}
 .chartbg path.deep{stroke-dasharray:2 6;stroke-opacity:.075}
@@ -1011,22 +1011,67 @@ body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opa
 @keyframes vread{50%{fill:#FFF4D6}}
 .voyage.watch .vbeamrot{animation-duration:1.4s}
 
-/* the watch, live: every item it settles runs down its lane into a bucket */
-.wflow{display:block;width:calc(100% - 24px);height:auto;margin:10px 12px 2px;overflow:visible}
-.wflow .lane{fill:none;stroke:var(--rule2);stroke-width:1.6;stroke-dasharray:2 6;stroke-linecap:round;animation:dash 1.2s linear infinite}
+/* the watch, live: a ship sails in under a container scanner, a track of forty containers fills, and every item runs
+   down the pipeline to the stage that settled it */
+.wpanel{width:min(440px,calc(100% - 32px));max-height:calc(100vh - 90px);overflow:hidden auto;scrollbar-width:thin}
+.dock{display:block;width:calc(100% - 24px);height:auto;margin:12px 12px 0;border-radius:12px}
+.dock .st{fill:#fff;opacity:.7;animation:twinkle 3s ease-in-out infinite}
+.dock .dkship{animation:dkIn 1.9s var(--tide) both}
+@keyframes dkIn{from{transform:translateX(-340px)}}
+.wpanel.done .dock .dkship{animation:dkOut 2.8s var(--tide) .5s both}
+@keyframes dkOut{to{transform:translateX(360px)}}
+.dock .dkbob{transform-box:fill-box;transform-origin:50% 100%;animation:bob 4s ease-in-out infinite}
+.dock .dkcur .box{fill:#5C7482;transition:fill .4s}
+.dock.judge .dkcur .box{fill:#F6B84D}
+.dock .dkcur.swap{animation:curIn .55s var(--spring)}
+@keyframes curIn{from{transform:translateY(-28px);opacity:0}}
+.dock .stk{animation:curIn .5s var(--spring) backwards}
+.dock .scanb{animation:scanb 1.3s var(--io) infinite alternate;transition:opacity .4s}
+.dock .scanb.think{opacity:0;animation-duration:2.6s}
+.dock.judge .scanb{opacity:0}
+.dock.judge .scanb.think{opacity:1}
+@keyframes scanb{to{transform:translateX(60px)}}
+.wpanel.done .dock .scanb{opacity:0}
+.dock .gl{fill:#8CC8E8;animation:lampb .8s ease-in-out infinite}
+.dock.judge .gl{fill:#F6B84D}
+.wpanel.done .dock .gl{fill:#60C99A;animation:none}
+.dock .dktag rect{fill:rgb(255 255 255 / .1);stroke:rgb(255 255 255 / .2)}
+.dock .dktag text{font:600 9.5px var(--mono);fill:#E4EDF0}
+.dock .dksea{fill:#12303D}
+.ctrack{position:relative;display:flex;gap:2px;height:16px;margin:16px 16px 0}
+.ctrack i{flex:1;border-radius:2px;background:var(--rule);background-image:repeating-linear-gradient(90deg,transparent 0 3px,rgb(0 0 0 / .08) 3px 4px);transition:background-color .4s}
+.ctrack i.f{background-color:var(--ink)}
+.ctrack i.new{animation:cellIn .55s var(--spring)}
+@keyframes cellIn{from{transform:scaleY(2);background-color:#8CC8E8}}
+.ctrack i.head{background-color:#8CC8E8;box-shadow:0 0 12px #8CC8E8;animation:lampb .8s ease-in-out infinite}
+.wpanel.done .ctrack i.f{background-color:var(--clear);transition-delay:calc(var(--k, 0) * 10ms)}
+.ctrack .flags{position:absolute;left:0;right:0;top:-8px;height:6px;pointer-events:none}
+.ctrack .flags b{position:absolute;top:0;width:3px;height:6px;margin-left:-1px;border-radius:1px;background:var(--hold);animation:popIn .45s var(--spring)}
+.wpcount{display:flex;justify-content:space-between;align-items:baseline;padding:8px 16px 0;font:500 12.5px var(--mono);color:var(--ink2)}
+.wpcount b{font:800 17px var(--display);color:var(--ink)}
+.pipe{display:block;width:calc(100% - 16px);height:auto;margin:10px 8px 0;overflow:visible}
+.pipe .pl{fill:none;stroke:var(--rule2);stroke-width:2;stroke-dasharray:3 5;animation:dash 1.2s linear infinite}
 @keyframes dash{to{stroke-dashoffset:-16}}
-.wpanel.done .wflow .lane{animation:none}
-.wflow .src rect{fill:var(--ink)}
-.wflow .src .sc1{fill:#ED76B3}.wflow .src .sc2{fill:#F6B84D}.wflow .src .sc3{fill:#BDD0D8}
-.wflow .bk .bg{fill:var(--shoal);stroke:var(--rule)}
-.wflow .bk .fill{fill:var(--ink);opacity:.12;transition:width .5s var(--out)}
-.wflow .bk .n{font:700 17px var(--display);fill:var(--ink)}
-.wflow .bk .l{font:600 11.5px var(--sans);fill:var(--ink2)}
-.wflow .bk.bump .n{animation:pulseN .45s var(--spring)}
+.wpanel.done .pipe .pl{animation:none;stroke:var(--clear)}
+.pipe .pr{fill:var(--sheet);stroke:var(--rule2);stroke-width:2;transition:stroke .3s}
+.pipe .pc{fill:var(--ink3);transition:fill .3s,opacity .3s}
+.pipe .ps.lit .pc{fill:var(--ink)}
+.pipe .ps.on .pr{stroke:var(--ink);animation:nodep 1.4s var(--out) infinite}
+@keyframes nodep{50%{stroke-width:5}}
+.pipe .ps.bump .pn{animation:pulseN .45s var(--spring)}
 @keyframes pulseN{40%{fill:var(--clear-ink)}}
-.wflow .dot{fill:var(--ink3)}
-.wflow .dot.hold{fill:var(--hold)}.wflow .dot.glance{fill:var(--glance)}.wflow .dot.cleared{fill:var(--clear)}.wflow .dot.notable{fill:var(--noted)}
-.flagchip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:var(--hold-bg);color:var(--hold-ink);font-size:12px;font-weight:800}
+.wpanel.done .pipe .pc{fill:var(--clear)}
+.pipe .pn{font:800 15px var(--display);fill:var(--ink)}
+.pipe .pl2{font:700 11px var(--sans);fill:var(--ink2)}
+.pipe .wave5{opacity:0;transition:opacity .3s}
+.pipe.judge .wave5{opacity:1}
+.pipe.judge #ps-model .pc{opacity:0}
+.pipe .wave5 rect{fill:var(--glance-ink);transform-box:fill-box;transform-origin:center;animation:wv .5s ease-in-out infinite alternate;animation-delay:calc(var(--n) * -.11s)}
+@keyframes wv{from{transform:scaleY(.4)}to{transform:scaleY(2.2)}}
+.pipe .dot{fill:var(--ink3)}
+.pipe .dot.hold{fill:var(--hold)}.pipe .dot.glance{fill:var(--glance)}.pipe .dot.cleared{fill:var(--clear)}.pipe .dot.notable{fill:var(--noted)}
+.wpanel .wpnow{padding-top:8px}
+.flagchip{display:inline-flex;align-items:center;height:22px;padding:0 8px;white-space:nowrap;flex:none;border-radius:999px;background:var(--hold-bg);color:var(--hold-ink);font-size:12px;font-weight:800}
 .flagchip.bump{animation:popIn .4s var(--spring)}
 .flagchip[hidden]{display:none}
 
@@ -1068,6 +1113,70 @@ body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opa
 .thm:hover{transform:translateY(-2px)}
 .thm[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 3px var(--rule)}
 @media (max-width:640px){.dialrow{grid-template-columns:1fr;justify-items:center}.rcards{grid-template-columns:1fr}}
+
+/* clearing: the button becomes a tick, the stamp slams, the box goes green from the inside out and is lifted away */
+.dta .btn.done{position:relative;background:var(--clear-ink);color:#fff;border-color:transparent;animation:okpop .55s var(--spring)}
+@keyframes okpop{35%{transform:scale(1.1)}}
+.dta .btn.done svg.i{stroke-width:2.4}
+.dta .btn.done svg.i path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .45s var(--out) .1s forwards}
+.btn .ring2{position:absolute;inset:-2px;border-radius:inherit;border:2px solid var(--clear);pointer-events:none;animation:ringout .9s var(--out) forwards}
+@keyframes ringout{from{opacity:.9}to{opacity:0;transform:scale(1.35,1.9)}}
+.scanner.cleared .xbeam{opacity:0;transition:opacity .2s}
+.scanner.cleared .tile{fill:#60C99A;opacity:1;animation:none;transition:fill .35s calc(.25s + var(--w) * 14ms),opacity .35s calc(.25s + var(--w) * 14ms)}
+.scanner.cleared .ln{stroke:#60C99A;transition:stroke .4s .3s}
+.scanner.cleared .tok .ring{stroke:#60C99A;transition:stroke .4s .35s}
+.scanner.cleared .halo{display:none}
+.scanner.cleared .badge circle{fill:#70CDA2}
+.scanner.cleared svg{animation:thump .45s var(--out) .12s}
+@keyframes thump{25%{transform:translate(2px,3px)}50%{transform:translate(-2px,-1px)}75%{transform:translate(1px,1px)}}
+.scanner .slam text{font:800 46px var(--display);letter-spacing:.06em;fill:rgb(96 201 154 / .12);stroke:#70CDA2;stroke-width:2.6;transform-box:fill-box;transform-origin:center;animation:slam .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes slam{from{opacity:0;transform:scale(2.6)}55%{opacity:1}}
+.scanner .shock{fill:none;stroke:#70CDA2;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:shock .9s var(--out) .12s both}
+@keyframes shock{from{opacity:.9;transform:scale(.2)}to{opacity:0;transform:scale(3.4)}}
+.scanner.lift .xbox,.scanner.lift .slam,.scanner.lift .tag{transition:transform .6s var(--io),opacity .45s;transform:translateY(-40px);opacity:0}
+.spark{position:absolute;width:7px;height:5px;border-radius:1.5px;pointer-events:none;animation:spark 1s cubic-bezier(.15,.7,.3,1) both}
+@keyframes spark{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}}
+#toastmsg{display:flex;align-items:center;gap:10px}
+.toast .tck{width:20px;height:20px;color:#70CDA2;stroke-width:2.4}
+.toast .tck path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s var(--out) .2s forwards}
+/* the x-ray's readout: what the analysis did, typed out like an instrument */
+.scanner .hud{font:500 11px var(--mono);fill:#8CC8E8}
+.scanner .hudclip{animation:hudtype 1.4s steps(40,end) .5s both}
+@keyframes hudtype{from{width:0}}
+.scanner .cur{fill:#8CC8E8;animation:lampb .9s steps(2) infinite}
+
+/* settings: a window that opens out of the gear, over a softened page */
+.drawer .scrim{background:rgb(5 16 23 / .36);backdrop-filter:blur(6px) saturate(1.15)}
+.dpanel{top:50%;left:50%;right:auto;bottom:auto;width:min(780px,calc(100% - 32px));max-height:min(88vh,860px);border-radius:22px;
+  transform:translate(-50%,-50%) scale(.97);opacity:0;clip-path:circle(0 at var(--cx,95%) var(--cy,0));
+  transition:clip-path .75s var(--io),transform .6s var(--spring),opacity .2s}
+.drawer.on .dpanel{transform:translate(-50%,-50%);opacity:1;clip-path:circle(150% at var(--cx,95%) var(--cy,0))}
+@media (min-width:761px){.dbody{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-flow:row dense;column-gap:32px}.sgrp.wide{grid-column:1/-1}.sgrp.tall{grid-row:span 2}.sgrp.tall .dialrow{grid-template-columns:1fr;justify-items:center;text-align:left}}
+@media (max-width:640px){.dpanel{top:auto;left:0;right:0;bottom:0;width:100%;max-height:92vh;border-radius:20px 20px 0 0;transform:translateY(100%);clip-path:none;opacity:1}.drawer.on .dpanel{transform:none;clip-path:none}}
+
+/* scrolling down is going deeper: the chart drifts, the water darkens, a depth gauge keeps count, and sections surface */
+.depth{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;background:linear-gradient(180deg,transparent 25%,color-mix(in oklab,var(--sea3) 26%,transparent) 100%)}
+.gauge{display:none}
+@property --dep{syntax:'<integer>';inherits:false;initial-value:0}
+@supports (animation-timeline:scroll()){
+  .chartbg .par{animation:chartpar linear both;animation-timeline:scroll(root)}
+  @keyframes chartpar{to{transform:translateY(-280px) scale(1.08)}}
+  .depth{animation:deepen linear both;animation-timeline:scroll(root)}
+  @keyframes deepen{to{opacity:1}}
+  .hero .hgrid{animation:heroout linear both;animation-timeline:scroll(root);animation-range:0 560px}
+  @keyframes heroout{to{transform:translateY(110px) scale(.95);opacity:.2}}
+  .ph,.pmap,.sonarbox,.voyage,.route .step,.claimrow,.scanner,.yard .ct:not(.in),.mr:not(.in),.notes li,.fl .fi:not(.flash),.rcard{animation:surface linear both;animation-timeline:view();animation-range:entry 0% entry 85%}
+  @keyframes surface{from{opacity:0;transform:translateY(36px) scale(.97)}}
+  .gauge{position:fixed;right:16px;top:50%;z-index:20;display:block;height:38vh;width:30px;transform:translateY(-50%);pointer-events:none}
+  .gauge .gt{position:absolute;left:14px;top:0;bottom:0;width:2px;background:repeating-linear-gradient(var(--rule2) 0 1px,transparent 1px 9px)}
+  .gauge .gm{position:absolute;left:6px;top:0;width:18px;height:18px;margin-top:-9px;animation:gaugem linear both;animation-timeline:scroll(root)}
+  .gauge .gm i{display:block;width:18px;height:18px;border-radius:50%;background:var(--sheet);box-shadow:inset 0 0 0 2px var(--ink),0 0 0 5px color-mix(in oklab,var(--lamp) 30%,transparent)}
+  .gauge .gv{position:absolute;right:30px;top:0;margin-top:-8px;font:italic 600 12px var(--display);color:var(--ink2);white-space:nowrap;counter-reset:dep var(--dep);animation:gaugem linear both,depthn linear both;animation-timeline:scroll(root),scroll(root)}
+  .gauge .gv::after{content:counter(dep) " m"}
+  @keyframes gaugem{to{top:100%}}
+  @keyframes depthn{to{--dep:42}}
+  @media (max-width:1320px){.gauge{display:none}}
+}
 
 body.boot,body.boot *{transition:none!important}  /* the first paint lands in its colours; later changes animate */
 body.empty .holds,body.empty .clearance{display:none}
@@ -1554,7 +1663,8 @@ function hero() {
 
 // ---------- the bar ----------
 const nextAt = at => { const [h, m] = at.split(':').map(Number), d = new Date(); d.setHours(h, m, 0, 0); if (d <= new Date()) d.setDate(d.getDate() + 1); return d; };
-const nextLabel = at => { const d = nextAt(at), soon = d - new Date() < 18 * 3600e3; return `${soon ? (d.getDate() === new Date().getDate() && d.getHours() >= 12 ? 'Today' : 'Tonight') : d.toLocaleDateString([], { weekday: 'long' })}, ${hm(d)}`; };
+// today's evening is "tonight", small hours after midnight are still "tonight", a morning after that is "tomorrow"
+const nextLabel = at => { const d = nextAt(at), today = d.getDate() === new Date().getDate(), h = d.getHours(); return `${today ? (h >= 17 ? 'Tonight' : 'Today') : h < 5 ? 'Tonight' : 'Tomorrow'}, ${hm(d)}`; };
 const sched = () => S.settings?.schedule || null;
 function bar() {
   const p = projOf();
@@ -1763,7 +1873,7 @@ function scannerHTML(i, rel) {
   const gOf = file => [...new Set(facts.filter(x => x.file === file).map(x => TG(x.cap)))].join(' ');
   const tiles = Array.from({ length: N }, (_, k) => {
     const file = files[k], [x, y] = pos(k);
-    return `<rect class="tile${file ? ' f' : ''}" x="${x}" y="${y}" width="${tw}" height="${tw}" rx="2" fill="${file ? XCOL[fileLv(file)] : '#fff'}" opacity="${file ? 1 : .2}"${file ? ` data-g="${gOf(file)}" style="--d:${(k * .07).toFixed(2)}s"` : ''}>${file ? `<title>${esc(file)}</title>` : ''}</rect>`;
+    return `<rect class="tile${file ? ' f' : ''}" x="${x}" y="${y}" width="${tw}" height="${tw}" rx="2" fill="${file ? XCOL[fileLv(file)] : '#fff'}" opacity="${file ? 1 : .2}" style="--w:${k}${file ? `;--d:${(k * .07).toFixed(2)}s` : ''}"${file ? ` data-g="${gOf(file)}"` : ''}>${file ? `<title>${esc(file)}</title>` : ''}</rect>`;
   }).join('');
   const ribs = Array.from({ length: 23 }, (_, k) => `M${52 + k * 12.5} 92v110`).join('');
   const groups = TOUCH.filter(t => facts.some(x => t[2].includes(x.cap))).slice(0, 6);
@@ -1785,13 +1895,16 @@ function scannerHTML(i, rel) {
   });
   const said = i.kind === 'app' ? 'your own build' : i.claim ? `“${short(i.claim.split('\n')[0], 40)}”` : 'no description';
   const tagW = Math.min(340, 80 + said.length * 7.8);
+  // the readout: what the analysis did on its way to this verdict
+  const combos = i.findings.filter(fd => fd.evidence.length > 1).length, notes = (i.facts || []).filter(x => x.label).length;
+  const hud = `${(i.facts || []).length} facts → ${combos} combination${combos === 1 ? '' : 's'} → ${notes} model note${notes === 1 ? '' : 's'}`;
   const c = i.coverage || {}, cap = c.files ? `${c.read} of ${c.files} file${c.files === 1 ? '' : 's'} read${c.files > 80 ? `, ${N} shown` : ''}. Nothing run.` : 'Read, never run.';
   const relG = rel === 'no' ? '<g class="xrel" transform="translate(384 102) scale(1.25)"><path pathLength="1" d="M10 16h20"/><path pathLength="1" d="M10 24h20" style="animation-delay:.42s"/><path pathLength="1" d="M26 8L14 32" style="animation-delay:.72s"/></g>'
     : rel === 'yes' ? '<g class="xrel yes" transform="translate(384 102) scale(1.25)"><path pathLength="1" d="M10 16h20"/><path pathLength="1" d="M10 24h20" style="animation-delay:.42s"/></g>' : '';
   return `<figure class="scanner" data-fp="${esc(i.fp)}"><button class="xi xq" data-explain="xray" aria-label="How to read the x-ray">?</button>
     <svg viewBox="0 0 640 250" role="img" aria-label="An x-ray of ${esc(name)}: ${groups.map(g => g[1]).join(', ') || 'nothing notable inside'}">
     <defs><linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="#FFF4D6" stop-opacity="0"/><stop offset=".5" stop-color="#FFF4D6" stop-opacity=".6"/><stop offset="1" stop-color="#FFF4D6" stop-opacity="0"/></linearGradient>
-      <clipPath id="${id}c"><rect x="40" y="88" width="300" height="118"/></clipPath></defs>
+      <clipPath id="${id}c"><rect x="40" y="88" width="300" height="118"/></clipPath><clipPath id="${id}h"><rect class="hudclip" x="300" y="228" width="330" height="18"/></clipPath></defs>
     <g class="xbox">
       <ellipse cx="200" cy="218" rx="172" ry="8" fill="#000" opacity=".45"/>
       <path d="M40 88 L76 58 H376 L340 88Z" fill="${top}" opacity=".85"/><path d="M340 88 L376 58 V176 L340 206Z" fill="${side}" opacity=".9"/>
@@ -1806,6 +1919,7 @@ function scannerHTML(i, rel) {
     ${relG}${parts.map(p => p.lines).join('')}${parts.map(p => p.tok).join('')}
     ${groups.length ? '' : '<text class="tl" x="452" y="128">Nothing notable inside</text>'}
     <text class="xcap" x="40" y="240">${esc(cap)}</text>
+    <g clip-path="url(#${id}h)"><text class="hud" x="620" y="240" text-anchor="end">${esc(hud)}</text></g><rect class="cur" x="623" y="231" width="5" height="11"/>
   </svg></figure>`;
 }
 // pointing at a power lights its wires and the files they come from; picking it jumps to that code
@@ -1990,14 +2104,17 @@ function voyage() {
 }
 
 // ---------- the live watch: every item it settles runs down its lane into a bucket ----------
-const LANE = { cached: 'M30 64 C130 64 150 22 250 22', rules: 'M30 64 C130 64 150 64 250 64', model: 'M30 64 C130 64 150 106 250 106' };
+// the pipeline every item goes through, left to right; an item stops at the stage that settled it
+const STEPS = [['find', 'Find'], ['print', 'Fingerprint'], ['read', 'Read code'], ['model', ''], ['verdict', 'Verdict']];
+const SX = [26, 112, 200, 288, 374];
 const NS = 'http://www.w3.org/2000/svg';
-function flowDot(how, st) {
-  const host = $('#wflow'), d = LANE[how]; if (!host || !d) return;
+function pipeDot(how, st) {
+  const host = $('#pipe'); if (!host) return;
+  const flagged = st === 'hold' || st === 'glance', end = SX[flagged ? 4 : ({ cached: 1, rules: 2, model: 3 }[how] ?? 2)];
   const c = document.createElementNS(NS, 'circle'), m = document.createElementNS(NS, 'animateMotion');
-  c.setAttribute('r', st === 'hold' || st === 'glance' ? 4.4 : 3.2); c.setAttribute('class', `dot ${st}`);
-  for (const [k, v] of [['dur', '.9s'], ['fill', 'freeze'], ['path', d], ['calcMode', 'spline'], ['keyTimes', '0;1'], ['keySplines', '.4 0 .2 1'], ['begin', 'indefinite']]) m.setAttribute(k, v);
-  c.appendChild(m); host.appendChild(c); m.beginElement(); setTimeout(() => c.remove(), 1000);
+  c.setAttribute('r', flagged ? 4.6 : 3.4); c.setAttribute('class', `dot ${st}`);
+  for (const [k, v] of [['dur', `${(.35 + (end - SX[0]) / 520).toFixed(2)}s`], ['fill', 'freeze'], ['path', `M${SX[0]} 40 H${end}`], ['calcMode', 'spline'], ['keyTimes', '0;1'], ['keySplines', '.4 0 .2 1'], ['begin', 'indefinite']]) m.setAttribute(k, v);
+  c.appendChild(m); host.appendChild(c); m.beginElement(); setTimeout(() => c.remove(), 1300);
 }
 
 // ---------- the schedule dial: a day round the clock; drag the ship to the hour ----------
@@ -2044,7 +2161,7 @@ function chartBg() {
   const isles = [[1320, 180, [50, 100, 160, 230, 310, 400]], [180, 860, [70, 140, 220, 310]], [760, 1120, [120, 220, 330]]];
   const paths = isles.flatMap(([x, y, rs]) => rs.map((r, k) => `<path${k % 2 ? ' class="deep"' : ''} d="${blob(x, y, r)}"/>`)).join('');
   const nums = Array.from({ length: 34 }, () => `<text x="${(rnd() * 1600).toFixed(0)}" y="${(rnd() * 1000).toFixed(0)}">${Math.floor(rnd() * 28) + 2}</text>`).join('');
-  document.body.insertAdjacentHTML('afterbegin', `<svg class="chartbg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g>${paths}${nums}</g></svg>`);
+  document.body.insertAdjacentHTML('afterbegin', `<svg class="chartbg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="par"><g class="drift">${paths}${nums}</g></g></svg><div class="depth" aria-hidden="true"></div><div class="gauge" aria-hidden="true"><span class="gt"></span><span class="gm"><i></i></span><span class="gv"></span></div>`);
 }
 
 // ---------- review: the queue on the left, the inspector on the right ----------
@@ -2096,10 +2213,33 @@ $('#queue').addEventListener('click', e => {
   const c = e.target.closest('.qc'), i = c && G.find(x => x.fp === c.dataset.fp); if (!i) return;
   wide() ? showInsp(i) : openSheet(i);
 });
+// clearing is a small ceremony: the button turns to a tick, a stamp slams onto the box, the x-ray goes green from the
+// inside out, bits of container fly off, and the box is lifted away before the next one comes in
+function celebrate(i) {
+  if (REDUCED) return;
+  if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(14);
+  for (const dt of $$('.dt')) {
+    if (dt.dataset.fp !== i.fp) continue;
+    const b = dt.querySelector('[data-act=clear]');
+    if (b) { b.classList.add('done'); b.innerHTML = `${svg('<path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/>')}Cleared<span class="ring2"></span>`; }
+    const sc = dt.querySelector('.scanner'); if (!sc) continue;
+    sc.classList.add('cleared');
+    sc.querySelector('svg').insertAdjacentHTML('beforeend', '<g class="slam"><circle class="shock" cx="190" cy="148" r="40"/><circle class="shock" cx="190" cy="148" r="40" style="animation-delay:.3s"/><g transform="rotate(-8 190 150)"><text x="190" y="166" text-anchor="middle">CLEARED</text></g></g>');
+    const w = sc.clientWidth, x0 = w * 190 / 640, y0 = w * 148 / 640;
+    for (let k = 0; k < 20; k++) {
+      const a = Math.PI * 2 * k / 20 + Math.random() * .3, d = 50 + Math.random() * 80, el = document.createElement('i');
+      el.className = 'spark';
+      el.style.cssText = `left:${x0}px;top:${y0}px;background:${['#60C99A', '#70CDA2', '#E4EDF0', '#2BA779'][k % 4]};--dx:${(Math.cos(a) * d * 1.7).toFixed(0)}px;--dy:${(Math.sin(a) * d).toFixed(0)}px;--r:${(Math.random() * 540 - 270).toFixed(0)}deg;animation-delay:${120 + k * 6}ms`;
+      sc.appendChild(el); setTimeout(() => el.remove(), 1400);
+    }
+    setTimeout(() => sc.classList.add('lift'), 1050);
+  }
+}
 async function clearItem(i) {
   const keys = keysOf(i), next = G.filter(x => !x.approved && needs(x) && x.fp !== i.fp).sort(queueOrder)[0];
   const qc = $(`#queue .qc[data-fp="${CSS.escape(i.fp)}"]`);
-  qc?.classList.add('stamped'); $$('.dt').forEach(d => d.dataset.fp === i.fp && d.classList.add('stamped'));
+  qc?.classList.add('stamped'); celebrate(i);
+  const t0 = performance.now();
   try {
     let run; for (const k of keys) run = await api('/api/approve', { key: k });
     S.sel = next?.fp;
@@ -2107,9 +2247,9 @@ async function clearItem(i) {
       // the card folds away and the ones below close the gap
       if (qc) { qc.style.height = qc.offsetHeight + 'px'; void qc.offsetWidth; qc.classList.add('gone'); qc.style.height = '0px'; }
       closeSheet(); setTimeout(() => load(run), REDUCED ? 0 : 420);
-    }, REDUCED ? 0 : 650);
-    toast(next ? `Cleared <b>${esc(label(i))}</b>. Next: <b>${esc(label(next))}</b>.` : `Cleared <b>${esc(label(i))}</b>. That was the last one.`, async () => { let r; for (const k of keys) r = await api('/api/unapprove', { key: k }); S.sel = i.fp; load(r); });
-  } catch (err) { qc?.classList.remove('stamped'); toast(`Couldn’t clear it: ${esc(err.message)}`); }
+    }, REDUCED ? 0 : Math.max(0, 1250 - (performance.now() - t0)));
+    toast(`<svg class="i tck" viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>${next ? `Cleared <b>${esc(label(i))}</b>. Next: <b>${esc(label(next))}</b>.` : `Cleared <b>${esc(label(i))}</b>. That was the last one.`}</span>`, async () => { let r; for (const k of keys) r = await api('/api/unapprove', { key: k }); S.sel = i.fp; load(r); });
+  } catch (err) { qc?.classList.remove('stamped'); render(); toast(`Couldn’t clear it: ${esc(err.message)}`); }
 }
 async function unclearItem(i) {
   let r; for (const k of keysOf(i)) r = await api('/api/unapprove', { key: k });
@@ -2261,17 +2401,17 @@ function settingsHTML() {
   const m = S.run?.model ? modelName() : 'gemma4';
   let g = 0;
   return `
-  <section class="sgrp" style="--i:${g++}"><h3>Project</h3>
+  <section class="sgrp wide" style="--i:${g++}"><h3>Project</h3>
     <div class="projcard"><span class="pico">${IC.folder}</span><div>${p ? `<b>${esc(baseName(p))}</b>${crumb(p)}` : '<b>No project yet</b><small class="shelp">Choose the folder that holds your package.json.</small>'}</div><button class="btn sm" data-browse="project">${p ? 'Switch…' : 'Choose…'}</button></div>
     ${recent.length ? `<div class="recent"><span>Recent</span>${recent.map(x => `<button class="rchip" data-pick="${esc(x)}" title="${esc(x)}">${IC.folder}${esc(baseName(x))}</button>`).join('')}</div>` : ''}
     <p class="shelp" style="margin-top:8px">Packages come from this project’s lockfile. Skills and MCP servers come from this computer, so they’re the same for every project.</p>
   </section>
-  <section class="sgrp" id="sg-schedule" style="--i:${g++}"><h3>Schedule</h3>
+  <section class="sgrp tall" id="sg-schedule" style="--i:${g++}"><h3>Schedule</h3>
     <div class="dialrow">${dialHTML()}<div class="dialside">
       <div class="srow"><div><b>Read every night</b><small>Drag the ship round the clock to pick the hour. Your computer’s own scheduler wakes slowship, even with this page closed.</small></div><button class="sw2" role="switch" aria-checked="${!!sc?.at}" data-night aria-label="Read every night"><i></i></button></div>
       <p class="shelp">${sc?.at ? `Next watch: <b>${nextLabel(sc.at)}</b>. If the laptop is asleep then, it runs when it wakes.` : 'Off. slowship only reads when you press Run now.'}</p></div></div>
   </section>
-  <section class="sgrp" style="--i:${g++}"><h3>What to read</h3>
+  <section class="sgrp wide" style="--i:${g++}"><h3>What to read</h3>
     <div class="rcards">${[['packages', 'Packages', 'From the project’s lockfile', KICON.npm], ['agents', 'Skills and MCP', 'Shared by this computer', KICON.skill], ['fetch', 'Fetch npx servers', 'To read them. Never run', KICON.mcp]].map(([k, t, s, ic]) => `<button class="rcard" data-opt="${k}" aria-pressed="${o[k] !== false}"><span class="led"></span><span class="ill">${ic}</span><b>${t}</b><small>${s}</small></button>`).join('')}</div>
     <div class="srow"><div><b>Your build folder</b>${o.app ? crumb(o.app) : '<small>Optional. Point it at your dist/ or app folder to check for keys, debug switches and risky Electron settings.</small>'}</div>
       <button class="btn sm" data-browse="app">${o.app ? 'Change…' : 'Choose…'}</button>${o.app ? '<button class="btn sm" data-noapp>Remove</button>' : ''}</div>
@@ -2294,7 +2434,12 @@ function themeThumb() { const on = $(`#themeseg button[aria-pressed="true"]`), t
 function openSettings(focus) {
   closeMenu(); hidePop(); closePanel();
   renderSettings();
-  SET.classList.add('on', 'opening'); SET.setAttribute('aria-hidden', 'false'); setTimeout(() => SET.classList.remove('opening'), 900);  // sections rise in on opening, not on every save $('#gear').setAttribute('aria-expanded', 'true');
+  // the window opens out of the gear: the reveal is centred on it
+  const p = $('.dpanel'), g = $('#gear').getBoundingClientRect();
+  p.style.setProperty('--cx', `${(g.left + g.width / 2 - (innerWidth - p.offsetWidth) / 2).toFixed(0)}px`);
+  p.style.setProperty('--cy', `${(g.top + g.height / 2 - (innerHeight - p.offsetHeight) / 2).toFixed(0)}px`);
+  SET.classList.add('on', 'opening'); SET.setAttribute('aria-hidden', 'false'); $('#gear').setAttribute('aria-expanded', 'true');
+  setTimeout(() => SET.classList.remove('opening'), 900);  // sections rise in on opening, not on every save
   requestAnimationFrame(themeThumb);
   setTimeout(() => (focus ? $(`#sg-${focus}`) : $('#setbody .btn'))?.scrollIntoView?.({ block: 'nearest' }), 60);
 }
@@ -2586,20 +2731,38 @@ function runState(state, w) {
 function ping() { if (REDUCED) return; for (let k = 0; k < 2; k++) setTimeout(() => { const el = document.createElement('span'); el.className = 'ping'; RUN.parentElement.appendChild(el); setTimeout(() => el.remove(), 1100); }, k * 200); }
 // the panel is built once and then only its moving parts change, so new rows slide in
 function panelSkeleton() {
+  const stars = Array.from({ length: 14 }, (_, k) => `<circle class="st" cx="${(k * 61) % 400}" cy="${6 + (k * 23) % 54}" r="${k % 3 ? .8 : 1.2}" style="animation-delay:${(-k * .4).toFixed(1)}s"/>`).join('');
   WP.innerHTML = `<div class="wph"><i class="live"></i><b id="wpk">Watching now</b><span class="flagchip" id="wpflag" hidden></span><span class="sp"></span><span class="mono" id="wpt">0:00</span><button class="wpx" data-wpclose aria-label="Close">${IC.x}</button></div>
-    <div class="wpnow">${miniFace('reading')}<p id="wpnow"></p></div>
-    <div class="wpbar"><i id="wpbar" style="width:0"></i></div><div class="wpcount"><span id="wpc">…</span><span id="wpp">0%</span></div>
-    <svg class="wflow" id="wflow" viewBox="0 0 368 128" aria-hidden="true">
-      <g class="src"><rect x="6" y="38" width="24" height="52" rx="5"/><rect class="sc1" x="10" y="44" width="16" height="9" rx="1.5"/><rect class="sc2" x="10" y="56" width="16" height="9" rx="1.5"/><rect class="sc3" x="10" y="68" width="16" height="9" rx="1.5"/></g>
-      ${Object.values(LANE).map(d => `<path class="lane" d="${d}"/>`).join('')}
-      ${['cached', 'rules', 'model'].map((k, j) => `<g class="bk" id="bk-${k}" transform="translate(250 ${6 + j * 42})"><title>${HOW[k][1]}</title><rect class="bg" width="112" height="32" rx="9"/><rect class="fill" id="bf-${k}" height="32" rx="9" style="width:0"/><text class="n" id="wpn-${k}" x="12" y="21.5">0</text><text class="l" x="46" y="20.5">${k === 'model' ? `asked ${modelName()}` : HOW[k][0]}</text></g>`).join('')}
+    <svg class="dock" id="dock" viewBox="0 0 400 132" aria-hidden="true">
+      <defs><linearGradient id="dkSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B1C26"/><stop offset="1" stop-color="#1A3A4E"/></linearGradient>
+        <linearGradient id="dkBeam" x1="0" x2="1"><stop offset="0" stop-color="#8CC8E8" stop-opacity="0"/><stop offset=".5" stop-color="#C9EBFF" stop-opacity=".8"/><stop offset="1" stop-color="#8CC8E8" stop-opacity="0"/></linearGradient>
+        <linearGradient id="dkThink" x1="0" x2="1"><stop offset="0" stop-color="#F6B84D" stop-opacity="0"/><stop offset=".5" stop-color="#FFE3A8" stop-opacity=".85"/><stop offset="1" stop-color="#F6B84D" stop-opacity="0"/></linearGradient></defs>
+      <rect width="400" height="132" fill="url(#dkSky)"/>${stars}
+      <g class="dkship"><g class="dkbob">
+        <g id="dkstack" data-n="0" data-f="0"></g>
+        <path d="M120 100 H372 L386 93 Q382 112 366 121 H134 Q122 115 120 106Z" fill="#2E4B5E"/><path d="M124 108 H380 Q376 116 366 121 H134 Q126 117 124 108Z" fill="#1E3644"/>
+        <path d="M126 100 V79 a3 3 0 0 1 3 -3 H151 a3 3 0 0 1 3 3 V100Z" fill="#E8F0F2"/><rect x="129" y="82" width="22" height="4" rx="1" fill="#F4D58A"/>
+        <g class="dkcur" id="dkcur"><rect class="box" x="262" y="78" width="52" height="22" rx="2"/><path d="M269 81v16M276 81v16M283 81v16M290 81v16M297 81v16M304 81v16" stroke="#000" stroke-opacity=".16" stroke-width="1.5"/></g>
+      </g></g>
+      <g class="gantry"><rect x="244" y="24" width="6" height="96" rx="1" fill="#93A9B3"/><rect x="326" y="24" width="6" height="96" rx="1" fill="#93A9B3"/><rect x="236" y="18" width="104" height="10" rx="2.5" fill="#C5D3D9"/>
+        <rect class="gl" x="283" y="28" width="10" height="4" rx="1"/>
+        <rect class="scanb" x="250" y="32" width="16" height="72" fill="url(#dkBeam)"/><rect class="scanb think" x="250" y="32" width="16" height="72" fill="url(#dkThink)"/></g>
+      <g class="dktag"><rect x="196" y="3" width="184" height="12" rx="6"/><text id="dktag" x="288" y="12" text-anchor="middle">finding the cargo…</text></g>
+      <path class="dksea" d="${wave(118, 2, 24, -24, 424)} V132 H-24Z"/>
     </svg>
+    <div class="ctrack" id="ctrack">${'<i></i>'.repeat(40)}<span class="flags" id="ctflags"></span></div>
+    <div class="wpcount"><span id="wpc">Counting…</span><b id="wpp">0%</b></div>
+    <svg class="pipe" id="pipe" viewBox="0 0 400 80" aria-hidden="true">
+      <path class="pl" d="M${SX[0]} 40 H${SX[4]}"/>
+      ${STEPS.map(([k, l], j) => `<g class="ps" id="ps-${k}" transform="translate(${SX[j]} 40)"><circle class="pr" r="12"/><circle class="pc" r="5"/>${k === 'model' ? `<g class="wave5">${[0, 1, 2, 3, 4].map(n => `<rect x="${-7 + n * 3}" y="-3" width="2" height="6" rx="1" style="--n:${n}"/>`).join('')}</g>` : ''}<text class="pn" y="-19" text-anchor="middle" id="pn-${k}">0</text><text class="pl2" y="29" text-anchor="middle">${k === 'model' ? modelName() : l}</text></g>`).join('')}
+    </svg>
+    <div class="wpnow">${miniFace('reading')}<p id="wpnow"></p></div>
     <div class="wplog" id="wplog" aria-live="off"></div><div class="wpdone" id="wpdone" hidden></div>`;
-  lastN = 0;
+  lastN = 0; WP._fl = 0; WP._held = false;
 }
 function panelUpdate(w) {
   if (!$('#wpnow')) panelSkeleton();
-  const pct = w.total ? Math.round(w.done / w.total * 100) : 0, done = !!w.finished;
+  const frac = w.total ? w.done / w.total : 0, pct = Math.round(frac * 100), done = !!w.finished, judge = !done && w.now?.phase === 'judge';
   WP.classList.toggle('done', done);
   $('#wpk').textContent = done ? (w.error ? 'The watch stopped' : 'The watch is done') : 'Watching now';
   const now = done ? (w.error ? `<span>${esc(w.error)}</span>` : `<span>All <b>${w.total}</b> read. The report is fresh.</span>`)
@@ -2607,22 +2770,45 @@ function panelUpdate(w) {
     : w.now?.phase === 'judge' ? `<span><b>${modelName()}</b> is comparing <span class="mono">${esc(w.now.name)}</span> with what it says it does…</span>`
     : w.now ? `<span>Reading <span class="mono">${esc(w.now.name)}</span>, never running it</span>` : '<span>Skipping what hasn’t changed since last time…</span>';
   const nowEl = $('#wpnow'); if (nowEl.dataset.v !== now) { nowEl.innerHTML = now; nowEl.dataset.v = now; }
-  $('#wpbar').style.width = (done ? 100 : pct) + '%';
-  $('#wpc').textContent = w.total ? `${w.done} of ${w.total}` : 'Counting…';
+  $('#wpc').textContent = w.total ? `${w.done} of ${w.total} read` : 'Counting…';
   $('#wpp').textContent = `${done ? 100 : pct}%`;
-  const tot = Math.max(1, w.total || 0);
-  for (const k of ['cached', 'rules', 'model']) {
-    const el = $(`#wpn-${k}`), v = String(w.counts?.[k] ?? 0);
-    $(`#bf-${k}`).style.width = `${(112 * (+v / tot)).toFixed(1)}px`;
-    if (el.textContent !== v) { el.textContent = v; const b = $(`#bk-${k}`); b.classList.remove('bump'); void b.getBoundingClientRect(); b.classList.add('bump'); }
-  }
+  // the track: forty containers fill as the watch reads; the lit one is the scanner's head; a tick marks each find
+  const fill = done ? 40 : Math.floor(frac * 40);
+  $$('#ctrack i').forEach((c, k) => {
+    const f = k < fill;
+    if (f && !c.classList.contains('f')) { c.classList.add('f', 'new'); setTimeout(() => c.classList.remove('new'), 550); }
+    if (!f) c.classList.remove('f');
+    c.classList.toggle('head', !done && w.total > 0 && k === fill);
+  });
   const fl = w.counts?.flagged ?? 0, fc = $('#wpflag');
+  if (fl > WP._fl) { $('#ctflags').insertAdjacentHTML('beforeend', Array.from({ length: Math.min(fl - WP._fl, 20) }, () => `<b style="left:${(frac * 100).toFixed(1)}%"></b>`).join('')); WP._fl = fl; }
   if (fc && fc.dataset.n !== String(fl)) { fc.dataset.n = fl; fc.hidden = !fl; fc.textContent = `${fl} flagged`; fc.classList.remove('bump'); void fc.offsetWidth; fc.classList.add('bump'); }
+  // the pipeline: which stage is working now, and how many each one has settled
+  const active = done ? 'verdict' : w.stage === 'finding' ? 'find' : judge ? 'model' : 'read';
+  const vals = { find: w.total || 0, print: w.counts?.cached ?? 0, read: w.counts?.rules ?? 0, model: w.counts?.model ?? 0, verdict: fl };
+  for (const [k] of STEPS) {
+    const g = $(`#ps-${k}`), t = $(`#pn-${k}`);
+    g.classList.toggle('on', k === active); g.classList.toggle('lit', vals[k] > 0);
+    if (t.textContent !== String(vals[k])) { t.textContent = vals[k]; g.classList.remove('bump'); void g.getBoundingClientRect(); g.classList.add('bump'); }
+  }
+  $('#pipe').classList.toggle('judge', judge);
+  // the dock: the deck fills with what's been read, flagged boxes on top; under the gantry, the thing being read now
+  const dock = $('#dock'), stk = $('#dkstack');
+  dock.classList.toggle('judge', judge);
+  const slots = done ? 24 : Math.round(frac * 24), flagSlots = w.done ? Math.min(slots, Math.ceil(fl / w.done * slots)) : 0, was = +stk.dataset.n;
+  if (was !== slots || +stk.dataset.f !== flagSlots) {
+    stk.innerHTML = Array.from({ length: slots }, (_, k) => `<rect class="${k >= was ? 'stk' : ''}" x="${158 + (k % 6) * 13}" y="${90 - Math.floor(k / 6) * 9}" width="12" height="8" rx="1" fill="${k >= slots - flagSlots ? (WP._held ? '#ED76B3' : '#F6B84D') : '#8396A1'}" style="animation-delay:${(k - was) * 40}ms"/>`).join('');
+    stk.dataset.n = slots; stk.dataset.f = flagSlots;
+  }
+  const cur = done ? (w.error ? 'stopped' : 'all read, nothing run') : w.now?.name || (w.stage === 'finding' ? 'finding the cargo…' : w.log?.[0]?.name || '…');
+  const tg = $('#dktag');
+  if (tg.textContent !== short(cur, 32)) { tg.textContent = short(cur, 32); const c = $('#dkcur'); c.classList.remove('swap'); void c.getBoundingClientRect(); c.classList.add('swap'); }
   const fresh = (w.log || []).filter(l => l.n > lastN).reverse(), log = $('#wplog');
   fresh.forEach((l, k) => {
     const st = l.level === 'cleared' ? 'cleared' : { hold: 'hold', review: 'glance', notable: 'notable' }[l.level] ?? 'quiet';
+    if (l.level === 'hold') WP._held = true;
     log.insertAdjacentHTML('afterbegin', `<div class="wl new"><span class="pip ${st}"></span><span class="wln">${esc(l.name)}</span><span class="wlh">${l.how === 'model' ? `${modelName()}, ${(l.ms / 1000).toFixed(1)} s` : HOW[l.how][0]}</span></div>`);
-    if (!REDUCED && k < 10) setTimeout(() => flowDot(l.how, st), k * 80);  // each one runs down its lane
+    if (!REDUCED && k < 10) setTimeout(() => pipeDot(l.how, st), k * 90);  // each one runs down the pipeline to the stage that settled it
   });
   if (fresh.length) lastN = fresh.at(-1).n;
   while (log.children.length > 9) log.lastElementChild.remove();
