@@ -406,7 +406,6 @@ html.vt-theme::view-transition-new(root){animation:reveal .75s var(--io)}
 .qc{position:relative;z-index:1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:12px 14px;border:1px solid transparent;border-radius:12px;background:none;text-align:left;overflow:hidden;
   transition:background-color .2s,opacity .35s,transform .45s var(--out),height .45s var(--out),padding .45s var(--out);animation:qin .55s var(--out) both;animation-delay:calc(var(--i) * 35ms)}
 @keyframes qin{from{opacity:0;transform:translateX(-10px)}}
-.qc:hover:not(.sel){background:color-mix(in oklab,var(--shoal) 70%,transparent)}
 .qc .pip{transition:transform .4s var(--spring)}
 .qc.sel .pip{transform:scale(1.25)}
 .qc.sel .pip.hold{transform:rotate(45deg) scale(1.15)}
@@ -843,6 +842,233 @@ dialog.proj[open]{animation:dlg .45s var(--spring)}
 .pcheck span{animation:rise .3s var(--out)}
 .dact{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
 
+/* ---------- the chart under everything, and a little grain, so the page has a surface ---------- */
+.chartbg{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
+.chartbg g{animation:chartdrift 90s ease-in-out infinite alternate}
+@keyframes chartdrift{to{transform:translate(-46px,20px)}}
+.chartbg path{fill:none;stroke:var(--ink);stroke-opacity:.055;stroke-width:1.1}
+.chartbg path.deep{stroke-dasharray:2 6;stroke-opacity:.075}
+.chartbg text{font:italic 500 12px var(--display);fill:var(--ink);fill-opacity:.1}
+body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.045;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* the tab icons act out their tab while it's open: a lens looks, a container settles, a sonar sweeps, a needle finds north */
+.tab .ti{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;overflow:visible;transition:transform .45s var(--spring)}
+.tab:hover .ti{transform:scale(1.12) rotate(-4deg)}
+.tab .ti .lens,.tab .ti .top,.tab .ti .sweep,.tab .ti .needle{transform-origin:12px 12px}
+.tab[aria-selected=true] .ti .lens{animation:lens 2.6s ease-in-out infinite}
+@keyframes lens{25%{transform:translate(-2.5px,1.5px)}75%{transform:translate(1px,-1px)}}
+.tab[aria-selected=true] .ti .top{animation:stackbob 2.2s var(--spring) infinite}
+@keyframes stackbob{0%,55%,100%{transform:none}25%{transform:translateY(-2.5px)}}
+.tab[aria-selected=true] .ti .sweep{animation:spin 2.2s linear infinite}
+.tab[aria-selected=true] .ti .needle{animation:needle 3.2s var(--spring) infinite}
+@keyframes needle{0%{transform:rotate(-50deg)}30%{transform:rotate(18deg)}55%,100%{transform:rotate(0)}}
+.hcell .hico{position:absolute;top:9px;right:9px;width:28px;height:28px;color:var(--ink3);transition:transform .5s var(--spring),color .3s}
+.hcell .hico svg.i{width:28px;height:28px;stroke-width:1.3}
+.hcell:hover .hico{transform:translateY(-3px) rotate(-8deg);color:var(--accent-ink,var(--ink))}
+.hcell.off .hico{opacity:.4}
+
+/* the review queue is a stack of containers: a door at one end, a rail in the colour of what was found */
+.queue{gap:8px;padding-left:12px}
+.qc{--sc:var(--noted);border:1px solid var(--rule);border-radius:8px;background:var(--sheet);padding:14px 14px 12px 26px;
+  background-image:repeating-linear-gradient(90deg,color-mix(in oklab,var(--ink) 4%,transparent) 0 1.5px,transparent 1.5px 9px);box-shadow:inset 0 3px 0 var(--sc)}
+.qc.hold{--sc:var(--hold)}.qc.glance{--sc:var(--glance)}
+.qc::before{content:"";position:absolute;left:9px;top:12px;bottom:10px;width:7px;border-inline:1.5px solid color-mix(in oklab,var(--sc) 70%,transparent);border-radius:1px}
+.qc:hover:not(.sel){transform:translateY(-2px);box-shadow:inset 0 3px 0 var(--sc),0 12px 22px -16px rgb(15 32 44 / .5)}
+.qc.sel{transform:translateX(6px);border-color:var(--ink);box-shadow:inset 0 3px 0 var(--sc),0 16px 30px -18px rgb(15 32 44 / .6)}
+.queue .qsel{left:0;right:auto;width:4px;border-radius:2px;background:var(--ink);border:0;box-shadow:none}
+
+/* the x-ray: the item as a container under the scanner, its files inside, wired to what they can do */
+.scanner{position:relative;margin:0;border-radius:16px;overflow:hidden;isolation:isolate;background:radial-gradient(110% 90% at 30% 0%,#183449 0%,#0B1A24 58%,#071219 100%);box-shadow:inset 0 0 0 1px rgb(255 255 255 / .05)}
+.scanner::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(rgb(140 200 232 / .07) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgb(140 200 232 / .07) 1px,transparent 1px) 0 0/22px 22px;-webkit-mask:radial-gradient(80% 90% at 40% 50%,#000,transparent);mask:radial-gradient(80% 90% at 40% 50%,#000,transparent)}
+.scanner svg{display:block;width:100%;height:auto}
+.scanner .xq{position:absolute;top:12px;right:12px;margin:0;color:#A4B4BB;border-color:rgb(255 255 255 / .25)}
+.scanner .xbox{animation:xIn .7s var(--spring) both}
+@keyframes xIn{from{opacity:0;transform:translateY(18px)}}
+.scanner .xbeam{animation:xbeam 2.6s var(--io) infinite alternate}
+@keyframes xbeam{to{transform:translateX(300px)}}
+.scanner .tile.f{animation:tglow 2.6s ease-in-out infinite;animation-delay:var(--d)}
+@keyframes tglow{50%{opacity:.55}}
+.scanner .tile.on{stroke:#fff;stroke-width:1.6}
+.scanner .ln{fill:none;stroke-width:1.6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;opacity:.75;animation:draw 1s var(--out) forwards;animation-delay:calc(.6s + var(--i) * .1s);transition:opacity .25s,stroke-width .25s}
+.scanner .ln.on{opacity:1;stroke-width:2.6}
+.scanner .tok{cursor:pointer;transform-box:fill-box;transform-origin:center;animation:popIn .55s var(--spring) both;animation-delay:calc(.5s + var(--i) * .1s);transition:opacity .25s}
+.scanner .tok .ring{fill:rgb(255 255 255 / .07);stroke-width:2;transition:fill .25s}
+.scanner .tok:hover .ring,.scanner .tok.on .ring{fill:rgb(255 255 255 / .18)}
+.scanner .tok .halo{fill:none;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:halo 1.8s var(--out) infinite}
+@keyframes halo{from{opacity:.7}to{opacity:0;transform:scale(1.9)}}
+.scanner .ti2{fill:none;stroke:#E4EDF0;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.scanner .tl{font:600 13px var(--sans);fill:#E4EDF0}
+.scanner .badge text{font:900 11px var(--sans);fill:#0B1A24}
+.scanner[data-hot] .ln:not(.on),.scanner[data-hot] .tok:not(.on){opacity:.15}
+.scanner[data-hot] .tile.f:not(.on){animation:none;opacity:.25}
+.scanner .tag{transform-origin:62px 14px;animation:swing 5s ease-in-out infinite}
+@keyframes swing{50%{transform:rotate(-1.6deg)}}
+.scanner .tag rect{fill:#F2E3CE;stroke:#C9A27C}
+.scanner .tag circle{fill:#0B1A24}
+.scanner .tag .string{fill:none;stroke:#C9A27C;stroke-width:1.4}
+.scanner .tag text{font:italic 500 14px var(--display);fill:#3A2618}
+.scanner .tag .tk{font:700 11.5px var(--sans);font-style:normal;fill:#7A5A40}
+.scanner .xrel path{fill:none;stroke:#F39AC6;stroke-width:3.4;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .45s var(--out) .3s forwards}
+.scanner .xrel.yes path{stroke:#70CDA2}
+.scanner .xstamp{font:800 40px var(--display);letter-spacing:.06em;fill:none;stroke:#70CDA2;stroke-width:2.2;transform-box:fill-box;transform-origin:center;animation:xst .5s var(--spring) both}
+@keyframes xst{from{opacity:0;transform:scale(1.8)}}
+.scanner .xcap{font:500 11.5px var(--mono);fill:#93A9B3}
+.claimrow{display:grid;gap:10px;padding:16px 18px;border-radius:14px;border:1px solid var(--rule);background:var(--paper)}
+.relw{margin-left:8px;font-weight:800;cursor:help}
+.relw.rel-no{color:var(--hold-ink)}.relw.rel-yes{color:var(--clear-ink)}
+.fi{border-radius:10px}
+.fi.flash{animation:fiflash 1.8s var(--out)}
+@keyframes fiflash{0%,35%{background:color-mix(in oklab,var(--accent) 12%,transparent);box-shadow:0 0 0 10px color-mix(in oklab,var(--accent) 12%,transparent)}}
+
+/* the power map: which kinds of thing can do what, as streams you can pick */
+.pmap{margin:18px 0 6px;padding:16px 18px 8px;border:1px solid var(--rule);border-radius:16px;background:var(--sheet)}
+.pmh{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:4px}
+.pmh b{font:700 18px var(--display)}
+.pmh span{flex-basis:100%;font-size:13.5px;color:var(--ink2)}
+.pmap svg{display:block;width:100%;height:auto;overflow:visible}
+.pmap .rb{fill:color-mix(in oklab,var(--ink) 12%,transparent);cursor:pointer;transition:fill .3s,opacity .3s}
+.pmap svg.intro .rb{animation:rbIn 1.2s var(--out) both;animation-delay:calc(var(--i) * 45ms)}
+@keyframes rbIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.pmap .rb:hover{fill:color-mix(in oklab,var(--ink) 30%,transparent)}
+.pmap.sel .rb{opacity:.35}
+.pmap .rb.on{fill:var(--accent);opacity:.85}
+.pmap .nd{cursor:pointer}
+.pmap .nd>rect{fill:var(--ink);transition:fill .3s}
+.pmap .nd.on>rect{fill:var(--accent)}
+.pmap .nd text{font:700 15px var(--sans);fill:var(--ink)}
+.pmap .nd .ct{font:500 13px var(--mono);fill:var(--ink2)}
+.pmap .nd:hover text{text-decoration:underline}
+.pmap .pmi{fill:none;stroke:var(--ink2);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:760px){.pmap{display:none}}
+@media (min-width:761px){.powers{display:none}}
+
+/* the yard: everything aboard as containers, in the colour of what was found */
+.yard{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;padding:14px 0 24px}
+.ct{--c1:#D3E1E6;--c2:#C1D2D9;--ci:#13232E;position:relative;display:grid;align-content:space-between;justify-items:start;gap:4px;height:86px;padding:12px 14px 10px;border:0;border-radius:6px;text-align:left;color:var(--ci);overflow:hidden;
+  background:repeating-linear-gradient(90deg,rgb(0 0 0 / .07) 0 2px,transparent 2px 10px),linear-gradient(var(--c1),var(--c2));
+  box-shadow:inset 0 2px 0 rgb(255 255 255 / .35),inset 0 -4px 0 rgb(0 0 0 / .13),0 1px 2px rgb(15 32 44 / .12);transition:transform .45s var(--spring),box-shadow .3s}
+.ct::after{content:"";position:absolute;right:9px;top:10px;bottom:12px;width:9px;border-inline:2px solid rgb(0 0 0 / .14);border-radius:1px}
+.ct:hover{transform:translateY(-5px) rotate(-.8deg);box-shadow:inset 0 2px 0 rgb(255 255 255 / .35),inset 0 -4px 0 rgb(0 0 0 / .13),0 18px 28px -14px rgb(15 32 44 / .5)}
+.ct:active{transform:translateY(-2px) scale(.97)}
+.ct.in{animation:ctIn .55s var(--spring) both;animation-delay:calc(var(--i) * 16ms)}
+@keyframes ctIn{from{opacity:0;transform:translateY(14px) scale(.94)}}
+.ct.hold{--c1:#C93A86;--c2:#A51F6E;--ci:#fff}
+.ct.glance{--c1:#F6C26A;--c2:#E59C2C;--ci:#2A1A05}
+.ct.cleared{--c1:#2BA779;--c2:#0C8A5E;--ci:#fff}
+.ct.notable{--c1:#8A9DA8;--c2:#6E838F;--ci:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .ct.quiet{--c1:#2B4250;--c2:#22394A;--ci:#E4EDF0}}
+:root[data-theme=dark] .ct.quiet{--c1:#2B4250;--c2:#22394A;--ci:#E4EDF0}
+.ct.hold::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgb(255 255 255 / .22) 50%,transparent 70%) 0 0/250% 100%;animation:sheen 3.2s linear infinite}
+.ct .cn{max-width:calc(100% - 22px);font:700 13.5px/1.25 var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct .cv{max-width:calc(100% - 22px);font:500 11.5px var(--mono);opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct .cc{display:flex;gap:6px;opacity:.85}
+.ct .cc svg.i{width:14px;height:14px}
+.ct .cd{position:absolute;right:24px;bottom:9px;font:700 9.5px var(--mono);letter-spacing:.08em;opacity:.55}
+.ct mark{background:rgb(255 255 255 / .45)}
+
+/* the sonar: every file the watch found, one point each, swept like a sounder */
+.sonarbox{position:relative;width:min(400px,100%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#11303F 0%,#0A1B24 62%,#061118 100%);
+  box-shadow:0 0 0 1px rgb(140 200 232 / .14),0 0 0 10px color-mix(in oklab,var(--ink) 4%,transparent),0 30px 60px -30px rgb(5 16 23 / .6),inset 0 0 50px rgb(0 0 0 / .5);animation:popIn .8s var(--spring) both}
+.sonarbox canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;cursor:crosshair}
+.sonarc{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;text-align:center;pointer-events:none}
+.sonarc .covn{font:800 clamp(32px,4vw,44px)/1 var(--display);letter-spacing:-.02em;color:#E4EDF0;text-shadow:0 2px 16px rgb(0 0 0 / .6)}
+.sonarc small{font-size:12px;color:#A4B4BB;margin-top:6px;max-width:13ch;line-height:1.3}
+.sleg{display:grid;gap:4px;margin-top:18px}
+.sl{display:grid;grid-template-columns:12px auto 1fr;gap:10px;align-items:center;padding:7px 10px;border:0;border-radius:8px;background:none;text-align:left;font-size:14px;color:var(--ink2);transition:background-color .2s}
+.sl:hover{background:var(--shoal)}
+.sl i{width:12px;height:12px;border-radius:3px}
+.sl i.lk{border-radius:50%;background:#ED76B3;box-shadow:0 0 0 3px rgb(237 118 179 / .25)}
+.sl b{font:700 15px var(--display);color:var(--ink)}
+.covl>p{color:var(--ink2);font-size:14.5px;margin-top:10px}
+
+/* the voyage: how it works, as one trip from your port, past the lighthouse, into the morning */
+.voyage{position:relative;margin-bottom:30px;border-radius:18px;overflow:hidden;box-shadow:0 0 0 1px var(--rule),0 24px 50px -32px rgb(5 16 23 / .5)}
+.voyage svg{display:block;width:100%;height:auto}
+.voyage .vstars circle{fill:#fff;animation:twinkle 3.6s ease-in-out infinite;animation-delay:calc(var(--n) * -.37s)}
+.voyage .vwave{animation:drift 7s linear infinite}
+.voyage .vroute{fill:none;stroke:#fff;stroke-opacity:.4;stroke-width:2;stroke-dasharray:2 9;stroke-linecap:round}
+.voyage .vwp circle{fill:#fff;opacity:.85}
+.voyage .vname{font:italic 600 14px var(--display);fill:#13232E}
+.voyage .vword{font:800 18px var(--display);fill:#0F202C}
+.voyage .vsub{font:600 12.5px var(--sans);fill:#475863}
+.voyage .vship{animation:voyageX 18s linear infinite}
+@keyframes voyageX{0%{transform:translateX(0);opacity:0}3%,10%{transform:translateX(0);opacity:1}40%{transform:translateX(520px)}58%{transform:translateX(520px)}86%{transform:translateX(860px);opacity:1}97%{transform:translateX(860px);opacity:1}100%{transform:translateX(860px);opacity:0}}
+.voyage .vbob{animation:bob 4s ease-in-out infinite}
+.voyage .vc{fill:#5C7482;animation:vlit 18s linear infinite;animation-delay:calc(var(--k) * .22s)}
+@keyframes vlit{0%,42%{fill:#5C7482}46%,100%{fill:var(--c)}}
+.voyage .vflag{animation:vflag 18s linear infinite}
+@keyframes vflag{0%,80%{opacity:.2}86%,100%{opacity:1}}
+.voyage .vbeamrot{transform-origin:716px 101px;animation:vsweep 6s ease-in-out infinite alternate}
+@keyframes vsweep{from{transform:rotate(-8deg)}to{transform:rotate(12deg)}}
+.voyage .vlamp{animation:vlamp 3s ease-in-out infinite}
+@keyframes vlamp{50%{fill:#FFF4D6}}
+.voyage .vsun{animation:vsun 18s ease-in-out infinite}
+@keyframes vsun{0%,55%{transform:translateY(44px)}86%,100%{transform:translateY(0)}}
+.voyage .vcard{animation:vcard 18s var(--out) infinite}
+@keyframes vcard{0%,78%{opacity:.35;transform:translateY(10px)}86%,100%{opacity:1;transform:none}}
+.voyage.watch .vship{animation:none;transform:translateX(520px)}
+.voyage.watch .vc{animation:vread 1.2s ease-in-out infinite;animation-delay:calc(var(--k) * .15s)}
+@keyframes vread{50%{fill:#FFF4D6}}
+.voyage.watch .vbeamrot{animation-duration:1.4s}
+
+/* the watch, live: every item it settles runs down its lane into a bucket */
+.wflow{display:block;width:calc(100% - 24px);height:auto;margin:10px 12px 2px;overflow:visible}
+.wflow .lane{fill:none;stroke:var(--rule2);stroke-width:1.6;stroke-dasharray:2 6;stroke-linecap:round;animation:dash 1.2s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-16}}
+.wpanel.done .wflow .lane{animation:none}
+.wflow .src rect{fill:var(--ink)}
+.wflow .src .sc1{fill:#ED76B3}.wflow .src .sc2{fill:#F6B84D}.wflow .src .sc3{fill:#BDD0D8}
+.wflow .bk .bg{fill:var(--shoal);stroke:var(--rule)}
+.wflow .bk .fill{fill:var(--ink);opacity:.12;transition:width .5s var(--out)}
+.wflow .bk .n{font:700 17px var(--display);fill:var(--ink)}
+.wflow .bk .l{font:600 11.5px var(--sans);fill:var(--ink2)}
+.wflow .bk.bump .n{animation:pulseN .45s var(--spring)}
+@keyframes pulseN{40%{fill:var(--clear-ink)}}
+.wflow .dot{fill:var(--ink3)}
+.wflow .dot.hold{fill:var(--hold)}.wflow .dot.glance{fill:var(--glance)}.wflow .dot.cleared{fill:var(--clear)}.wflow .dot.notable{fill:var(--noted)}
+.flagchip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:var(--hold-bg);color:var(--hold-ink);font-size:12px;font-weight:800}
+.flagchip.bump{animation:popIn .4s var(--spring)}
+.flagchip[hidden]{display:none}
+
+/* the schedule dial: a day round the clock; drag the ship to the hour */
+.dialrow{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:center}
+.dialside{display:grid;gap:6px}
+.dial{width:200px;height:200px;touch-action:none;user-select:none;cursor:pointer;overflow:visible;transition:opacity .3s,filter .3s}
+.dial:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:50%}
+.dial .day{fill:none;stroke:#F3E7C6;stroke-width:16}
+.dial .night{fill:none;stroke:#13283A;stroke-width:16}
+.dial .until{fill:none;stroke:var(--clear);stroke-width:3.5;stroke-linecap:round;opacity:.9}
+.dial .tick{stroke:var(--ink3);stroke-width:1}.dial .tick.major{stroke:var(--ink2);stroke-width:2}
+.dial .lbl{font:700 9.5px var(--sans);fill:var(--ink3);text-anchor:middle}
+.dial .hand{transform-origin:110px 110px;transition:transform .6s var(--spring)}
+.dial.drag .hand{transition:none}
+.dial .knob{fill:var(--clear-ink);stroke:var(--sheet);stroke-width:3;filter:drop-shadow(0 3px 6px rgb(0 0 0 / .3));transition:fill .3s}
+.dial .tt{font:800 26px var(--display);fill:var(--ink);text-anchor:middle}
+.dial .ts{font:600 11.5px var(--sans);fill:var(--ink2);text-anchor:middle}
+.dial .nowdot{fill:var(--ink)}
+.dial.off{opacity:.7;filter:saturate(.3)}
+.dial.off .knob{fill:var(--ink3)}
+/* what to read: three holds you switch on and off, each with its light */
+.rcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:6px}
+.rcard{position:relative;display:grid;gap:4px;justify-items:start;padding:12px;border-radius:12px;border:1.5px solid var(--rule2);background:var(--paper);text-align:left;transition:border-color .2s,opacity .3s,transform .35s var(--spring)}
+.rcard:hover{transform:translateY(-2px)}
+.rcard:active{transform:scale(.97)}
+.rcard .ill svg.i{width:34px;height:34px;stroke-width:1.3;transition:transform .5s var(--spring)}
+.rcard:hover .ill svg.i{transform:rotate(-8deg) scale(1.06)}
+.rcard b{font-size:14px}
+.rcard small{font-size:12.5px;color:var(--ink2);line-height:1.35}
+.rcard .led{position:absolute;top:12px;right:12px;width:9px;height:9px;border-radius:50%;background:var(--ink3);transition:background-color .3s,box-shadow .3s}
+.rcard[aria-pressed=true]{border-color:var(--ink)}
+.rcard[aria-pressed=true] .led{background:var(--clear);box-shadow:0 0 0 3px color-mix(in oklab,var(--clear) 25%,transparent),0 0 10px var(--clear)}
+.rcard[aria-pressed=false]{opacity:.6}
+.rcard[aria-pressed=false] .ill{filter:grayscale(1)}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.thm{display:grid;gap:6px;padding:6px 6px 8px;border-radius:12px;border:1.5px solid var(--rule2);background:var(--paper);font-weight:700;font-size:13.5px;transition:border-color .2s,transform .35s var(--spring),box-shadow .3s}
+.thm svg{width:100%;height:auto;border-radius:8px;display:block}
+.thm:hover{transform:translateY(-2px)}
+.thm[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 3px var(--rule)}
+@media (max-width:640px){.dialrow{grid-template-columns:1fr;justify-items:center}.rcards{grid-template-columns:1fr}}
+
 body.boot,body.boot *{transition:none!important}  /* the first paint lands in its colours; later changes animate */
 body.empty .holds,body.empty .clearance{display:none}
 
@@ -930,10 +1156,10 @@ body.empty .holds,body.empty .clearance{display:none}
 
 <nav class="tabs" id="tabs" aria-label="Sections"><div class="wrap tabsin" role="tablist" id="tablist">
   <span class="tthumb" id="tthumb"></span>
-  <button class="tab" role="tab" data-tab="review" id="t-review" aria-controls="p-review">Review <b id="tc-review">0</b></button>
-  <button class="tab" role="tab" data-tab="aboard" id="t-aboard" aria-controls="p-aboard">Everything aboard <b id="tc-aboard">0</b></button>
-  <button class="tab" role="tab" data-tab="blind" id="t-blind" aria-controls="p-blind">Blind spots <b id="tc-blind">…</b></button>
-  <button class="tab" role="tab" data-tab="how" id="t-how" aria-controls="p-how">How it works</button>
+  <button class="tab" role="tab" data-tab="review" id="t-review" aria-controls="p-review"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="9" width="12" height="9" rx="1.5"/><path d="M5.5 9v9M8.5 9v9M11.5 9v9"/><g class="lens"><circle cx="17" cy="8" r="3.6"/><path d="M19.6 10.6L22 13"/></g></svg>Review <b id="tc-review">0</b></button>
+  <button class="tab" role="tab" data-tab="aboard" id="t-aboard" aria-controls="p-aboard"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="13" width="9" height="6.5" rx="1"/><rect x="12.5" y="13" width="9" height="6.5" rx="1"/><rect class="top" x="7.5" y="5.5" width="9" height="6.5" rx="1"/></svg>Everything aboard <b id="tc-aboard">0</b></button>
+  <button class="tab" role="tab" data-tab="blind" id="t-blind" aria-controls="p-blind"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.3"/><path class="sweep" d="M12 12L18 6"/></svg>Blind spots <b id="tc-blind">…</b></button>
+  <button class="tab" role="tab" data-tab="how" id="t-how" aria-controls="p-how"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path class="needle" d="M12 5.5l2.2 6.5-2.2 6.5-2.2-6.5z"/></svg>How it works</button>
 </div></nav>
 
 <main class="wrap">
@@ -943,7 +1169,9 @@ body.empty .holds,body.empty .clearance{display:none}
   </section>
   <section class="panel" id="p-aboard" role="tabpanel" aria-labelledby="t-aboard" hidden>
     <div class="ph"><div><h2>Everything aboard</h2><p class="lede" id="manlede"></p></div></div>
+    <div class="pmap" id="pmap"></div>
     <div class="tools"><div class="seg" id="filters" role="group" aria-label="Show"><span class="thumb"></span></div>
+      <div class="seg" id="viewseg" role="group" aria-label="View"><span class="thumb"></span><button data-view="yard" aria-pressed="true">Yard</button><button data-view="list" aria-pressed="false">List</button></div>
       <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="q" placeholder="Search packages, skills and servers" aria-label="Search everything aboard"><kbd>/</kbd></label></div>
     <div class="powers" id="powers"></div>
     <div class="mlist" id="table"></div>
@@ -951,6 +1179,7 @@ body.empty .holds,body.empty .clearance{display:none}
   <section class="panel" id="p-blind" role="tabpanel" aria-labelledby="t-blind" hidden></section>
   <section class="panel" id="p-how" role="tabpanel" aria-labelledby="t-how" hidden>
     <div class="ph"><div><h2>How slowship works</h2><p class="lede">Three steps, and you only ever do the first. Everything you can change lives in Settings.</p></div><button class="btn" data-settings>Open settings</button></div>
+    <div class="voyage" id="voyage"></div>
     <ol class="route" id="route"></ol>
   </section>
 </main>
@@ -1022,6 +1251,13 @@ const IC = {
   model: svg('<circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/>'),  // a second opinion: two views of one thing
   play: svg('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>'),
   warn: svg('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>'),
+};
+// the four kinds of cargo, drawn: a crate, a scroll, a plug, a window
+const KICON = {
+  npm: svg('<path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5M7.8 6l8.5 4"/>'),
+  skill: svg('<path d="M7 4h10a2 2 0 0 1 2 2v11a3 3 0 0 1-3 3H8"/><path d="M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 4 0v-1h8M9.5 8.5h6M9.5 11.5h6"/>'),
+  mcp: svg('<path d="M9 3.5v4.5M15 3.5v4.5M6.5 8h11v3a5.5 5.5 0 0 1-11 0z"/><path d="M12 16.5v4"/>'),
+  app: svg('<rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M3 8h18M9 21h6M12 17v4"/><circle cx="12" cy="12.5" r="2"/>'),
 };
 // what a thing can touch, grouped the way a person thinks about it
 const TOUCH = [
@@ -1240,7 +1476,7 @@ function holds() {
   const sbar = l => { const c = {}; for (const i of l) c[stateOf(i)] = (c[stateOf(i)] || 0) + 1; return `<span class="sbar">${['hold', 'glance', 'cleared', 'notable', 'quiet'].filter(s => c[s]).map((s, k) => `<i class="${s}" style="flex:${c[s]};--i:${k}"></i>`).join('')}</span>`; };
   const H = [['npm', 'packages', 'package'], ['skill', 'agent skills', 'agent skill'], ['mcp', 'MCP servers', 'MCP server'], ['app', 'your build', 'your build']];
   const el = $('#holds');
-  if (!el.children.length) el.innerHTML = H.map(([k], i) => `<button class="hcell" data-f="${k}" data-explain="src-${k}" style="--i:${i}"><span class="hn" id="hn-${k}">0</span><span class="hl" id="hl-${k}"></span><span id="hb-${k}"></span></button>`).join('');
+  if (!el.children.length) el.innerHTML = H.map(([k], i) => `<button class="hcell" data-f="${k}" data-explain="src-${k}" style="--i:${i}"><span class="hico" aria-hidden="true">${KICON[k]}</span><span class="hn" id="hn-${k}">0</span><span class="hl" id="hl-${k}"></span><span id="hb-${k}"></span></button>`).join('');
   for (const [k, many, one] of H) {
     const l = by(k), n = l.length;
     tween($(`#hn-${k}`), n);
@@ -1362,15 +1598,16 @@ function thumbTo() {
 function showPanels() {
   for (const t of TABS) { $(`#p-${t}`).hidden = t !== S.tab; $(`#t-${t}`).setAttribute('aria-selected', t === S.tab); }
   thumbTo();
-  if (S.tab === 'blind') blindOpen();
-  if (S.tab === 'aboard') thumb();
+  if (S.tab === 'blind') blindOpen(); else sonarStop();
+  if (S.tab === 'aboard') { thumb(); viewSeg(); }
 }
 function setTab(t) {
   if (!TABS.includes(t) || t === S.tab) return;
   const dir = TABS.indexOf(t) > TABS.indexOf(S.tab) ? 'fwd' : 'back';
-  const go = () => { S.tab = t; showPanels(); };
+  S.tab = t;  // decided now, drawn when the transition is ready, so quick clicks always land on the last tab
+  const go = () => showPanels();
   document.documentElement.dataset.dir = dir;
-  document.startViewTransition && !REDUCED ? document.startViewTransition(go) : go();
+  if (document.startViewTransition && !REDUCED && !document.hidden) { const vt = document.startViewTransition(go); vt.ready.catch(() => {}); vt.finished.catch(() => {}); } else go();
   history.replaceState(null, '', '#' + t);
 }
 const toTabs = () => { const y = $('main').offsetTop - 62 - $('#tabs').offsetHeight; if (Math.abs(scrollY - y) > 4) scrollTo({ top: y, behavior: REDUCED ? 'auto' : 'smooth' }); };
@@ -1462,7 +1699,7 @@ const words = t => { let n = 0; return esc(t).split(/(\s+)/).map(w => /\s/.test(
 function findingHTML(i, f, k) {
   const ev = evidence(i, f), said = ev.find(e => e.why), sev = { hold: 'hold', review: 'glance' }[f.level] ?? 'note';
   const pip = { hold: 'hold', glance: 'glance', note: 'notable' }[sev];
-  return `<li class="fi ${sev}" style="--i:${k}">
+  return `<li class="fi ${sev}" style="--i:${k}" data-caps="${[...new Set(ev.map(e => TG(e.cap)).filter(Boolean))].join(' ')}">
     <div class="fh"><span class="pip ${pip}"></span><p class="fit">${sayHTML(f)}</p></div>
     <div class="fitags"><span class="tag ${sev}">${{ hold: 'Held', glance: 'Worth a glance', note: 'Noted' }[sev]}</span>${f.matches_claim === 'no' ? '<span class="tag no">Not what it says it does</span>' : ''}</div>
     ${ev.slice(0, 2).map(e => editor(i, e, sev, sayHTML(f))).join('')}
@@ -1500,14 +1737,314 @@ function detailHTML(i) {
       ${crumb(itemPath(i))}
       <div class="dta">${needs(i) ? (i.approved ? `<button class="btn" data-act="unclear">${IC.undo}Take back the clearance</button>` : `<button class="btn primary" data-act="clear">${IC.check}Clear it</button>`) : ''}<button class="btn" data-act="find">${IC.search}Find in the list</button></div>
     </header>
-    <section class="sd${i.kind === 'app' ? ' solo' : ''}" aria-label="What it says against what it does">
-      <div class="says"><span class="sdl">What it says it does</span><blockquote${i.claim ? ' title="Tap to read more"' : ''}>${says}</blockquote></div>
-      <div class="rel" data-explain="relation-${rel}" aria-label="${{ no: 'Does not match', yes: 'Matches', unknown: 'Not compared' }[rel]}">${REL[rel]}</div>
-      <div class="does"><span class="sdl">What its code can do</span><div class="pwr">${pw.length ? pw.map((t, k) => `<span class="pwc" style="--i:${k}">${IC[t[0]]}${t[1]}</span>`).join('') : '<span class="muted">Nothing notable</span>'}</div></div>
-    </section>
+    ${scannerHTML(i, rel)}
+    <section class="says claimrow"><span class="sdl">What it says it does${rel !== 'unknown' ? `<span class="relw rel-${rel}" data-explain="relation-${rel}">${rel === 'no' ? '≠ not what its code does' : '= matches its code'}</span>` : ''}</span><blockquote${i.claim ? ' title="Tap to read more"' : ''}>${says}</blockquote></section>
     ${fs.length ? `<ol class="fl">${fs.map((f, k) => findingHTML(i, f, k)).join('')}</ol>` : `<div class="calm2">${IC.check}<span>Read every file it ships: nothing to look at.</span></div>`}
     ${COVER(i)}
   </div>`;
+}
+
+// ---------- the x-ray: the item as a container under the scanner, its files inside, wired to what they can do ----------
+const TG = cap => TOUCH.find(t => t[2].includes(cap))?.[0];
+const LVN = { hold: 3, review: 2, notable: 1, info: 0 };
+const XCOL = ['#5E7684', '#A4B4BB', '#F6B84D', '#ED76B3'];  // by the worst finding: quiet, noted, a glance, held
+const inner = s => s.replace(/^<svg[^>]*>|<\/svg>$/g, '');
+let XID = 0;
+function scannerHTML(i, rel) {
+  const st = stateOf(i), [f, top, side] = BOX[st], [name] = splitName(i), id = 'x' + (++XID);
+  // every fact wears the colour of the worst finding it is evidence for
+  const lvOf = new Map();
+  for (const fd of i.findings) for (const e of fd.evidence) lvOf.set(e, Math.max(lvOf.get(e) ?? 0, LVN[fd.level] ?? 0));
+  const facts = (i.facts || []).filter(x => TG(x.cap)), fileLv = file => Math.max(0, ...facts.filter(x => x.file === file).map(x => lvOf.get(x.id) ?? 0));
+  const files = [...new Set(facts.map(x => x.file))].sort((a, b) => fileLv(b) - fileLv(a));
+  const total = Math.max(i.coverage?.files || 0, files.length), N = Math.max(1, Math.min(80, total)), gap = 2;
+  const [cols, tw] = N <= 8 ? [8, 30] : N <= 36 ? [12, 20] : [16, 15], y0 = 102 + (92 - Math.ceil(N / cols) * (tw + gap)) / 2;  // few files, bigger squares
+  const pos = k => [56 + (k % cols) * (tw + gap), y0 + Math.floor(k / cols) * (tw + gap)];
+  const gOf = file => [...new Set(facts.filter(x => x.file === file).map(x => TG(x.cap)))].join(' ');
+  const tiles = Array.from({ length: N }, (_, k) => {
+    const file = files[k], [x, y] = pos(k);
+    return `<rect class="tile${file ? ' f' : ''}" x="${x}" y="${y}" width="${tw}" height="${tw}" rx="2" fill="${file ? XCOL[fileLv(file)] : '#fff'}" opacity="${file ? 1 : .2}"${file ? ` data-g="${gOf(file)}" style="--d:${(k * .07).toFixed(2)}s"` : ''}>${file ? `<title>${esc(file)}</title>` : ''}</rect>`;
+  }).join('');
+  const ribs = Array.from({ length: 23 }, (_, k) => `M${52 + k * 12.5} 92v110`).join('');
+  const groups = TOUCH.filter(t => facts.some(x => t[2].includes(x.cap))).slice(0, 6);
+  let n = 0;
+  const parts = groups.map((g, k) => {
+    const gf = facts.filter(x => g[2].includes(x.cap)), col = XCOL[Math.max(0, ...gf.map(x => lvOf.get(x.id) ?? 0))];
+    const status = gf.some(x => x.label === 'unexpected') ? 'no' : gf.some(x => x.label === 'expected') ? 'yes' : 'na';
+    const tx = 452, ty = Math.round(124 + (k - (groups.length - 1) / 2) * 38);
+    const lines = [...new Set(gf.map(x => x.file))].filter(file => files.indexOf(file) < N).slice(0, 4).map(file => {
+      const [x, y] = pos(files.indexOf(file)), cx = x + tw / 2, cy = y + tw / 2;
+      return `<path class="ln" data-g="${g[0]}" pathLength="1" style="--i:${n++}" stroke="${col}" d="M${cx} ${cy} C${cx + 150} ${cy} ${tx - 120} ${ty} ${tx - 19} ${ty}"/>`;
+    }).join('');
+    const tok = `<g transform="translate(${tx} ${ty})"><g class="tok ${status}" data-g="${g[0]}" style="--i:${k}" role="button" tabindex="0" aria-label="${g[1]}${status === 'no' ? ', not in its description' : ''}: show the code">
+      ${status === 'no' ? `<circle class="halo" r="17" stroke="${col}"/>` : ''}<circle class="ring" r="17" stroke="${col}"/>
+      <svg x="-9" y="-9" width="18" height="18" viewBox="0 0 24 24" class="ti2">${inner(IC[g[0]])}</svg>
+      ${status !== 'na' ? `<g class="badge" transform="translate(13 -13)"><circle r="7.5" fill="${status === 'no' ? '#ED76B3' : '#70CDA2'}"/><text text-anchor="middle" y="3.8">${status === 'no' ? '≠' : '='}</text></g>` : ''}
+      <text class="tl" x="28" y="4.5">${esc(g[1])}</text></g></g>`;
+    return { lines, tok };
+  });
+  const said = i.kind === 'app' ? 'your own build' : i.claim ? `“${short(i.claim.split('\n')[0], 40)}”` : 'no description';
+  const tagW = Math.min(340, 80 + said.length * 7.8);
+  const c = i.coverage || {}, cap = c.files ? `${c.read} of ${c.files} file${c.files === 1 ? '' : 's'} read${c.files > 80 ? `, ${N} shown` : ''}. Nothing run.` : 'Read, never run.';
+  const relG = rel === 'no' ? '<g class="xrel" transform="translate(384 102) scale(1.25)"><path pathLength="1" d="M10 16h20"/><path pathLength="1" d="M10 24h20" style="animation-delay:.42s"/><path pathLength="1" d="M26 8L14 32" style="animation-delay:.72s"/></g>'
+    : rel === 'yes' ? '<g class="xrel yes" transform="translate(384 102) scale(1.25)"><path pathLength="1" d="M10 16h20"/><path pathLength="1" d="M10 24h20" style="animation-delay:.42s"/></g>' : '';
+  return `<figure class="scanner" data-fp="${esc(i.fp)}"><button class="xi xq" data-explain="xray" aria-label="How to read the x-ray">?</button>
+    <svg viewBox="0 0 640 250" role="img" aria-label="An x-ray of ${esc(name)}: ${groups.map(g => g[1]).join(', ') || 'nothing notable inside'}">
+    <defs><linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="#FFF4D6" stop-opacity="0"/><stop offset=".5" stop-color="#FFF4D6" stop-opacity=".6"/><stop offset="1" stop-color="#FFF4D6" stop-opacity="0"/></linearGradient>
+      <clipPath id="${id}c"><rect x="40" y="88" width="300" height="118"/></clipPath></defs>
+    <g class="xbox">
+      <ellipse cx="200" cy="218" rx="172" ry="8" fill="#000" opacity=".45"/>
+      <path d="M40 88 L76 58 H376 L340 88Z" fill="${top}" opacity=".85"/><path d="M340 88 L376 58 V176 L340 206Z" fill="${side}" opacity=".9"/>
+      <rect x="40" y="88" width="300" height="118" fill="${f}" opacity=".22"/>
+      <path d="${ribs}" stroke="${top}" stroke-opacity=".28" stroke-width="1.4"/>
+      ${tiles}
+      <rect x="40" y="88" width="300" height="118" fill="none" stroke="${top}" stroke-width="2"/>
+      <g clip-path="url(#${id}c)"><rect class="xbeam" x="10" y="88" width="34" height="118" fill="url(#${id}b)"/></g>
+      ${i.approved && needs(i) ? '<g transform="rotate(-8 190 150)"><text class="xstamp" x="190" y="164" text-anchor="middle">CLEARED</text></g>' : ''}
+    </g>
+    <g class="tag"><path class="string" d="M64 31 C70 44 72 52 78 60"/><rect x="46" y="12" width="${tagW}" height="30" rx="5"/><circle cx="60" cy="27" r="3.4"/><text x="72" y="32"><tspan class="tk">It says </tspan>${esc(said)}</text></g>
+    ${relG}${parts.map(p => p.lines).join('')}${parts.map(p => p.tok).join('')}
+    ${groups.length ? '' : '<text class="tl" x="452" y="128">Nothing notable inside</text>'}
+    <text class="xcap" x="40" y="240">${esc(cap)}</text>
+  </svg></figure>`;
+}
+// pointing at a power lights its wires and the files they come from; picking it jumps to that code
+function hotScan(sc, g) {
+  if (g) sc.dataset.hot = g; else delete sc.dataset.hot;
+  sc.querySelectorAll('[data-g]').forEach(el => el.classList.toggle('on', !!g && el.dataset.g.split(' ').includes(g)));
+}
+document.addEventListener('pointerover', e => { const sc = e.target.closest?.('.scanner'); if (sc) hotScan(sc, e.target.closest('.tok,.tile.f')?.dataset.g?.split(' ')[0] ?? null); });
+document.addEventListener('pointerout', e => { const sc = e.target.closest?.('.scanner'); if (sc && !sc.contains(e.relatedTarget)) hotScan(sc, null); });
+function toCode(tok) {
+  const fi = tok.closest('.dt')?.querySelector(`.fi[data-caps~="${tok.dataset.g}"]`); if (!fi) return;
+  fi.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
+  fi.classList.remove('flash'); void fi.offsetWidth; fi.classList.add('flash');
+}
+document.addEventListener('click', e => { const t = e.target.closest?.('.scanner .tok'); if (t) toCode(t); });
+document.addEventListener('keydown', e => { const t = e.target.closest?.('.scanner .tok'); if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toCode(t); } });
+
+// ---------- the power map: which kinds of thing can do what, as streams; pick one to filter ----------
+const KL = { npm: ['Packages', 'packages'], skill: ['Skills', 'skills'], mcp: ['MCP servers', 'MCP servers'], app: ['Your build', 'your build'] };
+function powerMap() {
+  const el = $('#pmap');
+  const kinds = ['npm', 'skill', 'mcp', 'app'].map(k => [k, G.filter(i => i.kind === k)]).filter(([, l]) => l.length);
+  const pws = TOUCH.map(t => [t, G.filter(i => touches(i, t))]).filter(([, l]) => l.length);
+  const links = [];
+  for (const [k, l] of kinds) for (const [t] of pws) { const n = l.filter(i => touches(i, t)).length; if (n) links.push({ k, t: t[0], n }); }
+  if (!links.length) { el.innerHTML = ''; el.hidden = true; return; }
+  el.hidden = false;
+  const lk = kinds.filter(([k]) => links.some(l => l.k === k)), rows = Math.max(lk.length, pws.length), gap = 12;
+  const H = Math.max(190, rows * 36 + 24), sum = links.reduce((a, l) => a + l.n, 0), unit = (H - 24 - gap * (rows - 1)) / sum, hOf = n => Math.max(3, n * unit);
+  const stack = (keys, of) => {
+    const hs = keys.map(k => links.filter(l => of(l) === k).reduce((a, l) => a + hOf(l.n), 0));
+    let y = (H - hs.reduce((a, b) => a + b, 0) - gap * (keys.length - 1)) / 2;
+    return Object.fromEntries(keys.map((k, j) => { const r = [k, { y, h: hs[j], off: 0 }]; y += hs[j] + gap; return r; }));
+  };
+  const L = stack(lk.map(([k]) => k), l => l.k), R = stack(pws.map(([t]) => t[0]), l => l.t), x0 = 210, x1 = 760, xm = 485;
+  const picked = S.cap || S.filter !== 'all';
+  const rb = links.map((l, j) => {
+    const a = L[l.k], b = R[l.t], hh = hOf(l.n), ya = a.y + a.off, yb = b.y + b.off; a.off += hh; b.off += hh;
+    const on = picked && (!S.cap || S.cap === l.t) && (S.filter === 'all' || S.filter === l.k);
+    return `<path class="rb${on ? ' on' : ''}" data-k="${l.k}" data-t="${l.t}" style="--i:${j}" d="M${x0} ${ya.toFixed(1)} C${xm} ${ya.toFixed(1)} ${xm} ${yb.toFixed(1)} ${x1} ${yb.toFixed(1)} V${(yb + hh).toFixed(1)} C${xm} ${(yb + hh).toFixed(1)} ${xm} ${(ya + hh).toFixed(1)} ${x0} ${(ya + hh).toFixed(1)}Z"><title>${l.n} ${KL[l.k][1]}: ${TOUCH.find(t => t[0] === l.t)[1].toLowerCase()}</title></path>`;
+  }).join('');
+  const lnodes = lk.map(([k, l]) => `<g class="nd${S.filter === k ? ' on' : ''}" data-k="${k}" role="button" tabindex="0" aria-label="Show only ${KL[k][1]}"><rect x="${x0 - 12}" y="${L[k].y.toFixed(1)}" width="12" height="${L[k].h.toFixed(1)}" rx="3"/><text x="${x0 - 22}" y="${(L[k].y + L[k].h / 2 + 5).toFixed(1)}" text-anchor="end">${KL[k][0]} <tspan class="ct">${l.length}</tspan></text></g>`).join('');
+  const rnodes = pws.map(([t, l]) => { const r = R[t[0]], cy = r.y + r.h / 2;
+    return `<g class="nd${S.cap === t[0] ? ' on' : ''}" data-t="${t[0]}" role="button" tabindex="0" aria-label="Show only what ${t[1].toLowerCase()}"><rect x="${x1}" y="${r.y.toFixed(1)}" width="12" height="${r.h.toFixed(1)}" rx="3"/><svg x="${x1 + 22}" y="${(cy - 9).toFixed(1)}" width="18" height="18" viewBox="0 0 24 24" class="pmi">${inner(IC[t[0]])}</svg><text x="${x1 + 48}" y="${(cy + 5).toFixed(1)}">${t[1]} <tspan class="ct">${l.length}</tspan></text></g>`; }).join('');
+  const sig = `${G.length}:${links.length}:${sum}`, intro = el.dataset.sig !== sig;
+  el.dataset.sig = sig;
+  el.classList.toggle('sel', picked);
+  el.innerHTML = `<div class="pmh"><b>What the code can touch</b>${info('touch')}<span>Each stream is one kind of thing having one power. Pick a power, a kind or a stream to filter the yard below.</span></div>
+    <svg class="${intro && !REDUCED ? 'intro' : ''}" viewBox="0 0 1000 ${H}" role="group" aria-label="Which kinds of thing can do what">${rb}${lnodes}${rnodes}</svg>`;
+}
+function pickPower(n) {
+  const t = n.dataset.t, k = n.dataset.k;
+  if (t && !k) S.cap = S.cap === t ? null : t;
+  else if (k && !t) S.filter = S.filter === k ? 'all' : k;
+  else { const same = S.cap === t && S.filter === k; S.cap = same ? null : t; S.filter = same ? 'all' : k; }
+  $$('#powers .pw').forEach(x => x.setAttribute('aria-pressed', x.dataset.cap === S.cap));
+  setFilter(S.filter);  // redraws the kind tabs, the yard and this map
+}
+$('#pmap').addEventListener('click', e => { const n = e.target.closest('[data-t],[data-k]'); if (n && !e.target.closest('.xi')) pickPower(n); });
+$('#pmap').addEventListener('keydown', e => { const n = e.target.closest('[data-t],[data-k]'); if (n && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pickPower(n); } });
+
+// ---------- the yard: each thing as a container ----------
+const ctTile = (i, k, q, anim) => {
+  const st = stateOf(i), [name, ver] = splitName(i), pw = TOUCH.filter(t => touches(i, t)).slice(0, 4);
+  return `<button class="ct ${st}${anim && k < 48 ? ' in' : ''}" data-fp="${esc(i.fp)}" style="--i:${Math.min(k, 48)}" aria-label="${esc(label(i))}: ${ST[st]}"><span class="cn">${marked(name, q)}</span><span class="cv">${ver ? esc(ver) : KIND[i.kind]}${i.also.length ? ` · ×${i.also.length + 1}` : ''}</span><span class="cc">${pw.map(t => IC[t[0]]).join('')}</span><span class="cd">${CODE[i.kind]}</span></button>`;
+};
+const segThumb = seg => { const on = seg?.querySelector('button[aria-pressed="true"]'), th = seg?.querySelector('.thumb'); if (on && th) { th.style.width = on.offsetWidth + 'px'; th.style.transform = `translateX(${on.offsetLeft}px)`; } };
+S.view = (() => { try { return localStorage.getItem('slowship-view') || 'yard'; } catch { return 'yard'; } })();
+function viewSeg() { $$('#viewseg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === S.view)); segThumb($('#viewseg')); }
+$('#viewseg').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (!b) return; S.view = b.dataset.view; try { localStorage.setItem('slowship-view', S.view); } catch {} viewSeg(); table(true); });
+
+// ---------- the sonar: every file the watch found, one point each, swept like a sounder ----------
+let SON = null;
+const SONAR_CATS = (parsed, lines, unread, tests) => [
+  { id: 'parsed', n: parsed, col: '#8CC8E8', base: .5, label: 'read with the parser' },
+  { id: 'lines', n: lines, col: '#F6B84D', base: .6, label: 'scripts read line by line' },
+  { id: 'unread', n: unread, col: '#ED76B3', base: .95, label: 'code it couldn’t read' },
+  { id: 'tests', n: tests, col: '#5E7684', base: .4, label: 'test and example files left out on purpose' },
+];
+function sonarStop() { if (SON) cancelAnimationFrame(SON.raf); SON = null; }
+function sonarStart() {
+  sonarStop();
+  const cv = $('#sonar'); if (!cv || !cv.clientWidth) return;
+  const dpr = Math.min(2, devicePixelRatio || 1), size = cv.clientWidth, ctx = cv.getContext('2d'), TAU = Math.PI * 2;
+  cv.width = size * dpr; cv.height = size * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  let lines = 0, tests = 0;
+  for (const i of G) { lines += i.coverage?.lineLevel?.length || 0; tests += i.coverage?.tests || 0; }
+  const c = coverage(), cats = SONAR_CATS(Math.max(0, c.read - lines), lines, Math.max(0, c.code - c.read), tests), total = cats.reduce((a, k) => a + k.n, 0) || 1;
+  const R = size / 2, R0 = size * .21, R1 = size * .46;
+  // a sunflower spiral: the n-th point at n golden angles and a radius growing with its square root, so the field fills evenly
+  const pts = []; let n = 0;
+  for (const k of cats) for (let j = 0; j < k.n; j++, n++) { const a = (n * 2.399963) % TAU, r = R0 + (R1 - R0) * Math.sqrt((n + .5) / total); pts.push([R + Math.cos(a) * r, R + Math.sin(a) * r, a, k]); }
+  const dot = Math.max(1.4, Math.min(3.4, (R1 - R0) * Math.sqrt(Math.PI / total) * .78)), locked = (S.run?.unread || []).length, t0 = performance.now();
+  const frame = t => {
+    const el = (t - t0) / 1000, spin = REDUCED ? TAU * 1.25 : el * 1.25, sweep = spin % TAU, reveal = spin < TAU ? spin : TAU;
+    ctx.clearRect(0, 0, size, size);
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(140,200,232,.13)';
+    for (const r of [R0 - 7, (R0 + R1) / 2, R1 + 7]) { ctx.beginPath(); ctx.arc(R, R, r, 0, TAU); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(R, 12); ctx.lineTo(R, R - R0 + 7); ctx.moveTo(R, R + R0 - 7); ctx.lineTo(R, size - 12); ctx.moveTo(12, R); ctx.lineTo(R - R0 + 7, R); ctx.moveTo(R + R0 - 7, R); ctx.lineTo(size - 12, R); ctx.stroke();
+    if (!REDUCED) {
+      const g = ctx.createConicGradient(sweep - 1.2, R, R);
+      g.addColorStop(0, 'rgba(140,200,232,0)'); g.addColorStop(1.2 / TAU, 'rgba(140,200,232,.24)'); g.addColorStop(1.2 / TAU + .002, 'rgba(140,200,232,0)'); g.addColorStop(1, 'rgba(140,200,232,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(R, R, R1 + 12, 0, TAU); ctx.arc(R, R, R0 - 12, 0, TAU, true); ctx.fill();
+      ctx.strokeStyle = 'rgba(184,226,248,.6)'; ctx.beginPath(); ctx.moveTo(R + Math.cos(sweep) * (R0 - 12), R + Math.sin(sweep) * (R0 - 12)); ctx.lineTo(R + Math.cos(sweep) * (R1 + 12), R + Math.sin(sweep) * (R1 + 12)); ctx.stroke();
+    }
+    for (const [x, y, a, k] of pts) {
+      if (a > reveal) continue;  // the first turn reveals the field
+      const since = ((sweep - a) % TAU + TAU) % TAU, glow = REDUCED ? 0 : Math.exp(-since * 1.8);
+      ctx.globalAlpha = SON?.hl && SON.hl !== k.id ? .1 : k.base + (1 - k.base) * glow;
+      ctx.fillStyle = k.col;
+      const s = k.id === 'unread' ? dot * 2 : dot;
+      ctx.fillRect(x - s / 2, y - s / 2, s, s);
+    }
+    ctx.globalAlpha = SON?.hl && SON.hl !== 'locked' ? .2 : 1;
+    for (let j = 0; j < locked; j++) {  // what couldn't be read at all: blips on the rim, pinging
+      const a = -Math.PI / 2 + j * .35, x = R + Math.cos(a) * (R1 + 20), y = R + Math.sin(a) * (R1 + 20), p = (el * .7 + j * .3) % 1;
+      ctx.strokeStyle = `rgba(237,118,179,${(1 - p).toFixed(2)})`; ctx.beginPath(); ctx.arc(x, y, 5 + p * 11, 0, TAU); ctx.stroke();
+      ctx.fillStyle = '#ED76B3'; ctx.beginPath(); ctx.arc(x, y, 4.5, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    if (SON) SON.raf = REDUCED || document.hidden ? 0 : requestAnimationFrame(frame);
+  };
+  SON = { raf: 0, hl: null, cats, total, R, R0, R1, frame };
+  SON.raf = requestAnimationFrame(frame);
+  $('#sleg').innerHTML = cats.filter(k => k.n).map(k => `<button class="sl" data-cat="${k.id}"><i style="background:${k.col}"></i><b>${k.n.toLocaleString()}</b><span>${k.label}</span></button>`).join('')
+    + (locked ? `<button class="sl" data-cat="locked"><i class="lk"></i><b>${locked}</b><span>${locked === 1 ? 'MCP server' : 'MCP servers'} it couldn’t read at all</span></button>` : '');
+}
+document.addEventListener('visibilitychange', () => { if (SON && !SON.raf && !document.hidden && !REDUCED) SON.raf = requestAnimationFrame(SON.frame); });
+$('#p-blind').addEventListener('pointermove', e => {
+  if (!SON || e.target.id !== 'sonar') return;
+  const r = e.target.getBoundingClientRect(), d = Math.hypot(e.clientX - r.left - SON.R, e.clientY - r.top - SON.R);
+  if (d < SON.R0 - 9 || d > SON.R1 + 10) { SON.hl = null; if (popFor?.sonar) hidePop(); return; }
+  const at = SON.total * Math.min(1, Math.max(0, (d - SON.R0) / (SON.R1 - SON.R0))) ** 2;
+  let acc = 0; const k = SON.cats.find(x => x.n && (acc += x.n) >= at) || SON.cats.filter(x => x.n).at(-1);
+  if (!k) return;
+  SON.hl = k.id;
+  showPop({ sonar: true, getBoundingClientRect: () => ({ left: e.clientX, right: e.clientX, top: e.clientY, bottom: e.clientY, width: 0, height: 0 }) }, { t: `${k.n.toLocaleString()} ${k.n === 1 ? 'file' : 'files'}`, b: `<span>${cap1(k.label)}.</span>` });
+});
+$('#p-blind').addEventListener('pointerout', e => { if (e.target.id === 'sonar' && SON) { SON.hl = null; if (popFor?.sonar) hidePop(); } const s = e.target.closest?.('.sl'); if (s && SON && !s.contains(e.relatedTarget)) SON.hl = null; });
+$('#p-blind').addEventListener('pointerover', e => { const s = e.target.closest?.('.sl'); if (s && SON) SON.hl = s.dataset.cat; });
+
+// ---------- the voyage: how it works, as one trip from your port, past the lighthouse, into the morning ----------
+function voyage() {
+  const el = $('#voyage'), v = S.v, p = baseName(projOf()) || 'your project', sc = sched(), watching = !!S.watch;
+  const sig = [v, p, sc?.at, watching, G.length, G.filter(i => i.approved).length].join('|');
+  if (el.dataset.sig === sig) return;
+  el.dataset.sig = sig;
+  const open = G.filter(i => !i.approved && needs(i)), word = { hold: 'Held in port', review: 'Ready after a glance', clear: 'Cleared to sail' }[v] ?? 'Your verdict';
+  const flag = { hold: '#ED76B3', review: '#F6B84D', clear: '#60C99A' }[v] ?? '#F4D58A';
+  // her cargo: the most telling containers aboard, grey until the lighthouse has read them
+  const rank = i => ({ hold: 4, glance: 3, cleared: 2, notable: 1, quiet: 0 })[stateOf(i)];
+  const COL = { hold: '#ED76B3', glance: '#F6B84D', cleared: '#60C99A', notable: '#8396A1', quiet: '#BDD0D8' };
+  const cargo = [...G].sort((a, b) => rank(b) - rank(a)).slice(0, 8);
+  const boxes = Array.from({ length: 8 }, (_, k) => `<rect class="vc" x="${20 + (k % 4) * 15}" y="${-23 - Math.floor(k / 4) * 10}" width="14" height="9" rx="1" style="--c:${cargo[k] ? COL[stateOf(cargo[k])] : '#BDD0D8'};--k:${k}"/>`).join('');
+  const stars = Array.from({ length: 24 }, (_, k) => `<circle cx="${420 + (k * 97) % 430}" cy="${14 + (k * 53) % 120}" r="${k % 4 ? .9 : 1.5}" style="--n:${k}"/>`).join('');
+  el.className = `voyage${watching ? ' watch' : ''}`;
+  el.innerHTML = `<svg viewBox="0 0 1200 250" role="img" aria-label="Your project leaves port, the lighthouse reads everything aboard overnight, and the verdict is waiting in the morning">
+    <defs><linearGradient id="vsky" x1="0" x2="1"><stop offset="0" stop-color="#F3DDBB"/><stop offset=".2" stop-color="#8FA9BF"/><stop offset=".36" stop-color="#1B3149"/><stop offset=".5" stop-color="#0B1C26"/><stop offset=".64" stop-color="#1B3149"/><stop offset=".8" stop-color="#E7C29C"/><stop offset="1" stop-color="#F4EEDF"/></linearGradient>
+      <linearGradient id="vsea" x1="0" x2="1"><stop offset="0" stop-color="#7FA4B6"/><stop offset=".5" stop-color="#0E2936"/><stop offset="1" stop-color="#8CB7C6"/></linearGradient>
+      <radialGradient id="vsunG"><stop offset="0" stop-color="#FFE7A8"/><stop offset=".55" stop-color="#FFD27A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD27A" stop-opacity="0"/></radialGradient>
+      <linearGradient id="vbeamG" x1="1" x2="0"><stop offset="0" stop-color="#FFE6A6" stop-opacity=".6"/><stop offset="1" stop-color="#FFE6A6" stop-opacity="0"/></linearGradient></defs>
+    <rect width="1200" height="250" fill="url(#vsky)"/>
+    <g class="vstars">${stars}</g>
+    <path d="M600 40a15 15 0 1 0 12 23a12 12 0 1 1 -12 -23z" fill="#F2ECD8"/>
+    <g class="vsun"><circle cx="1080" cy="188" r="84" fill="url(#vsunG)"/><circle cx="1080" cy="188" r="30" fill="#FFD27A"/></g>
+    <g class="vbeamrot"><path d="M716 101 L470 62 L470 150Z" fill="url(#vbeamG)"/></g>
+    <rect y="188" width="1200" height="62" fill="url(#vsea)"/>
+    <g class="vwave"><path d="${wave(197, 2.5, 40, -40, 1260)}" fill="none" stroke="#fff" stroke-opacity=".28"/></g>
+    <path class="vroute" d="M150 222 H1060"/>
+    <g><rect x="18" y="168" width="156" height="20" fill="#3E5566"/><path d="M34 168 V122 h38 l8 -10 h52 v56Z" fill="#E8F0F2"/><rect x="62" y="140" width="34" height="28" rx="2" fill="#13232E"/>
+      <text x="84" y="134" text-anchor="middle" class="vname">${esc(short(p, 14))}</text></g>
+    <g><path d="M700 188 L707 104 H725 L732 188Z" fill="#F6FAFB"/><path d="M704 150 H728 L729.6 166 H702.4Z" fill="#13232E"/><path d="M706.4 122 H725.6 L726.3 132 H705.7Z" fill="#13232E"/>
+      <rect x="704" y="96" width="24" height="10" rx="2" fill="#F4D58A" class="vlamp"/><path d="M702 96 L716 84 L730 96Z" fill="#13232E"/></g>
+    <g class="vcard"><rect x="930" y="36" width="196" height="80" rx="12" fill="#FBFDFE"/><circle cx="956" cy="66" r="7" fill="${flag}"/><text x="972" y="72" class="vword">${esc(word)}</text>
+      <text x="948" y="98" class="vsub">${G.length ? (open.length ? `${pl(open.length, 'thing')} to review` : 'Nothing to review') : 'After the first watch'}</text></g>
+    <g class="vship"><g transform="translate(150 214)"><g class="vbob">
+      ${boxes}
+      <path d="M0 -12 H86 L94 -16 Q92 -2 84 6 H10 Q2 2 0 -6Z" fill="#13232E"/><path d="M4 -12 V-30 a2 2 0 0 1 2 -2 H16 a2 2 0 0 1 2 2 V-12Z" fill="#E8F0F2"/>
+      <rect x="10" y="-44" width="1.6" height="13" fill="#13232E"/><path class="vflag" d="M11.6 -44 L22 -41 L11.6 -38Z" fill="${flag}"/></g></g></g>
+    <g class="vwp"><circle cx="170" cy="222" r="5"/><circle cx="716" cy="222" r="5"/><circle cx="1050" cy="222" r="5"/></g>
+  </svg>`;
+}
+
+// ---------- the live watch: every item it settles runs down its lane into a bucket ----------
+const LANE = { cached: 'M30 64 C130 64 150 22 250 22', rules: 'M30 64 C130 64 150 64 250 64', model: 'M30 64 C130 64 150 106 250 106' };
+const NS = 'http://www.w3.org/2000/svg';
+function flowDot(how, st) {
+  const host = $('#wflow'), d = LANE[how]; if (!host || !d) return;
+  const c = document.createElementNS(NS, 'circle'), m = document.createElementNS(NS, 'animateMotion');
+  c.setAttribute('r', st === 'hold' || st === 'glance' ? 4.4 : 3.2); c.setAttribute('class', `dot ${st}`);
+  for (const [k, v] of [['dur', '.9s'], ['fill', 'freeze'], ['path', d], ['calcMode', 'spline'], ['keyTimes', '0;1'], ['keySplines', '.4 0 .2 1'], ['begin', 'indefinite']]) m.setAttribute(k, v);
+  c.appendChild(m); host.appendChild(c); m.beginElement(); setTimeout(() => c.remove(), 1000);
+}
+
+// ---------- the schedule dial: a day round the clock; drag the ship to the hour ----------
+const dpt = (deg, r) => [110 + Math.sin(deg * Math.PI / 180) * r, 110 - Math.cos(deg * Math.PI / 180) * r];
+const darc = (a0, a1, r) => { const d = ((a1 - a0) % 360 + 360) % 360 || 359.9, [x0, y0] = dpt(a0, r), [x1, y1] = dpt(a0 + d, r); return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+const toMin = at => { const [h, m] = at.split(':').map(Number); return h * 60 + m; };
+const toAt = mins => `${String(Math.floor(mins / 60) % 24).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
+function dialHTML() {
+  const sc = sched(), at = S.dialAt || sc?.at || '03:00', mins = toMin(at), now = new Date(), nm = now.getHours() * 60 + now.getMinutes();
+  const ticks = Array.from({ length: 24 }, (_, k) => { const [a, b] = dpt(k * 15, 74), [c, d] = dpt(k * 15, k % 6 ? 79 : 83); return `<line class="tick${k % 6 ? '' : ' major'}" x1="${a.toFixed(1)}" y1="${b.toFixed(1)}" x2="${c.toFixed(1)}" y2="${d.toFixed(1)}"/>`; }).join('');
+  const lbl = [[0, '12 AM'], [90, '6 AM'], [180, '12 PM'], [270, '6 PM']].map(([a, t]) => { const [x, y] = dpt(a, 62); return `<text class="lbl" x="${x.toFixed(1)}" y="${(y + 3.5).toFixed(1)}">${t}</text>`; }).join('');
+  const hrs = Math.round(((mins - nm + 1440) % 1440) / 6) / 10, [mx, my] = dpt(0, 92), [sx, sy] = dpt(180, 92), [nx, ny] = dpt(nm / 4, 104);
+  return `<svg class="dial${sc?.at ? '' : ' off'}" id="dial" viewBox="0 0 220 220" role="slider" tabindex="0" aria-label="Time of the nightly watch" aria-valuemin="0" aria-valuemax="1425" aria-valuenow="${mins}" aria-valuetext="${hm(nextAt(at))}">
+    <path class="day" d="${darc(97.5, 285, 92)}"/><path class="night" d="${darc(285, 97.5, 92)}"/>
+    ${sc?.at ? `<path class="until" d="${darc(nm / 4, mins / 4, 104)}"/>` : ''}
+    ${ticks}${lbl}
+    <circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="5.5" fill="#F6B84D"/>
+    <path transform="translate(${mx.toFixed(1)} ${my.toFixed(1)})" d="M-2 -5a5.5 5.5 0 1 0 6 8a4.5 4.5 0 1 1 -6 -8z" fill="#F2ECD8"/>
+    <circle class="nowdot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="3.5"><title>Now</title></circle>
+    <g class="hand" style="transform:rotate(${mins / 4}deg)"><circle class="knob" cx="110" cy="18" r="13"/><path d="M103 20h14l-2.5 4h-9z M108 13.5h4v6h-4z" fill="#fff"/></g>
+    <text class="tt" x="110" y="112" id="dialt">${hm(nextAt(at))}</text>
+    <text class="ts" x="110" y="131" id="dials">${sc?.at ? `in ${hrs} h` : 'drag to turn on'}</text>
+  </svg>`;
+}
+// the four themes' little harbours, so you choose by looking
+const thumbSVG = t => {
+  const [a, b] = { system: ['#E3EFF2', '#0B1C26'], light: ['#E3EFF2', '#E3EFF2'], dark: ['#0B1C26', '#0B1C26'] }[t];
+  const s1 = t === 'dark' ? '#0E2936' : '#9FC8D7', s2 = t === 'light' ? '#9FC8D7' : '#0E2936';
+  return `<svg viewBox="0 0 120 64" aria-hidden="true"><defs><linearGradient id="th-${t}" x1="0" x2="1"><stop offset=".5" stop-color="${a}"/><stop offset=".5" stop-color="${b}"/></linearGradient><linearGradient id="ts-${t}" x1="0" x2="1"><stop offset=".5" stop-color="${s1}"/><stop offset=".5" stop-color="${s2}"/></linearGradient></defs>
+    <rect width="120" height="64" fill="url(#th-${t})"/><rect y="46" width="120" height="18" fill="url(#ts-${t})"/><path d="M18 46h56l-6 8H24z" fill="#13232E"/>
+    <rect x="26" y="38" width="10" height="8" rx="1" fill="#EB9F2C"/><rect x="38" y="38" width="10" height="8" rx="1" fill="#A92172"/><rect x="50" y="38" width="10" height="8" rx="1" fill="#BDD0D8"/>
+    <rect x="97" y="22" width="6" height="24" fill="#F6FAFB"/><circle cx="100" cy="20" r="3.4" fill="#F4D58A"/></svg>`;
+};
+
+// ---------- the chart under everything: depth contours and soundings ----------
+function chartBg() {
+  let s = 11; const rnd = () => (s = s * 16807 % 2147483647) / 2147483647;
+  const blob = (cx, cy, r) => {
+    const n = 30, pts = Array.from({ length: n }, (_, k) => { const a = k / n * Math.PI * 2, w = 1 + .16 * Math.sin(a * 3 + cx * .01) + .08 * Math.cos(a * 5 + cy * .02); return [cx + Math.cos(a) * r * w, cy + Math.sin(a) * r * w * .6]; });
+    const mid = k => { const p = pts[k % n], q = pts[(k + 1) % n]; return `${((p[0] + q[0]) / 2).toFixed(1)} ${((p[1] + q[1]) / 2).toFixed(1)}`; };
+    let d = `M${mid(n - 1)}`; for (let k = 0; k < n; k++) d += ` Q${pts[k][0].toFixed(1)} ${pts[k][1].toFixed(1)} ${mid(k)}`;
+    return d + 'Z';
+  };
+  const isles = [[1320, 180, [50, 100, 160, 230, 310, 400]], [180, 860, [70, 140, 220, 310]], [760, 1120, [120, 220, 330]]];
+  const paths = isles.flatMap(([x, y, rs]) => rs.map((r, k) => `<path${k % 2 ? ' class="deep"' : ''} d="${blob(x, y, r)}"/>`)).join('');
+  const nums = Array.from({ length: 34 }, () => `<text x="${(rnd() * 1600).toFixed(0)}" y="${(rnd() * 1000).toFixed(0)}">${Math.floor(rnd() * 28) + 2}</text>`).join('');
+  document.body.insertAdjacentHTML('afterbegin', `<svg class="chartbg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g>${paths}${nums}</g></svg>`);
 }
 
 // ---------- review: the queue on the left, the inspector on the right ----------
@@ -1532,7 +2069,7 @@ function review() {
   if (!open.some(i => i.fp === S.sel)) S.sel = open[0].fp;
   $('#queue').innerHTML = '<span class="qsel" id="qsel"></span>' + open.map((i, k) => {
     const fs = i.findings.filter(needs);
-    return `<button class="qc${i.fp === S.sel ? ' sel' : ''}" data-fp="${esc(i.fp)}" style="--i:${k}"><span class="pip ${stateOf(i)}"></span>
+    return `<button class="qc ${stateOf(i)}${i.fp === S.sel ? ' sel' : ''}" data-fp="${esc(i.fp)}" style="--i:${k}"><span class="pip ${stateOf(i)}"></span>
       <span class="qm"><span class="qn">${esc(label(i))}</span><span class="qs">${fs[0] ? sayHTML(fs[0]) : ''}</span></span><span class="qk">${KIND[i.kind]}</span></button>`;
   }).join('');
   if (wide()) showInsp(open.find(i => i.fp === S.sel), false);
@@ -1624,19 +2161,20 @@ function filters() {
   const n = k => k === 'all' ? G.length : G.filter(i => i.kind === k).length;
   $('#filters').innerHTML = '<span class="thumb"></span>' + FILTERS.filter(([k]) => n(k)).map(([k, l]) => `<button data-f="${k}" aria-pressed="${S.filter === k}">${l}<b>${n(k)}</b></button>`).join('');
   $$('#filters button').forEach(b => b.onclick = () => setFilter(b.dataset.f));
-  thumb();
+  thumb(); viewSeg();
 }
 function thumb() {
   const on = $(`#filters button[data-f="${S.filter}"]`), th = $('#filters .thumb');
   if (on && th) { th.style.width = on.offsetWidth + 'px'; th.style.transform = `translateX(${on.offsetLeft}px)`; }
 }
-function setFilter(f) { S.filter = f; S.shown = 60; $$('#filters button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === f)); thumb(); table(true); }
+function setFilter(f) { S.filter = f; S.shown = 60; $$('#filters button').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === f)); thumb(); table(true); powerMap(); }
 // what the code can touch, as filters with counts: the project's power signature, readable at a glance
 function powers() {
   const sig = TOUCH.map(t => [t, G.filter(i => touches(i, t)).length]).filter(([, n]) => n);
   $('#powers').innerHTML = sig.length ? `<span>Can touch${info('touch')}</span>` + sig.map(([t, n]) => `<button class="pw" data-cap="${t[0]}" aria-pressed="${S.cap === t[0]}">${IC[t[0]]}${t[1]}<b>${n}</b></button>`).join('') : '';
+  powerMap();
 }
-$('#powers').addEventListener('click', e => { const b = e.target.closest('.pw'); if (!b) return; S.cap = S.cap === b.dataset.cap ? null : b.dataset.cap; S.shown = 60; $$('#powers .pw').forEach(x => x.setAttribute('aria-pressed', x.dataset.cap === S.cap)); table(true); });
+$('#powers').addEventListener('click', e => { const b = e.target.closest('.pw'); if (!b) return; S.cap = S.cap === b.dataset.cap ? null : b.dataset.cap; S.shown = 60; $$('#powers .pw').forEach(x => x.setAttribute('aria-pressed', x.dataset.cap === S.cap)); table(true); powerMap(); });
 const GROUPS = [['hold', 'Held', 'Does more than it says'], ['glance', 'Worth a glance', 'A look before you ship'], ['cleared', 'Cleared by you', 'Open one to take it back'], ['notable', 'Noted', 'Uses a power you’d expect from it'], ['quiet', 'Fine', 'Nothing to look at']];
 const marked = (t, q) => { if (!q) return esc(t); const k = t.toLowerCase().indexOf(q); return k < 0 ? esc(t) : esc(t.slice(0, k)) + `<mark>${esc(t.slice(k, k + q.length))}</mark>` + esc(t.slice(k + q.length)); };
 function mrow(i, k, q, anim) {
@@ -1655,7 +2193,7 @@ function table(anim = false) {
   $('#table').innerHTML = GROUPS.map(([st, name, hint]) => {
     const rows = list.filter(i => stateOf(i) === st); if (!rows.length) return '';
     const lim = st === 'quiet' ? S.shown : rows.length;
-    return `<div class="mg ${st}"><div class="mgh"><span class="pip ${st}"></span><b>${name}</b><span class="n">${rows.length}</span><span class="k">${hint}</span></div>${rows.slice(0, lim).map(i => mrow(i, k++, q, anim)).join('')}
+    return `<div class="mg ${st}"><div class="mgh"><span class="pip ${st}"></span><b>${name}</b><span class="n">${rows.length}</span><span class="k">${hint}</span></div>${S.view === 'yard' ? `<div class="yard">${rows.slice(0, lim).map(i => ctTile(i, k++, q, anim)).join('')}</div>` : rows.slice(0, lim).map(i => mrow(i, k++, q, anim)).join('')}
       ${rows.length > lim ? `<button class="more" data-more>Show ${Math.min(120, rows.length - lim)} more of ${rows.length - lim}</button>` : ''}</div>`;
   }).join('');
 }
@@ -1685,18 +2223,20 @@ function blind() {
   notes.push({ ic: 'eyeoff', t: 'Anything that only exists while a program runs', w: 'slowship reads code; it never runs it. Code fetched or built at runtime can’t be seen.' });
   const c = coverage();
   $('#p-blind').innerHTML = `<div class="ph"><div><h2>What it couldn’t read</h2><p class="lede">An honest watch says where it didn’t look. No findings is not proof of nothing.</p></div></div>
-    <div class="cover"><div class="covl"><span class="covn" id="covn">0%</span><p>of the code that runs was read: <b>${c.read.toLocaleString()} of ${c.code.toLocaleString()}</b> files across ${pl(G.length, 'thing')}.</p><div class="covbar"><i id="covbar"></i></div></div>
+    <div class="cover"><div class="covl"><div class="sonarbox"><canvas id="sonar" role="img" aria-label="Every file the watch found, as points on a sonar: read, read line by line, not read, and test files left out"></canvas><div class="sonarc"><span class="covn" id="covn">0%</span><small>of the code that runs was read</small></div></div>
+      <div class="sleg" id="sleg"></div><p><b>${c.read.toLocaleString()} of ${c.code.toLocaleString()}</b> files across ${pl(G.length, 'thing')}. Point at the sonar to see what each ring is.</p></div>
       <ul class="notes">${notes.map((n, k) => `<li style="--i:${k}">${IC[n.ic]}<div><b>${esc(n.t)}</b><p>${esc(n.w)}</p>${n.src ? crumb(n.src) : ''}</div></li>`).join('')}</ul></div>`;
 }
 // opening the tab counts the coverage up and fills its bar
 function blindOpen() {
-  const c = coverage(), n = $('#covn'), b = $('#covbar'); if (!n) return;
+  const c = coverage(), n = $('#covn'); if (!n) return;
   n.dataset.v = 0; tween(n, c.pct * 100, x => `${x.toFixed(c.pct < 1 && c.pct > .999 ? 2 : 1)}%`, 1400);
-  b.style.width = '0'; requestAnimationFrame(() => requestAnimationFrame(() => { b.style.width = `${c.pct * 100}%`; }));
+  requestAnimationFrame(sonarStart);
 }
 
 // ---------- how it works: three steps, each with what is true right now ----------
 function how() {
+  voyage();
   const r = S.run && !S.run.empty ? S.run : null, sc = sched(), st = r?.stats || {}, p = projOf();
   const d = r?.finished ? new Date(r.finished) : null, m = r?.model ? modelName() : null, open = G.filter(i => !i.approved && needs(i)).length;
   $('#route').innerHTML = `
@@ -1727,13 +2267,12 @@ function settingsHTML() {
     <p class="shelp" style="margin-top:8px">Packages come from this project’s lockfile. Skills and MCP servers come from this computer, so they’re the same for every project.</p>
   </section>
   <section class="sgrp" id="sg-schedule" style="--i:${g++}"><h3>Schedule</h3>
-    <div class="srow"><div><b>Read every night</b><small>Your computer’s own scheduler wakes slowship, even with this page closed. If the laptop was asleep, it runs when it wakes.</small></div><button class="sw2" role="switch" aria-checked="${!!sc?.at}" data-night aria-label="Read every night"><i></i></button></div>
-    <div class="srow${sc?.at ? '' : ' dim'}"><div><b>At</b><small>${sc?.at ? `Next: ${nextLabel(sc.at)}` : 'Turn the nightly watch on to pick a time.'}</small></div><input type="time" id="nat" value="${esc(sc?.at || '03:00')}" aria-label="Time of the nightly watch"></div>
+    <div class="dialrow">${dialHTML()}<div class="dialside">
+      <div class="srow"><div><b>Read every night</b><small>Drag the ship round the clock to pick the hour. Your computer’s own scheduler wakes slowship, even with this page closed.</small></div><button class="sw2" role="switch" aria-checked="${!!sc?.at}" data-night aria-label="Read every night"><i></i></button></div>
+      <p class="shelp">${sc?.at ? `Next watch: <b>${nextLabel(sc.at)}</b>. If the laptop is asleep then, it runs when it wakes.` : 'Off. slowship only reads when you press Run now.'}</p></div></div>
   </section>
   <section class="sgrp" style="--i:${g++}"><h3>What to read</h3>
-    <div class="srow"><div><b>Packages</b><small>Everything in the project’s <code class="ic">package-lock.json</code>.</small></div>${sw('packages', o.packages !== false, 'Read packages')}</div>
-    <div class="srow"><div><b>Agent skills and MCP servers</b><small>The skill folders and editor settings your AI coding agents use on this computer.</small></div>${sw('agents', o.agents !== false, 'Read agent skills and MCP servers')}</div>
-    <div class="srow"><div><b>Download npx MCP servers to read them</b><small>Into a quarantine folder, never run. Off means fully offline; those servers are listed as unread.</small></div>${sw('fetch', o.fetch !== false, 'Download npx MCP servers')}</div>
+    <div class="rcards">${[['packages', 'Packages', 'From the project’s lockfile', KICON.npm], ['agents', 'Skills and MCP', 'Shared by this computer', KICON.skill], ['fetch', 'Fetch npx servers', 'To read them. Never run', KICON.mcp]].map(([k, t, s, ic]) => `<button class="rcard" data-opt="${k}" aria-pressed="${o[k] !== false}"><span class="led"></span><span class="ill">${ic}</span><b>${t}</b><small>${s}</small></button>`).join('')}</div>
     <div class="srow"><div><b>Your build folder</b>${o.app ? crumb(o.app) : '<small>Optional. Point it at your dist/ or app folder to check for keys, debug switches and risky Electron settings.</small>'}</div>
       <button class="btn sm" data-browse="app">${o.app ? 'Change…' : 'Choose…'}</button>${o.app ? '<button class="btn sm" data-noapp>Remove</button>' : ''}</div>
   </section>
@@ -1741,7 +2280,7 @@ function settingsHTML() {
     <div class="srow"><div><b>Second opinion from ${m}</b><small>A small model on this laptop compares what code does with what it says. Off: rules only. Faster, but more to glance at.</small></div>${sw('model', o.model !== false, 'Use the local model')}</div>
   </section>
   <section class="sgrp" style="--i:${g++}"><h3>Appearance</h3>
-    <div class="srow"><div><b>Theme</b><small>Auto follows your system.</small></div><div class="seg" id="themeseg"><span class="thumb"></span>${[['system', 'Auto'], ['light', 'Day'], ['dark', 'Night']].map(([t, l]) => `<button data-theme="${t}" aria-pressed="${theme === t}">${l}</button>`).join('')}</div></div>
+    <div class="themes">${[['system', 'Auto'], ['light', 'Day'], ['dark', 'Night']].map(([t, l]) => `<button class="thm" data-theme="${t}" aria-pressed="${theme === t}">${thumbSVG(t)}<span>${l}</span></button>`).join('')}</div>
     <div class="srow"><div><b>The tour</b><small>A 30-second walk through this page.</small></div><button class="btn sm" data-tour>Take the tour</button></div>
   </section>`;
 }
@@ -1772,7 +2311,7 @@ async function saveSetting(body, el) {
 async function setNightly(body) {
   try {
     const s = await api('/api/schedule', body);
-    S.settings = { ...(S.settings || {}), schedule: s.off ? null : s }; saved();
+    S.settings = { ...(S.settings || {}), schedule: s.off ? null : s }; S.dialAt = null; saved();
     toast(s.off ? 'The nightly watch is off.' : `slowship will read <b>${esc(baseName(s.project))}</b> every night at <b>${esc(s.at)}</b>.`);
   } catch (e) { toast(`Couldn’t change the nightly watch: ${esc(e.message)}`); }
   bar(); how(); renderSettings();
@@ -1780,15 +2319,32 @@ async function setNightly(body) {
 SET.addEventListener('click', e => {
   if (e.target.closest('[data-sclose]')) return closeSettings();
   const o = e.target.closest('[data-opt]');
-  if (o) { const on = o.getAttribute('aria-checked') !== 'true'; o.setAttribute('aria-checked', on); return saveSetting({ [o.dataset.opt]: on }, o); }  // the switch moves at once; the server confirms
+  if (o) { const a = o.hasAttribute('aria-pressed') ? 'aria-pressed' : 'aria-checked', on = o.getAttribute(a) !== 'true'; o.setAttribute(a, on); return saveSetting({ [o.dataset.opt]: on }, o); }  // it moves at once; the server confirms
   const n = e.target.closest('[data-night]');
-  if (n) { const on = n.getAttribute('aria-checked') !== 'true'; n.setAttribute('aria-checked', on); return setNightly(on ? { at: $('#nat').value || '03:00' } : { on: false }); }
+  if (n) { const on = n.getAttribute('aria-checked') !== 'true'; n.setAttribute('aria-checked', on); $('#dial')?.classList.toggle('off', !on); return setNightly(on ? { at: S.dialAt || sched()?.at || '03:00' } : { on: false }); }
   if (e.target.closest('[data-noapp]')) return saveSetting({ app: null });
   const th = e.target.closest('[data-theme]');
-  if (th) { setTheme(th.dataset.theme, th); $$('#themeseg button').forEach(b => b.setAttribute('aria-pressed', b === th)); themeThumb(); return; }
+  if (th) { setTheme(th.dataset.theme, th); $$('[data-theme]').forEach(b => b.setAttribute('aria-pressed', b === th)); return; }
   if (e.target.closest('[data-tour]')) { closeSettings(); setTimeout(() => tourGo(0), 450); return; }
   const p = e.target.closest('[data-pick]')?.dataset.pick;
   if (p) { closeSettings(); startWatch(p, baseName(p)); }
+});
+// the dial: drag the ship round, or use the arrow keys; letting go sets the nightly watch
+const dialMin = e => { const r = $('#dial').getBoundingClientRect(); let deg = Math.atan2(e.clientX - r.left - r.width / 2, -(e.clientY - r.top - r.height / 2)) * 180 / Math.PI; if (deg < 0) deg += 360; return Math.round(deg * 4 / 15) * 15 % 1440; };
+function dialShow(m) {
+  S.dialAt = toAt(m);
+  const d = $('#dial'); if (!d) return;
+  d.querySelector('.hand').style.transform = `rotate(${m / 4}deg)`; $('#dialt').textContent = hm(nextAt(S.dialAt)); d.setAttribute('aria-valuenow', m); d.setAttribute('aria-valuetext', hm(nextAt(S.dialAt)));
+}
+let dialT;
+SET.addEventListener('pointerdown', e => { const d = e.target.closest('#dial'); if (!d) return; e.preventDefault(); d.setPointerCapture(e.pointerId); d.classList.add('drag'); dialShow(dialMin(e)); });
+SET.addEventListener('pointermove', e => { if ($('#dial')?.classList.contains('drag')) dialShow(dialMin(e)); });
+SET.addEventListener('pointerup', e => { const d = $('#dial'); if (!d?.classList.contains('drag')) return; d.classList.remove('drag'); setNightly({ at: S.dialAt }); });
+SET.addEventListener('keydown', e => {
+  if (e.target.id !== 'dial' || !/^Arrow/.test(e.key)) return;
+  e.preventDefault();
+  dialShow((toMin(S.dialAt || sched()?.at || '03:00') + (e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 15 : -15) + 1440) % 1440);
+  clearTimeout(dialT); dialT = setTimeout(() => setNightly({ at: S.dialAt }), 800);
 });
 SET.addEventListener('change', e => { if (e.target.id === 'nat' && /^\d\d:\d\d$/.test(e.target.value) && sched()?.at) setNightly({ at: e.target.value }); });
 
@@ -1935,6 +2491,7 @@ const EXPLAIN = {
   'relation-unknown': () => ({ t: 'Not compared', b: '<span>There was nothing for the model to compare, or it wasn’t sure. The rules still read every line.</span>' }),
   tabs: () => ({ t: 'Everything else, one tab at a time', b: '<span><b>Review</b> is the short list that needs you. <b>Everything aboard</b> is the full list. <b>Blind spots</b> says where the watch couldn’t look. <b>How it works</b> explains the rest.</span>' }),
   settings: () => ({ t: 'Settings', b: '<span>Switch project, turn on the nightly watch, choose what to read, add your build folder, or turn the model off. Everything saves as you change it.</span>' }),
+  xray: () => ({ t: 'The x-ray', b: `<span>The box is this item, and each square inside is a file it ships. Lit squares are where something was found; point at one for its name.</span><span>Wires run from those files to what that code can do. <b>≠</b> means ${modelName()} found the description doesn’t call for it, <b>=</b> means it does.</span><span>Pick a power to jump to its code.</span>` }),
 };
 const pop = $('#pop');
 let popFor = null, popPinned = false, popT;
@@ -2000,7 +2557,8 @@ function tourGo(n) {
 function tourEnd() { tour = -1; document.body.classList.remove('touring'); try { localStorage.setItem('slowship-tour-3', '1'); } catch {} }
 $('#tourcard').addEventListener('click', e => { const t = e.target.closest('[data-t]')?.dataset.t; if (t === 'next') tourGo(tour + 1); else if (t === 'back') tourGo(tour - 1); else if (t === 'end') tourEnd(); });
 $('#help').onclick = () => tourGo(0);
-addEventListener('resize', () => { if (tour >= 0) tourGo(tour); thumbTo(); thumb(); moveSel(); });
+let rsT;
+addEventListener('resize', () => { if (tour >= 0) tourGo(tour); thumbTo(); thumb(); segThumb($('#viewseg')); moveSel(); clearTimeout(rsT); rsT = setTimeout(() => { if (S.tab === 'blind') sonarStart(); }, 250); });
 
 // ---------- the watch, live: the run button becomes the watch, and a panel shows the work as it happens ----------
 const RUN = $('#again'), WP = $('#wpanel');
@@ -2028,10 +2586,14 @@ function runState(state, w) {
 function ping() { if (REDUCED) return; for (let k = 0; k < 2; k++) setTimeout(() => { const el = document.createElement('span'); el.className = 'ping'; RUN.parentElement.appendChild(el); setTimeout(() => el.remove(), 1100); }, k * 200); }
 // the panel is built once and then only its moving parts change, so new rows slide in
 function panelSkeleton() {
-  WP.innerHTML = `<div class="wph"><i class="live"></i><b id="wpk">Watching now</b><span class="sp"></span><span class="mono" id="wpt">0:00</span><button class="wpx" data-wpclose aria-label="Close">${IC.x}</button></div>
+  WP.innerHTML = `<div class="wph"><i class="live"></i><b id="wpk">Watching now</b><span class="flagchip" id="wpflag" hidden></span><span class="sp"></span><span class="mono" id="wpt">0:00</span><button class="wpx" data-wpclose aria-label="Close">${IC.x}</button></div>
     <div class="wpnow">${miniFace('reading')}<p id="wpnow"></p></div>
     <div class="wpbar"><i id="wpbar" style="width:0"></i></div><div class="wpcount"><span id="wpc">…</span><span id="wpp">0%</span></div>
-    <div class="wpipe">${Object.entries(HOW).map(([k, [l, tip]]) => `<div class="wps" id="wps-${k}" title="${tip}"><b id="wpn-${k}">0</b><small>${k === 'model' ? `asked ${modelName()}` : l}</small></div>`).join('')}</div>
+    <svg class="wflow" id="wflow" viewBox="0 0 368 128" aria-hidden="true">
+      <g class="src"><rect x="6" y="38" width="24" height="52" rx="5"/><rect class="sc1" x="10" y="44" width="16" height="9" rx="1.5"/><rect class="sc2" x="10" y="56" width="16" height="9" rx="1.5"/><rect class="sc3" x="10" y="68" width="16" height="9" rx="1.5"/></g>
+      ${Object.values(LANE).map(d => `<path class="lane" d="${d}"/>`).join('')}
+      ${['cached', 'rules', 'model'].map((k, j) => `<g class="bk" id="bk-${k}" transform="translate(250 ${6 + j * 42})"><title>${HOW[k][1]}</title><rect class="bg" width="112" height="32" rx="9"/><rect class="fill" id="bf-${k}" height="32" rx="9" style="width:0"/><text class="n" id="wpn-${k}" x="12" y="21.5">0</text><text class="l" x="46" y="20.5">${k === 'model' ? `asked ${modelName()}` : HOW[k][0]}</text></g>`).join('')}
+    </svg>
     <div class="wplog" id="wplog" aria-live="off"></div><div class="wpdone" id="wpdone" hidden></div>`;
   lastN = 0;
 }
@@ -2048,15 +2610,20 @@ function panelUpdate(w) {
   $('#wpbar').style.width = (done ? 100 : pct) + '%';
   $('#wpc').textContent = w.total ? `${w.done} of ${w.total}` : 'Counting…';
   $('#wpp').textContent = `${done ? 100 : pct}%`;
-  for (const k of Object.keys(HOW)) {
+  const tot = Math.max(1, w.total || 0);
+  for (const k of ['cached', 'rules', 'model']) {
     const el = $(`#wpn-${k}`), v = String(w.counts?.[k] ?? 0);
-    if (el.textContent !== v) { el.textContent = v; const box = $(`#wps-${k}`); box.classList.remove('bump'); void box.offsetWidth; box.classList.add('bump'); setTimeout(() => box.classList.remove('bump'), 400); }
+    $(`#bf-${k}`).style.width = `${(112 * (+v / tot)).toFixed(1)}px`;
+    if (el.textContent !== v) { el.textContent = v; const b = $(`#bk-${k}`); b.classList.remove('bump'); void b.getBoundingClientRect(); b.classList.add('bump'); }
   }
+  const fl = w.counts?.flagged ?? 0, fc = $('#wpflag');
+  if (fc && fc.dataset.n !== String(fl)) { fc.dataset.n = fl; fc.hidden = !fl; fc.textContent = `${fl} flagged`; fc.classList.remove('bump'); void fc.offsetWidth; fc.classList.add('bump'); }
   const fresh = (w.log || []).filter(l => l.n > lastN).reverse(), log = $('#wplog');
-  for (const l of fresh) {
+  fresh.forEach((l, k) => {
     const st = l.level === 'cleared' ? 'cleared' : { hold: 'hold', review: 'glance', notable: 'notable' }[l.level] ?? 'quiet';
     log.insertAdjacentHTML('afterbegin', `<div class="wl new"><span class="pip ${st}"></span><span class="wln">${esc(l.name)}</span><span class="wlh">${l.how === 'model' ? `${modelName()}, ${(l.ms / 1000).toFixed(1)} s` : HOW[l.how][0]}</span></div>`);
-  }
+    if (!REDUCED && k < 10) setTimeout(() => flowDot(l.how, st), k * 80);  // each one runs down its lane
+  });
   if (fresh.length) lastN = fresh.at(-1).n;
   while (log.children.length > 9) log.lastElementChild.remove();
   const dn = $('#wpdone');
@@ -2206,11 +2773,12 @@ let theme = (() => { try { return localStorage.getItem('slowship-theme') || 'sys
 applyTheme(theme);
 function setTheme(t, from) {
   theme = t; try { localStorage.setItem('slowship-theme', t); } catch {}
-  if (!document.startViewTransition || REDUCED) return applyTheme(t);
+  if (!document.startViewTransition || REDUCED || document.hidden) return applyTheme(t);
   const r = from?.getBoundingClientRect(), root = document.documentElement;
   root.style.setProperty('--vx', `${r ? r.left + r.width / 2 : innerWidth - 60}px`); root.style.setProperty('--vy', `${r ? r.top + r.height / 2 : 30}px`);
   root.classList.add('vt-theme');
-  document.startViewTransition(() => applyTheme(t)).finished.finally(() => root.classList.remove('vt-theme'));
+  const vt = document.startViewTransition(() => applyTheme(t));
+  vt.ready.catch(() => {}); vt.finished.catch(() => {}).finally(() => root.classList.remove('vt-theme'));
 }
 
 // the skipper's eyes follow your pointer, slowly
@@ -2252,8 +2820,10 @@ $('#q').oninput = e => { S.q = e.target.value; S.shown = 60; table(true); };
 matchMedia('(min-width: 980px)').addEventListener('change', () => { if (S.run && !S.run.empty) review(); });
 
 (async () => {
+  chartBg();
   sceneInit();
   wirePeek($('#harbour'), t => t.closest?.('.c'));
+  wirePeek($('#table'), t => t.closest?.('.ct'));
   wirePeek($('#meter'), t => t.closest?.('#meter i'));
   const want = location.hash.slice(1);
   if (TABS.includes(want)) S.tab = want;
