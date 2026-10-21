@@ -1,13 +1,13 @@
 // Your own build, before it ships: secrets that slipped in, risky Electron settings, shipped source maps and .env
 // files, and (when REA is installed) REA's view of the app's structure. Your own code's network and file use is
 // your business, so it isn't listed here; this is about what you didn't mean to ship.
-import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { basename, dirname, extname, join, relative } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { basename, extname, join, relative } from 'node:path';
 import * as acorn from 'acorn';
 import * as loose from 'acorn-loose';
 import * as walk from 'acorn-walk';
-import { entropy } from './facts.js';
+import { binaryFacts, isBinary, rea } from './binary.js';
+import { entropy, fileFacts } from './facts.js';
 
 // Known secret shapes. A few are public by design (a Firebase web key), so they are notable, not hold.
 const SECRETS = [
@@ -82,40 +82,74 @@ export function electronFacts(src, file) {
   return out;
 }
 
-/** Where REA's entry script lives: SLOWSHIP_REA (the script, or a bin wrapper next to it), or a global npm install. */
-function reaScript() {
-  const env = process.env.SLOWSHIP_REA, find = 'rea-agents/scripts/rea.mjs';
-  const tries = env ? [env, join(dirname(env), '..', find)] : [];
-  if (process.env.APPDATA) tries.push(join(process.env.APPDATA, 'npm', 'node_modules', find));
-  return tries.find(p => /\.m?js$/.test(p) && existsSync(p)) ?? null;
+/** REA's view of an Electron app: its summary and graph (nodes and edges only: the semantic graph is the big part). */
+export function reaApp(path) {
+  const r = rea(['analyze-javascript-application', path, '--filter-output', 'normalized_result.summary,normalized_result.graph.nodes,normalized_result.graph.edges'], 64 << 20);
+  return r?.normalized_result ?? null;
 }
 
-/** REA's summary of an Electron app's structure, or null when REA isn't installed. Small on purpose (--filter-output). */
-export function reaSummary(path) {
-  const script = reaScript();
-  const args = ['analyze-javascript-application', path, '--format', 'json', '--filter-output', 'normalized_result.summary'];
-  const opts = { encoding: 'utf8', timeout: 300_000, maxBuffer: 8 << 20, stdio: ['ignore', 'pipe', 'ignore'] };
-  try {
-    // No shell: run REA's own JavaScript with this Node (rea.cmd on Windows is only a wrapper around it)
-    const out = script ? execFileSync(process.execPath, [script, ...args], opts) : execFileSync('rea', args, opts);
-    return JSON.parse(out).normalized_result.summary;
-  } catch { return null; }
+/** Every main-process IPC handler in REA's graph: its channel and place, whether REA saw it check the sender,
+ *  which contextBridge members lead to it (window.api.x) and which files send to it. */
+export function ipcMap(graph) {
+  const nodes = new Map(graph.nodes.map(n => [n.node_id, n])), via = new Map(), from = new Map();
+  const put = (m, k, v) => v && (m.get(k) ?? m.set(k, new Set()).get(k)).add(v);
+  for (const n of graph.nodes) for (const o of n.observations ?? [])
+    if (o.properties?.entry_kind === 'bridge-member') put(via, o.properties.channel, `window.${o.properties.entry}`);
+  for (const e of graph.edges ?? [])
+    if ((e.relation === 'invokes' || e.relation === 'sends') && e.properties?.handler_path) put(from, e.target_node_id, nodes.get(e.source_node_id)?.observations?.[0]?.label);
+  return graph.nodes.filter(n => n.kind === 'ipc-handler').map(n => {
+    const [o] = n.observations, p = o.properties, at = o.evidence?.location?.value;
+    return {
+      channel: p.channel ?? '(computed name)', op: p.operation, file: at?.source ?? null,
+      line: p.handler_location?.start.line ?? at?.start.line ?? 0, end: p.handler_location?.end.line ?? at?.end.line ?? 0,
+      checked: n.observations.some(x => x.properties?.fact_kind === 'sender-validation-candidate'),
+      via: [...(via.get(p.channel) ?? [])], from: [...(from.get(n.node_id) ?? [])],
+    };
+  });
+}
+
+// What an unchecked handler can be talked into: starting programs, running strings as code, opening a computed URL.
+const SINKS = new Map([['exec', 'starts a program'], ['code', 'runs a string as code'], ['open-external', 'opens a computed URL']]);
+
+/** A fact per unchecked handler, and the sinks inside its body when something in the renderer can reach it.
+ *  ponytail: only inline handler bodies are searched; a handler that calls a named function elsewhere isn't followed. */
+export function ipcFacts(map, root, known = []) {
+  const out = [], nodeOn = known.some(f => f.cap === 'electron-node'), files = new Map();  // a bundled main.js holds many handlers: read it once
+  const read = file => {
+    if (!files.has(file)) {
+      let src = '';
+      try { src = readFileSync(join(root, file), 'utf8'); } catch { /* REA saw it; we can't reopen it */ }
+      files.set(file, { src, facts: src ? [...fileFacts(src, file).facts, ...electronFacts(src, file)] : [] });
+    }
+    return files.get(file);
+  };
+  for (const h of map.filter(h => !h.checked)) {
+    const { src, facts } = h.file ? read(h.file) : { src: '', facts: [] };
+    const scope = `ipc:${h.channel}`, code = (src.split(/\r?\n/)[h.line - 1] || '').trim().slice(0, 160);
+    const reach = h.via.length ? `pages reach it through ${h.via.join(', ')}` : h.from.length ? `${h.from.join(', ')} sends to it` : nodeOn ? 'any page can reach it: nodeIntegration is on' : '';
+    out.push({ cap: 'ipc-unchecked', detail: `IPC handler "${h.channel}" doesn't check who sent the message${reach ? `; ${reach}` : ''}`, file: h.file ?? '(REA)', line: h.line, scope, code });
+    if (!reach || !src) continue;
+    for (const f of facts) {
+      if (!SINKS.has(f.cap) || f.line < h.line || f.line > h.end) continue;
+      out.push({ ...f, cap: 'ipc-sink', detail: `inside the "${h.channel}" handler: ${f.detail}`, scope });
+      h.does = [...new Set([...(h.does ?? []), SINKS.get(f.cap)])];  // for the map in the report
+    }
+  }
+  return out;
 }
 
 export function reaFacts(summary) {
   if (!summary) return [];
   const out = [], add = (cap, detail) => out.push({ cap, detail, file: '(REA)', line: 0, scope: 'rea#0', code: '' });
-  const ipc = summary.ipc ?? {};
-  if (ipc.main_handlers > 0 && !summary.sender_validation_observations)
-    add('ipc-unchecked', `${ipc.main_handlers} IPC handler${ipc.main_handlers === 1 ? '' : 's'} in the main process, and REA saw none check who sent the message`);
   if (summary.exposed_api_members > 0) add('bridge', `${summary.exposed_api_members} function${summary.exposed_api_members === 1 ? '' : 's'} exposed to web pages through contextBridge`);
-  if (summary.native_addon_bindings > 0) add('native', `${summary.native_addon_bindings} native addon${summary.native_addon_bindings === 1 ? '' : 's'}: compiled code slowship can't read`);
+  if (summary.native_addon_bindings > 0) add('native', `${summary.native_addon_bindings} native addon${summary.native_addon_bindings === 1 ? '' : 's'}: compiled code, read only as far as its build record`);
   return out;
 }
 
 /** Everything about a build directory (or a single file). REA only runs for directories that look like an Electron app. */
-export function appFacts(root, { rea = true } = {}) {
-  const facts = [], coverage = { files: 0, read: 0, skipped: [], errors: [] };
+export function appFacts(root, { rea: useRea = true } = {}) {
+  let facts = [];
+  const coverage = { files: 0, read: 0, skipped: [], errors: [] }, map = {};
   let electron = false;
   const visit = dir => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -127,6 +161,11 @@ export function appFacts(root, { rea = true } = {}) {
       }
       if (/^\.env(\.|$)/.test(e.name) && !/\.(example|sample|template)$/.test(e.name)) facts.push({ cap: 'env-file', detail: `${e.name} is in the build: it usually holds secrets`, file: rel, line: 0, scope: `${rel}#0`, code: '' });
       if (ext === '.map') facts.push({ cap: 'sourcemap', detail: 'ships a source map: your original source code is readable', file: rel, line: 0, scope: `${rel}#0`, code: '' });
+      if (useRea && isBinary(p)) {
+        const b = binaryFacts(p, rel);
+        facts.push(...b.facts); (map.binaries ??= []).push({ file: rel, ...b.built });
+        continue;
+      }
       if (!TEXT.has(ext)) continue;
       coverage.files++;
       if (statSync(p).size > 5_000_000) { coverage.skipped.push(`${rel} (over 5 MB)`); continue; }
@@ -140,10 +179,15 @@ export function appFacts(root, { rea = true } = {}) {
     }
   };
   statSync(root).isDirectory() ? visit(root) : facts.push(...secretFacts(readFileSync(root, 'utf8'), basename(root)));
-  if (rea && electron) {
-    const summary = reaSummary(root);
-    coverage.rea = summary ? 'read by REA' : 'REA not installed: structure checks skipped (npm i -g rea-agents)';
-    facts.push(...reaFacts(summary));
+  if (useRea && electron) {
+    const r = statSync(root).isDirectory() ? reaApp(root) : null;
+    coverage.rea = r ? 'read by REA' : 'REA not installed: structure checks skipped (npm i -g rea-agents)';
+    if (r) {
+      map.ipc = ipcMap(r.graph);
+      const ipc = ipcFacts(map.ipc, root, facts), sunk = new Set(ipc.filter(f => f.cap === 'ipc-sink').map(f => `${f.file}:${f.line}`));
+      // a sink inside a handler is shown once, as part of that handler
+      facts = [...facts.filter(f => !(f.cap === 'open-external' && sunk.has(`${f.file}:${f.line}`))), ...reaFacts(r.summary), ...ipc];
+    }
   }
-  return { facts, coverage };
+  return { facts, coverage, map: Object.keys(map).length ? map : undefined };
 }

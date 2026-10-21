@@ -31,7 +31,7 @@ export function fingerprint(dir, integrity) {
       else if (statSync(p).size < 5_000_000) h.update(p.slice(dir.length)).update(readFileSync(p));
     }
   };
-  if (existsSync(dir)) visit(dir);
+  if (existsSync(dir)) statSync(dir).isFile() ? h.update(readFileSync(dir)) : visit(dir);  // a compiled server is one file
   return `sha256-${h.digest('base64')}`;
 }
 

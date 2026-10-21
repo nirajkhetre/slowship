@@ -6,6 +6,7 @@ import { join, relative, extname } from 'node:path';
 import * as acorn from 'acorn';
 import * as loose from 'acorn-loose';
 import * as walk from 'acorn-walk';
+import { binaryFacts, isBinary } from './binary.js';
 
 // Node built-ins worth knowing about, and what importing them means.
 const MODULES = {
@@ -145,16 +146,21 @@ export function fileFacts(src, file) {
 const CODE = new Set(['.js', '.cjs', '.mjs']);
 const TESTY = /(^|\/)(test|tests|__tests__|spec|specs|example|examples|bench|benchmark|benchmarks|fixtures?|demo|docs?)\/|\.(test|spec|bench)\.[cm]?js$/;
 
-/** Facts for a whole package (or skill / app directory), plus what we couldn't read. */
+/** Facts for a whole package (or skill / app directory), plus what we couldn't read, plus what compiled files are built from. */
 export function dirFacts(root, { manifest } = {}) {
-  const facts = [], coverage = { files: 0, read: 0, skipped: [], errors: [] };
+  const facts = [], coverage = { files: 0, read: 0, skipped: [], errors: [] }, binaries = [];
   const visit = dir => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, e.name);
       if (e.isDirectory()) { if (e.name !== 'node_modules' && e.name !== '.git') visit(p); continue; }
+      const rel = relative(root, p).replaceAll('\\', '/');
+      if (isBinary(p) && !TESTY.test(rel)) {
+        const b = binaryFacts(p, rel);
+        facts.push(...b.facts); binaries.push({ file: rel, ...b.built });
+        continue;
+      }
       if (!CODE.has(extname(e.name)) || e.name.endsWith('.d.ts')) continue;
       coverage.files++;
-      const rel = relative(root, p).replaceAll('\\', '/');
       // tests, examples and benchmarks ship in many packages but never run when you use them
       if (TESTY.test(rel)) { coverage.tests = (coverage.tests || 0) + 1; continue; }
       if (statSync(p).size > MAX_BYTES) { coverage.skipped.push(`${rel} (over 2 MB)`); continue; }
@@ -168,7 +174,7 @@ export function dirFacts(root, { manifest } = {}) {
   const pkg = manifest ?? (() => { try { return JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')); } catch { return null; } })();
   for (const k of ['preinstall', 'install', 'postinstall'])
     if (pkg?.scripts?.[k]) facts.unshift({ cap: 'install-script', detail: `runs "${pkg.scripts[k]}" on install`, file: 'package.json', line: 0, scope: 'package.json#0', code: '' });
-  return { facts, coverage };
+  return { facts, coverage, map: binaries.length ? { binaries } : undefined };
 }
 
 /** One fact per (capability, detail, file), with how many times it occurred: short enough for a small model.

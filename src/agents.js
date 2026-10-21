@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { gunzipSync } from 'node:zlib';
+import { binaryFacts, isBinary, reaScript } from './binary.js';
 import { dirFacts, fileFacts } from './facts.js';
 import { HOME } from './state.js';
 
@@ -88,7 +89,7 @@ export function scriptFacts(text, file) {
 
 /** All facts for a skill directory: its instructions (.md), its JS (parser) and its other scripts (line rules). */
 export function skillFacts(dir) {
-  const { facts, coverage } = dirFacts(dir, { manifest: readJson(join(dir, 'package.json')) });
+  const { facts, coverage, map } = dirFacts(dir, { manifest: readJson(join(dir, 'package.json')) });
   const visit = d => {
     for (const e of readdirSync(d, { withFileTypes: true })) {
       if (e.name === 'node_modules' || e.name === '.git') continue;
@@ -103,7 +104,13 @@ export function skillFacts(dir) {
     }
   };
   visit(dir);
-  return { facts, coverage };
+  return { facts, coverage, map };
+}
+
+/** A compiled MCP server: its build record, read by REA. Its code itself stays unread, and coverage says so. */
+export function serverBinaryFacts(file) {
+  const { facts, built } = binaryFacts(file);
+  return { facts, coverage: { files: 1, read: 0, skipped: [], errors: [], compiled: true }, map: { binaries: [{ file: basename(file), ...built }] } };
 }
 
 // ---------- MCP servers ----------
@@ -151,6 +158,9 @@ export function resolveServer(s, { fetch = true } = {}) {
   }
   if (['uvx', 'pipx', 'uv'].includes(cmd)) return { readable: false, why: 'Python package run by uvx/pipx: not fetched in this version' };
   if (cmd === 'docker' || cmd === 'podman') return { readable: false, why: 'container image: not inspected' };
+  if (s.command && existsSync(s.command) && isBinary(s.command))
+    return reaScript() ? { readable: true, binary: s.command }
+      : { readable: false, why: `${basename(s.command)} is a compiled program: install REA (npm i -g rea-agents) to see what it was built from` };
   return { readable: false, why: `${basename(s.command || '?')} is a compiled program: its source can't be read here` };
 }
 

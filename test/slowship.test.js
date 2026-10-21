@@ -1,10 +1,13 @@
 // Rules-only checks (no model needed): run with `npm test`. Fixtures are inert and never executed.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { condense, dirFacts, fileFacts } from '../src/facts.js';
 import { assess, combos, keysOf, risk } from '../src/policy.js';
 import { resolveServer, skillFacts } from '../src/agents.js';
+import { binaryFacts, reaScript } from '../src/binary.js';
 
 const FX = join(import.meta.dirname, 'fixtures');
 const verdict = ({ facts }, labels = {}) => {
@@ -84,6 +87,61 @@ test('your own build: a shipped key is held and never printed in full', async ()
   const kinds = v.findings.map(f => f.kind);
   for (const k of ['electron-open', 'secret', 'env-file', 'electron-websec-off', 'devtools', 'sourcemap']) assert.ok(kinds.includes(k), k);
   assert.ok(!JSON.stringify(r.facts).includes('AbCdEfGhIjKlMnOpQrStUvWxYz0123456789'), 'the full key must never appear');
+});
+
+const ipcGraph = () => JSON.parse(readFileSync(join(FX, 'rea', 'ipc-app.graph.json'), 'utf8'));
+
+test('IPC map: an unchecked handler a page can reach that opens a computed URL is held; a checked one is quiet', async () => {
+  const { ipcMap, ipcFacts } = await import('../src/app.js');
+  const map = ipcMap(ipcGraph()), by = Object.fromEntries(map.map(h => [h.channel, h]));
+  assert.deepEqual(Object.keys(by).sort(), ['log', 'open-link', 'read-note']);
+  assert.equal(by['read-note'].checked, true);
+  assert.deepEqual(by['open-link'].via, ['window.notes.openLink']);
+  const v = verdict({ facts: ipcFacts(map, join(FX, 'ipc-app')) });
+  assert.equal(v.level, 'hold');
+  assert.deepEqual(v.findings.map(f => f.kind), ['ipc-open', 'ipc-unchecked']);
+  assert.ok(!v.short.some(f => f.detail.includes('read-note')), 'a handler that checks its sender is not flagged');
+});
+
+test('REA, live: the recorded IPC graph still matches what REA says today', { skip: !reaScript() && 'REA not installed (set SLOWSHIP_REA)' }, async () => {
+  const { ipcMap, reaApp } = await import('../src/app.js');
+  const sort = m => m.sort((a, b) => a.channel.localeCompare(b.channel));
+  assert.deepEqual(sort(ipcMap(reaApp(join(FX, 'ipc-app')).graph)), sort(ipcMap(ipcGraph())));
+});
+
+test('a compiled Go server: its build record is read, a swapped module and a dirty build stand out', () => {
+  const asked = [], go = { normalized_result: { build_info: { go_version: 'go1.26.0', module: {
+    path: 'example.invalid/weather-mcp', main: { path: 'example.invalid/weather-mcp', version: 'v1.2.0' },
+    dependencies: [{ path: 'github.com/mark3labs/mcp-go', version: 'v0.40.0', replacement: null },
+      { path: 'golang.org/x/net', version: 'v0.44.0', replacement: { path: '../net-fork', version: null } }],
+    settings: [{ key: 'CGO_ENABLED', value: '0' }, { key: 'vcs.revision', value: 'abc123' }, { key: 'vcs.modified', value: 'true' }] } } } };
+  const r = binaryFacts('server.exe', 'server.exe', args => (asked.push(args), args[0] === 'inspect-go-binary' ? go : null));
+  assert.equal(r.built.lang, 'go');
+  assert.equal(r.built.deps.length, 2);
+  assert.deepEqual(r.facts.map(f => f.cap), ['built-from', 'swapped-dep', 'dirty-build']);
+  assert.match(r.facts[1].detail, /golang\.org\/x\/net v0\.44\.0 is swapped for \.\.\/net-fork/);
+  assert.ok(asked.every(a => a[0].startsWith('inspect-') && a.includes('--filter-output')), 'only static inspectors, always filtered');
+  assert.equal(verdict(r).level, 'notable');
+});
+
+test('a .NET assembly: P/Invoke into CreateProcess is "starts programs"; harmless imports say nothing', async () => {
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const dll = join(mkdtempSync(join(tmpdir(), 'slowship-')), 'Helper.dll');
+  writeFileSync(dll, 'MZ inert test bytes, not a real program');
+  const answers = {
+    'inspect-go-binary': { normalized_result: { build_info: null } },
+    'inspect-rust-binary': { normalized_result: { auditable_metadata: null, rustc_commit: null } },
+    'inspect-managed-artifact': { normalized_result: { classification: { status: 'managed' }, assembly: { name: 'Helper', version: '1.0.0.0' },
+      target_frameworks: ['.NETCoreApp,Version=v8.0'], references: [{ name: 'System.Runtime', version: '8.0.0.0' }] } },
+    'inspect-managed-native-boundaries': { normalized_result: { pinvoke_imports: [
+      { import_name: 'CreateProcessW', member_name: 'CreateProcess', import_scope_name: 'kernel32.dll' },
+      { import_name: 'GetTickCount64', member_name: 'Ticks', import_scope_name: 'kernel32.dll' }] } },
+  };
+  const r = binaryFacts(dll, 'Helper.dll', args => answers[args[0]]);
+  assert.equal(r.built.lang, 'dotnet');
+  assert.deepEqual(r.built.native, ['kernel32.dll']);
+  assert.deepEqual(r.facts.map(f => f.cap), ['built-from', 'exec']);
+  assert.match(r.facts[1].detail, /CreateProcess in kernel32\.dll: starts programs/);
 });
 
 test('unpacking a tarball never writes outside the quarantine folder', async () => {

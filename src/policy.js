@@ -5,7 +5,10 @@ const RISK = {
   // your own build
   secret: 3, 'secret-maybe': 2, 'secret-public': 1, 'env-file': 2, sourcemap: 1, devtools: 1, 'open-external': 1,
   'electron-node': 2, 'electron-isolation-off': 2, 'electron-sandbox-off': 1, 'electron-websec-off': 2,
-  'ipc-unchecked': 2, bridge: 0, native: 0, code: 2, exec: 2, net: 2, 'install-script': 2,
+  'ipc-unchecked': 2, 'ipc-sink': 1, bridge: 0, native: 0,
+  // compiled files, from their build record (binary.js)
+  'built-from': 0, 'swapped-dep': 1, 'dirty-build': 1, keys: 2, inject: 2, dpapi: 1,
+  code: 2, exec: 2, net: 2, 'install-script': 2,
   'fs-write': 1, 'env-secret': 1, 'secret-path': 1, 'persist-path': 1, 'dynamic-load': 1, imports: 0,
   decode: 0, 'fs-read': 0, fs: 0, os: 0, env: 0, url: 0,
 };
@@ -26,6 +29,8 @@ const COMBOS = [
     says: 'writes to a place that makes code start again on its own (shell profile, startup folder, SSH keys)' },
   { id: 'electron-open', level: 3, within: 'file', needs: [['electron-node'], ['electron-isolation-off']],
     says: 'a window with Node.js on and isolation off: any page it loads can run code on your users\' computers' },
+  { id: 'ipc-open', level: 3, within: 'scope', needs: [['ipc-unchecked'], ['ipc-sink']],
+    says: 'a page in your app can call this IPC handler, nothing checks who sent the message, and it starts programs, runs code or opens a computed URL' },
   { id: 'install-runs', level: 2, within: 'package', needs: [['install-script'], ['exec', 'net']],
     says: 'runs code at install time that downloads or starts programs' },
 ];

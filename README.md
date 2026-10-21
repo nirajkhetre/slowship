@@ -46,8 +46,9 @@ To get the model: `ollama pull gemma4:e2b`. Choose another with `SLOWSHIP_MODEL`
 |---|---|
 | **Packages** | your lockfile (`package-lock.json`), so it reads what you'll actually ship |
 | **Agent skills** | the skill folders that coding agents use, in your home folder and in the project (for example `~/.agents/skills` and `~/.codex/skills`), plugin folders included |
-| **MCP servers** | the MCP configs of the popular coding agents and editors (Cursor, VS Code, Codex and others). `npx` servers are downloaded into a quarantine folder with scripts disabled and read there; they are never started |
-| **Your build** (`--app`) | secrets that slipped in (redacted in every output), shipped `.env` files and source maps, Electron switches like `nodeIntegration` or `contextIsolation: false`, DevTools left on, and, if [REA](https://github.com/morluto/rea) is installed, IPC handlers that never check who sent the message |
+| **MCP servers** | the MCP configs of the popular coding agents and editors (Cursor, VS Code, Codex and others). `npx` servers are downloaded into a quarantine folder with scripts disabled and read there; compiled servers are read as far as their build record (see below). None are ever started |
+| **Compiled files** (with [REA](https://github.com/morluto/rea)) | Go and Rust programs and .NET assemblies, whether a compiled MCP server or a `.node`, `.exe` or `.dll` inside a package: what they were built from (modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes) and, for .NET, the native functions they declare (starting programs, raw network, keystroke hooks, writing into other programs, decrypting what Windows protects for the user) |
+| **Your build** (`--app`) | secrets that slipped in (redacted in every output), shipped `.env` files and source maps, Electron switches like `nodeIntegration` or `contextIsolation: false`, DevTools left on, and, if REA is installed, a map of every IPC handler: which page function (`window.api.x`) reaches it, whether it checks who sent the message, and what it does |
 
 ## How it works
 
@@ -56,7 +57,7 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 1. **Inventory.** Find everything aboard, in one pass, with no setup.
 2. **Memory by content.** Every item is fingerprinted. Anything whose bytes haven't changed since last time is skipped, and anything you've cleared stays cleared until its code changes.
 3. **Facts from the syntax tree.** An AST pass finds what the code can actually do: network calls, running programs, writing files, reading secrets, building code at runtime, install scripts, hidden characters. Each fact keeps its file and line.
-4. **Combinations, in code.** Some pairs mean more than their parts: a credential file read next to a network call, decoding then running code in the same function, a skill that tells your agent to keep something from you. Only these can **hold** the ship.
+4. **Combinations, in code.** Some pairs mean more than their parts: a credential file read next to a network call, decoding then running code in the same function, a skill that tells your agent to keep something from you, an IPC handler a page can reach that never checks the sender and starts programs or opens a computed URL. Only these can **hold** the ship.
 5. **Claim against behaviour, on your laptop.** For anything worth a second opinion, the local model gets the item's own description and the short fact list (marked as untrusted data) and says, fact by fact, whether the description calls for it. It must cite fact ids that exist.
 6. **Severity stays in code.** The model can move a single fact one step up or down, never past "worth a glance". Only a combination found in code can hold the ship, and the model can never lower one, so a README that tells AI scanners to approve everything gets nowhere.
 7. **The morning report.** One verdict, a short queue of what to look at, the real code around each finding, and an honest map of what couldn't be read.
@@ -67,7 +68,7 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 
 - **The verdict.** *Held in port*, *ready after a glance* or *cleared to sail*, with one button for what to do next. Your project is drawn as a ship in harbour, with one container per thing aboard. It stays moored while something is held, and sails out once everything is clear.
 - **What it read.** Where everything came from: the project's lockfile, plus the skill folders and editor settings your AI agents use on this computer, plus your build.
-- **A review list with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. Clear it and a ship takes it aboard, a painter rolls it green, and the next one comes up. Undo rewinds the scene and puts it back in the list.
+- **A review list with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. For your build there is a map of how pages reach the main process, drawn as lock gates: a handler that checks its sender shuts its gate, one that doesn't lets the current run through. Compiled files get a manifest of what they were built from. Clear it and a ship takes it aboard, a painter rolls it green, and the next one comes up. Undo rewinds the scene and puts it back in the list.
 - **A project switcher and Settings.** Switch to a recent project, or browse to any folder on this computer. Settings hold the nightly watch, what to read, your build folder, the model and the theme, and save as you change them.
 - **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run: the ship docks, a gantry scans each thing aboard, and every step from fingerprint to verdict lights up as it happens.
 
@@ -79,13 +80,25 @@ These are measured on one real project folder: the 174 dependencies of REA's own
 
 | | |
 |---|---|
-| Things found | 274 (251 distinct) |
-| Settled by rules alone | 200 |
+| Things found | 275 (252 distinct) |
+| Settled by rules alone | 202 |
 | Same bytes as another copy, read once | 23 |
-| Sent to the local model | 51, in 4 min 32 s of model time |
+| Sent to the local model | 50, in 4 min 23 s of model time |
 | Re-run with nothing changed | about 4 s |
-| Code that runs, actually read | 3,827 of 3,828 files (99.97%); 454 test and example files left out on purpose |
-| Verdict | held: the test build (an inert fixture with a fake key and risky Electron settings). 11 more worth a glance, 0 holds among real packages and skills |
+| Code that runs, actually read | 3,827 of 3,829 files (99.95%); 454 test and example files left out on purpose |
+| Compiled files read by REA | 4, about 2 to 4 s each: the MCP server (Rust, built without a crate list) and 3 native addons with no Go, Rust or .NET record |
+| Verdict | held: the test build (an inert fixture with a fake key, risky Electron settings and an IPC handler that opens any URL). 10 more worth a glance, 0 holds among real packages and skills |
+
+The model isn't repeatable bit for bit: between this run and the one before it, it moved 4 package verdicts by one step. Rules-only verdicts didn't change at all ([eval/EVAL.md](eval/EVAL.md) has more on this).
+
+Reading compiled programs installed on the same laptop (REA 6.7.0, nothing started):
+
+| File | What its build record says | Time |
+|---|---|---|
+| `ollama.exe` | Go 1.26.0, 54 modules | 1.2 s |
+| `uv.exe` | Rust, 572 crates | 2.6 s |
+| PowerShell's `System.Management.Automation.dll` | .NET, 62 references, 192 native imports, two flagged: `CreateProcess` and `CryptUnprotectData` | 5.6 s |
+| a C++ `.node` addon (node-pty) | no record: named, not read | 3.8 s |
 
 ### Against known malware
 
@@ -104,7 +117,8 @@ Put plainly: a hold is usually right (12 of 14), but it catches about one malici
 slowship reads code; it never runs it. So:
 
 - Code fetched or built while a program runs is invisible. It reports the capability ("downloads and runs code") but not the payload.
-- Compiled programs and native addons can't be read. They're listed, not guessed at.
+- Compiled code isn't decompiled. With REA installed, Go, Rust and .NET files are read as far as their build record: what they were built from, not what they do. C and C++ leave no record, so those are only named.
+- In your build, only inline IPC handler bodies are searched for what they do; a handler that hands off to a function elsewhere isn't followed.
 - Python and shell inside skills are read line by line, not with a full parser. Treat quiet there as "nothing obvious".
 - TypeScript isn't read yet, and code inside markdown code blocks isn't read as code.
 - Instructions in SKILL.md are checked for four narrow things: hiding something from you, ignoring other instructions, downloading and running a script, and sending your data somewhere. Other prompt injection passes unnoticed.
@@ -115,6 +129,7 @@ slowship reads code; it never runs it. So:
 ## Safety
 
 - **It never executes scanned code.** No `require`, no install scripts, no starting MCP servers.
+- **REA runs only its static readers** (`analyze-javascript-application`, `inspect-go-binary`, `inspect-rust-binary`, `inspect-managed-artifact`, `inspect-managed-native-boundaries`), with fixed arguments, a timeout and a cap on output. None of them loads or starts the file it reads.
 - **No shell anywhere.** Programs are started with `execFile` and fixed arguments. Package names are validated before `npm pack`, and tarballs are unpacked by our own reader, which refuses paths that try to leave the quarantine folder.
 - **The report server answers only this machine.** It checks the `Host` header (no DNS rebinding) and the `Origin`, takes JSON only, and caps request bodies.
 - **Code context is safe to serve.** The code shown around a finding is read only from inside that item's own folder, and secrets are cut down before they reach the page.
@@ -138,11 +153,11 @@ node site/record.mjs <project>   # record one real watch for the web demo (publi
 node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
-There are 15 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker and schedule quoting. The test fixtures are inert and point at `.invalid` domains.
+There are 19 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, and Go and .NET build records (from recorded REA answers). One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 
-- [REA](https://github.com/morluto/rea) (MIT) maps the structure of Electron builds.
+- [REA](https://github.com/morluto/rea) (MIT) maps the structure of Electron builds and reads the build records of compiled Go, Rust and .NET files.
 - [acorn](https://github.com/acornjs/acorn) (MIT) parses JavaScript.
 - [Ollama](https://ollama.com) and Google's Gemma 4 (under the Gemma terms) are the local model.
 - Fonts (SIL Open Font License): [Besley](https://github.com/indestructible-type/Besley) for the verdict, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else, drawn so that 0/O and 1/l/I can't be mistaken. They're bundled, so the report makes no outside requests.

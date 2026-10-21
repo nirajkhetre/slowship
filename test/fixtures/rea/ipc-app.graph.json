@@ -1,0 +1,425 @@
+{
+ "_note": "Trimmed REA 6.7.0 analyze-javascript-application graph for test/fixtures/ipc-app (nodes and edges slowship reads).",
+ "nodes": [
+  {
+   "node_id": "jag_node_0ffc3a871fd",
+   "kind": "javascript-expression",
+   "observations": [
+    {
+     "label": "notes.log",
+     "properties": {
+      "path_id": "32ba631e2fcce0f2f71d748c3042e8a65a978fe92d6c3e9c43e1b441a5f1ce4a",
+      "entry": "notes.log",
+      "entry_path": [
+       "notes",
+       "log"
+      ],
+      "entry_kind": "bridge-member",
+      "channel": "log",
+      "terminal": "electron.ipcRenderer.send",
+      "step_kind": "exposure",
+      "step_index": 0,
+      "module_key": null,
+      "module_runtime": null,
+      "conditions": [],
+      "resolution": "candidate"
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "source-range",
+        "source": "preload.js",
+        "start": {
+         "line": 4,
+         "column": 0
+        },
+        "end": {
+         "line": 8,
+         "column": 2
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_2c927770437",
+   "kind": "javascript-asset",
+   "observations": [
+    {
+     "label": "renderer.js",
+     "properties": {
+      "path": "renderer.js",
+      "bytes": 250,
+      "inventory_artifact_id": "art_fdc34ce1fd6a42a3a842c90cc82948f293361b58f086680f999f0bbccb4a782b",
+      "unpacked": false,
+      "file_kind": "javascript",
+      "text_status": "included",
+      "parse_status": "complete",
+      "json_parse_status": null,
+      "json_top_level_keys": [],
+      "omitted_json_top_level_keys": 0,
+      "vendor_markers": []
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "artifact-path",
+        "path": "renderer.js"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_37eb02e748b",
+   "kind": "ipc-handler",
+   "observations": [
+    {
+     "label": "log",
+     "properties": {
+      "side": "main",
+      "operation": "on",
+      "mode": "listen",
+      "channel": "log",
+      "channel_expression": null,
+      "handler_kind": "inline-function",
+      "handler_location": {
+       "start": {
+        "line": 18,
+        "column": 18
+       },
+       "end": {
+        "line": 18,
+        "column": 52
+       }
+      }
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "source-range",
+        "source": "main.js",
+        "start": {
+         "line": 18,
+         "column": 18
+        },
+        "end": {
+         "line": 18,
+         "column": 52
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_3e02d56afb8",
+   "kind": "ipc-handler",
+   "observations": [
+    {
+     "label": "read-note",
+     "properties": {
+      "side": "main",
+      "operation": "handle",
+      "mode": "handle",
+      "channel": "read-note",
+      "channel_expression": null,
+      "handler_kind": "inline-function",
+      "handler_location": {
+       "start": {
+        "line": 13,
+        "column": 28
+       },
+       "end": {
+        "line": 16,
+        "column": 1
+       }
+      }
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "source-range",
+        "source": "main.js",
+        "start": {
+         "line": 13,
+         "column": 28
+        },
+        "end": {
+         "line": 16,
+         "column": 1
+        }
+       }
+      }
+     }
+    },
+    {
+     "label": "sender-url validation candidate",
+     "properties": {
+      "fact_kind": "sender-validation-candidate",
+      "subject": "sender-url",
+      "mechanism": "call:startsWith",
+      "expected": {
+       "status": "literal",
+       "value": "file://",
+       "expression": null
+      },
+      "enforcement": "unknown"
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "source-range",
+        "source": "main.js",
+        "start": {
+         "line": 14,
+         "column": 7
+        },
+        "end": {
+         "line": 14,
+         "column": 50
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_52e48bb6aff",
+   "kind": "javascript-asset",
+   "observations": [
+    {
+     "label": "main.js",
+     "properties": {
+      "path": "main.js",
+      "bytes": 802,
+      "inventory_artifact_id": "art_628a4d93d680c3b2e0a0e45d4028d6f9b2e4a38019ecccfce50147735c90ae16",
+      "unpacked": false,
+      "file_kind": "javascript",
+      "text_status": "included",
+      "parse_status": "complete",
+      "json_parse_status": null,
+      "json_top_level_keys": [],
+      "omitted_json_top_level_keys": 0,
+      "vendor_markers": []
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "artifact-path",
+        "path": "main.js"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_90a95067fc1",
+   "kind": "javascript-asset",
+   "observations": [
+    {
+     "label": "preload.js",
+     "properties": {
+      "path": "preload.js",
+      "bytes": 300,
+      "inventory_artifact_id": "art_5622a914f36c645a6bd53ecd4dfe67cb574319fa02fd35ae4c302a4d1f63bc11",
+      "unpacked": false,
+      "file_kind": "javascript",
+      "text_status": "included",
+      "parse_status": "complete",
+      "json_parse_status": null,
+      "json_top_level_keys": [],
+      "omitted_json_top_level_keys": 0,
+      "vendor_markers": []
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "artifact-path",
+        "path": "preload.js"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_b0c767e9528",
+   "kind": "javascript-expression",
+   "observations": [
+    {
+     "label": "notes.openLink",
+     "properties": {
+      "path_id": "e0e5fd2de9828be561b91fa9f118d208fcf9753fc5f5ea5934346182a48fb745",
+      "entry": "notes.openLink",
+      "entry_path": [
+       "notes",
+       "openLink"
+      ],
+      "entry_kind": "bridge-member",
+      "channel": "open-link",
+      "terminal": "electron.ipcRenderer.invoke",
+      "step_kind": "exposure",
+      "step_index": 0,
+      "module_key": null,
+      "module_runtime": null,
+      "conditions": [],
+      "resolution": "candidate"
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "source-range",
+        "source": "preload.js",
+        "start": {
+         "line": 4,
+         "column": 0
+        },
+        "end": {
+         "line": 8,
+         "column": 2
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_c5b9d616110",
+   "kind": "ipc-handler",
+   "observations": [
+    {
+     "label": "open-link",
+     "properties": {
+      "side": "main",
+      "operation": "handle",
+      "mode": "handle",
+      "channel": "open-link",
+      "channel_expression": null,
+      "handler_kind": "inline-function",
+      "handler_location": {
+       "start": {
+        "line": 11,
+        "column": 28
+       },
+       "end": {
+        "line": 11,
+        "column": 67
+       }
+      }
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "source-range",
+        "source": "main.js",
+        "start": {
+         "line": 11,
+         "column": 28
+        },
+        "end": {
+         "line": 11,
+         "column": 67
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "node_id": "jag_node_f6a43aa3d6d",
+   "kind": "javascript-expression",
+   "observations": [
+    {
+     "label": "notes.read",
+     "properties": {
+      "path_id": "d8a69d095a38832f003aa81ed7e175fbe15aa3d880ef52f85c883ed651514f84",
+      "entry": "notes.read",
+      "entry_path": [
+       "notes",
+       "read"
+      ],
+      "entry_kind": "bridge-member",
+      "channel": "read-note",
+      "terminal": "electron.ipcRenderer.invoke",
+      "step_kind": "exposure",
+      "step_index": 0,
+      "module_key": null,
+      "module_runtime": null,
+      "conditions": [],
+      "resolution": "candidate"
+     },
+     "evidence": {
+      "location": {
+       "available": true,
+       "value": {
+        "kind": "source-range",
+        "source": "preload.js",
+        "start": {
+         "line": 4,
+         "column": 0
+        },
+        "end": {
+         "line": 8,
+         "column": 2
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source_node_id": "jag_node_90a95067fc1",
+   "target_node_id": "jag_node_c5b9d616110",
+   "relation": "invokes",
+   "properties": {
+    "channel": "open-link",
+    "pairing_basis": "unique-exact-literal-channel",
+    "handler_path": "main.js",
+    "handler_operation": "handle"
+   }
+  },
+  {
+   "source_node_id": "jag_node_90a95067fc1",
+   "target_node_id": "jag_node_37eb02e748b",
+   "relation": "sends",
+   "properties": {
+    "channel": "log",
+    "pairing_basis": "unique-exact-literal-channel",
+    "handler_path": "main.js",
+    "handler_operation": "on"
+   }
+  },
+  {
+   "source_node_id": "jag_node_90a95067fc1",
+   "target_node_id": "jag_node_3e02d56afb8",
+   "relation": "invokes",
+   "properties": {
+    "channel": "read-note",
+    "pairing_basis": "unique-exact-literal-channel",
+    "handler_path": "main.js",
+    "handler_operation": "handle"
+   }
+  }
+ ]
+}

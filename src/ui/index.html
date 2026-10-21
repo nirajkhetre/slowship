@@ -521,6 +521,66 @@ html.vt-theme::view-transition-new(root){animation:reveal .75s var(--io)}
 .cov svg.i{width:16px;height:16px}
 .cov b{color:var(--ink)}
 .calm2{display:flex;gap:10px;align-items:center;padding:14px 16px;border-radius:12px;background:var(--shoal);color:var(--ink2)}
+.ipc,.built{display:grid;gap:12px;min-width:0}
+.ipc>.sdl,.built>.sdl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ipc>.sdl small,.built>.sdl small{font-weight:500;color:var(--ink3)}
+.ipc>.sdl svg.i,.built>.sdl svg.i{width:15px;height:15px;align-self:center}
+
+/* the IPC map: each handler is a lane from a page to the main process, through a lock gate. A handler that checks
+   who is calling shuts its gate and the water stops there; one that doesn't lets the current run on through. */
+.lanes{display:grid;grid-template-columns:minmax(0,max-content) minmax(18px,1fr) auto minmax(18px,1fr) minmax(0,max-content);row-gap:8px}
+.lane{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:center;padding:10px 14px;border-radius:12px;background:var(--shoal);
+  --c:var(--glance);animation:rise .5s var(--out) both;animation-delay:calc(.15s + var(--i) * 80ms)}
+.lane.hold{--c:var(--hold)}.lane.ok{--c:var(--clear)}
+.lc{display:grid;gap:2px;min-width:0}
+.lc code{font:600 13px/1.35 var(--mono);overflow-wrap:anywhere}
+.lc small{font-size:12px;color:var(--ink3)}
+.lc .muted{font-size:13px}
+.lc.hd .does{font-size:13px;font-weight:700;color:var(--hold-ink)}
+.w{height:2px;margin:0 2px;background:repeating-linear-gradient(90deg,var(--c) 0 7px,transparent 7px 12px);animation:current .9s linear infinite}
+.lane.ok .w2{background:var(--rule2);animation:none}  /* past a shut gate the water is still */
+@keyframes current{to{background-position:12px 0}}
+.lc.gt{justify-items:center;text-align:center}
+.lc.gt small{white-space:nowrap}
+.gate{width:34px;height:34px;fill:none;stroke-linecap:round;overflow:visible}
+.gate .water{stroke:var(--c);stroke-width:2;stroke-dasharray:7 5;animation:currentG .9s linear infinite}
+.lane.ok .gate .water{d:path("M0 12H8");animation:none;stroke-dasharray:none}
+@keyframes currentG{to{stroke-dashoffset:-12}}
+.gate .bank{stroke:var(--ink3);stroke-width:2}
+.gate .lf{stroke:var(--c);stroke-width:2.8;transform-box:view-box;stroke-linecap:round}
+.gate .a{transform-origin:12px 4px;transform:rotate(-20deg)}.gate .b{transform-origin:12px 20px;transform:rotate(20deg)}  /* open: swung back into the walls */
+/* shut, the two leaves meet in a V that points upstream, the way real lock gates hold back the water */
+.lane.ok .gate .a{transform:rotate(116.6deg);animation:shutA .9s var(--spring) both;animation-delay:calc(.45s + var(--i) * 80ms)}
+.lane.ok .gate .b{transform:rotate(-116.6deg);animation:shutB .9s var(--spring) both;animation-delay:calc(.45s + var(--i) * 80ms)}
+@keyframes shutA{from{transform:rotate(-20deg)}}@keyframes shutB{from{transform:rotate(20deg)}}
+@media (max-width:640px){
+  .lanes{grid-template-columns:minmax(0,1fr)}
+  .lane{grid-template-columns:none;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+  .lc.gt{justify-items:start;text-align:left;grid-auto-flow:column;align-items:center;gap:8px}
+  .w{width:2px;height:12px;margin:2px 0 2px 16px;background:repeating-linear-gradient(180deg,var(--c) 0 5px,transparent 5px 9px);animation-name:currentY}
+  @keyframes currentY{to{background-position:0 9px}}
+  .lc.gt .gate{rotate:90deg}  /* the water runs down the page here, so the lock turns with it */
+}
+
+/* built from: a compiled file's cargo manifest, as its build record lists it */
+.bin{display:grid;gap:8px;padding:14px 16px;border-radius:12px;border:1px solid var(--rule2);background:var(--sheet);min-width:0;animation:rise .5s var(--out) both;animation-delay:calc(.15s + var(--i) * 80ms)}
+.bh{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.bf{font:700 14px/1.3 var(--mono);overflow-wrap:anywhere}
+.bt{font:500 12.5px var(--mono);color:var(--ink3)}
+.bm{font-size:14.5px;overflow-wrap:anywhere}
+.bn{font-size:13.5px;color:var(--ink2);overflow-wrap:anywhere}
+.mani summary{display:inline-flex;gap:8px;align-items:center;cursor:pointer;list-style:none;font-size:13.5px;font-weight:700;color:var(--ink2)}
+.mani summary::-webkit-details-marker{display:none}
+.mani summary::before{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(-45deg);transition:transform .3s var(--out)}
+.mani[open] summary::before{transform:rotate(45deg) translate(-2px,-2px)}
+.mani summary b{color:var(--glance-ink)}
+.mani ol{list-style:none;margin:10px 0 0;padding:0 4px 0 0;max-height:280px;overflow:auto;display:grid;gap:1px;font:500 12.5px/1.65 var(--mono)}
+.mani li{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 6px;min-width:0}
+.mani .dn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%}
+.mani .dl{flex:1;min-width:14px;border-bottom:1.5px dotted var(--rule2);transform:translateY(-4px)}
+.mani .dv{color:var(--ink2);white-space:nowrap}
+.mani li.odd .dn{color:var(--glance-ink);font-weight:700}
+.mani .sw{flex-basis:100%;padding-left:14px;font-size:12px;color:var(--glance-ink)}
 
 /* a path that reads like one */
 .crumb{display:flex;flex-wrap:wrap;align-items:center;gap:1px;font:500 13px/1 var(--mono);color:var(--ink2);min-width:0}
@@ -1426,6 +1486,7 @@ const IC = {
   model: svg('<circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/>'),  // a second opinion: two views of one thing
   play: svg('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>'),
   warn: svg('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>'),
+  chip: svg('<rect x="6.5" y="6.5" width="11" height="11" rx="2"/><path d="M10 3.5v3M14 3.5v3M10 17.5v3M14 17.5v3M3.5 10h3M3.5 14h3M17.5 10h3M17.5 14h3"/>'),
 };
 // the four kinds of cargo, drawn: a crate, a scroll, a plug, a window
 const KICON = {
@@ -1439,11 +1500,12 @@ const TOUCH = [
   ['net', 'Network calls', ['net']],
   ['run', 'Runs programs', ['exec']],
   ['files', 'Writes files', ['fs-write', 'persist-path']],
-  ['key', 'Touches secrets', ['env-secret', 'secret-path', 'secret', 'secret-maybe', 'secret-public', 'env-file']],
+  ['key', 'Touches secrets', ['env-secret', 'secret-path', 'secret', 'secret-maybe', 'secret-public', 'env-file', 'dpapi']],
   ['code', 'Builds code at runtime', ['code', 'dynamic-load', 'obfuscated', 'hidden-chars']],
   ['box', 'Runs at install', ['install-script']],
   ['speech', 'Instructs your agent', ['conceal', 'override']],
-  ['app', 'Risky app settings', ['electron-node', 'electron-isolation-off', 'electron-sandbox-off', 'electron-websec-off', 'ipc-unchecked', 'devtools', 'open-external', 'sourcemap']],
+  ['app', 'Risky app settings', ['electron-node', 'electron-isolation-off', 'electron-sandbox-off', 'electron-websec-off', 'ipc-unchecked', 'ipc-sink', 'devtools', 'open-external', 'sourcemap']],
+  ['chip', 'Compiled code', ['built-from', 'swapped-dep', 'dirty-build', 'keys', 'inject']],
 ];
 // a bare call like "fetch()" gets a plain-words lead-in
 const PHRASE = { net: 'makes a network call', 'fs-write': 'writes a file', 'fs-read': 'reads a file', exec: 'runs a program', code: 'builds code at runtime', 'dynamic-load': 'loads code by a computed name', decode: 'decodes data' };
@@ -1463,6 +1525,10 @@ const WHY = {
   secret: 'A real-looking key in a build ships to every user. Revoke it, then move it behind your server.',
   'install-runs': 'Code that runs at install and downloads or starts programs is normal for native tools, and also how install-time worms spread.',
   'hidden-chars': 'Bidirectional control characters can make code read differently from how it runs (“Trojan Source”).',
+  'ipc-open': 'This handler trusts every page in the window. If one is ever compromised (a bad link, an injected script), it can make your app start programs or open any URL. Check event.senderFrame before doing anything.',
+  'ipc-unchecked': 'Electron’s security checklist asks every IPC handler to check who sent the message (event.senderFrame). Without that, any page in the window can call it.',
+  'swapped-dep': 'The build record says this dependency was replaced or came from outside the public registry. Sometimes that’s a quick fix; it’s also how a tampered build hides.',
+  'dirty-build': 'Built from changes that were never committed, so no published source matches it exactly.',
 };
 const whyOf = f => WHY[f.kind] ?? (f.matches_claim === 'no'
   ? 'The local model compared this with the description and found the description doesn’t need it. Clear it once and slowship won’t ask again until the code changes.'
@@ -1882,7 +1948,7 @@ const codeRows = (start, lines, hot, lang, note, sev, ctx) => lines.map((l, k) =
 }).join('');
 function editor(i, e, sev, note) {
   // no single line to show (a whole file, a package.json script, REA's view of the app): say what was found, where
-  if (!e.code || !e.line) return `<div class="filecard">${e.file === '(REA)' ? IC.app : IC.files}<div><b>${esc(e.file === '(REA)' ? 'REA · how the app is built' : e.file)}</b><span>${esc(e.detail || (e.file === '(REA)' ? 'Found in REA’s map of the app’s structure.' : 'The whole file.'))}</span></div></div>`;
+  if (!e.code || !e.line) return `<div class="filecard">${e.file === '(REA)' ? IC.app : TG(e.cap) === 'chip' ? IC.chip : IC.files}<div><b>${esc(e.file === '(REA)' ? 'REA · how the app is built' : e.file)}</b><span>${esc(e.detail || (e.file === '(REA)' ? 'Found in REA’s map of the app’s structure.' : 'The whole file.'))}</span></div></div>`;
   return `<figure class="ed ${sev}" data-key="${esc(i.key)}" data-file="${esc(e.file)}" data-line="${e.line}" data-sev="${sev}" data-note="${esc(note)}">
     <figcaption class="edbar">${IC.files}<span class="fn" title="${esc(joinPath(itemPath(i), e.file))}">${esc(e.file)}</span><span class="sp"></span><span class="at">line ${e.line}</span><button class="cbtn" data-copy="${esc(e.code)}" aria-label="Copy this line" title="Copy the line">${IC.copy}</button></figcaption>
     <div class="edbody">${codeRows(e.line, [e.code], e.line, langOf(e.file), note, sev)}</div></figure>`;
@@ -1901,8 +1967,9 @@ function hydrate(root) {
 // ---------- one item, explained: what it says against what it does ----------
 const COVER = i => {
   const c = i.coverage || {}, big = (c.skipped || []).filter(x => !x.includes('dependencies')).length;
+  if (c.compiled) return `<div class="cov">${IC.chip}<span>Compiled: REA read <b>its build record</b>; the code itself can’t be read. Nothing run.</span></div>`;
   if (!c.files) return '';
-  return `<div class="cov">${IC.eye}<span>Read <b>${c.read} of ${c.files}</b> file${c.files === 1 ? '' : 's'}${c.lineLevel?.length ? `, ${c.lineLevel.length} of them line by line` : ''}${big ? `. ${big} too large to read` : ''}${c.rea ? `. ${esc(c.rea)}` : ''}. Read, never run.</span></div>`;
+  return `<div class="cov">${IC.eye}<span>Read <b>${c.read} of ${c.files}</b> file${c.files === 1 ? '' : 's'}${c.lineLevel?.length ? `, ${c.lineLevel.length} of them line by line` : ''}${big ? `. ${big} too large to read` : ''}${c.rea ? `. ${esc(cap1(c.rea))}` : ''}. Read, never run.</span></div>`;
 };
 function evidence(i, f) {
   const at = e => `${e.file}${e.line ? ':' + e.line : ''}`, seen = new Set();
@@ -1954,9 +2021,56 @@ function detailHTML(i) {
     </header>
     ${scannerHTML(i, rel)}
     <section class="says claimrow"><span class="sdl">What it says it does${rel !== 'unknown' ? `<span class="relw rel-${rel}" data-explain="relation-${rel}">${rel === 'no' ? '≠ not what its code does' : '= matches its code'}</span>` : ''}</span><blockquote${i.claim ? ' title="Tap to read more"' : ''}>${says}</blockquote></section>
-    ${fs.length ? `<ol class="fl">${fs.map((f, k) => findingHTML(i, f, k)).join('')}</ol>` : `<div class="calm2">${IC.check}<span>Read every file it ships: nothing to look at.</span></div>`}
+    ${fs.length ? `<ol class="fl">${fs.map((f, k) => findingHTML(i, f, k)).join('')}</ol>` : `<div class="calm2">${IC.check}<span>${i.coverage?.compiled ? 'Nothing in its build record to look at.' : 'Read every file it ships: nothing to look at.'}</span></div>`}
+    ${ipcHTML(i)}${builtHTML(i)}
     ${COVER(i)}
   </div>`;
+}
+
+// ---------- the IPC map: REA's page → bridge → handler, with the sender check drawn as a lock gate ----------
+const GATE = '<svg class="gate" viewBox="0 0 24 24" aria-hidden="true"><path class="bank" d="M5 4h14M5 20h14"/><path class="water" d="M0 12H24"/><line class="lf a" x1="12" y1="4" x2="20.9" y2="4"/><line class="lf b" x1="12" y1="20" x2="20.9" y2="20"/></svg>';
+const LANE = { hold: 0, glance: 1, ok: 2 };
+function ipcHTML(i) {
+  const map = i.map?.ipc;
+  if (!map?.length) return '';
+  const nodeOn = (i.facts || []).some(f => f.cap === 'electron-node');
+  const sev = h => h.checked ? 'ok' : h.does?.length ? 'hold' : 'glance';
+  const lanes = [...map].sort((a, b) => LANE[sev(a)] - LANE[sev(b)]);
+  return `<section class="ipc"><span class="sdl">${IC.app}How pages reach your main process<small>REA’s map of every IPC handler, read from your code</small></span>
+    <div class="lanes" role="list">${lanes.map((h, k) => {
+      const s = sev(h), from = h.via.length ? h.via : h.from.length ? h.from : nodeOn ? ['any page'] : [];
+      return `<div class="lane ${s}" role="listitem" style="--i:${k}">
+        <span class="lc pg">${from.length ? `<code>${esc(from[0])}</code><small>${from.length > 1 ? `and ${from.length - 1} more` : h.via.length ? 'from the page, through the bridge' : nodeOn ? 'Node.js is on in its window' : 'sends here'}</small>` : '<span class="muted">nothing found calls it</span>'}</span>
+        <i class="w w1"></i>
+        <span class="lc gt">${GATE}<small>${h.checked ? 'checks the sender' : 'no sender check'}</small></span>
+        <i class="w w2"></i>
+        <span class="lc hd"><code>"${esc(h.channel)}"</code><small>${esc(h.file || 'main process')}${h.line ? ':' + h.line : ''}</small>${h.does?.length ? `<span class="does">${esc(cap1(h.does.join(', ')))}</span>` : ''}</span>
+      </div>`;
+    }).join('')}</div></section>`;
+}
+
+// ---------- built from: what REA read from each compiled file's build record ----------
+const LANG = { go: 'Go', rust: 'Rust', dotnet: '.NET' };
+const UNIT = { go: ['module', 'modules'], rust: ['crate', 'crates'], dotnet: ['assembly', 'assemblies'] };
+function builtHTML(i) {
+  const bins = i.map?.binaries;
+  if (!bins?.length) return '';
+  const read = bins.filter(b => b.lang), blank = bins.filter(b => !b.lang);
+  const card = (b, k) => {
+    const deps = b.deps || [], odd = deps.filter(d => d.swap || (d.source && d.source !== 'crates.io' && d.source !== 'local'));
+    const rows = [...odd, ...deps.filter(d => !odd.includes(d))].map(d => `<li${odd.includes(d) ? ' class="odd"' : ''}><span class="dn" title="${esc(d.name)}">${esc(d.name)}</span><span class="dl"></span><span class="dv">${esc(d.version || '')}</span>${d.swap ? `<span class="sw">swapped for ${esc(d.swap)}</span>` : odd.includes(d) ? `<span class="sw">from ${esc(d.source)}</span>` : ''}</li>`).join('');
+    return `<div class="bin" style="--i:${k}">
+      <div class="bh"><code class="bf">${esc(b.file)}</code><span class="kchip">${LANG[b.lang]}</span>${b.tool ? `<span class="bt">${esc(b.tool)}</span>` : ''}</div>
+      ${b.main ? `<p class="bm">${esc(b.main)}${deps.length ? ` and <b>${pl(deps.length, ...UNIT[b.lang])}</b>` : ''}</p>` : ''}
+      ${b.native?.length ? `<p class="bn">Calls into ${b.native.slice(0, 8).map(n => `<code class="ic">${esc(n)}</code>`).join(' ')}${b.native.length > 8 ? ` and ${b.native.length - 8} more` : ''}</p>` : ''}
+      ${b.note ? `<p class="bn">${esc(b.note)}</p>` : ''}
+      ${rows ? `<details class="mani"${odd.length ? ' open' : ''}><summary>The manifest${odd.length ? ` · <b>${pl(odd.length, 'not from the public registry', 'not from the public registry')}</b>` : ''}</summary><ol>${rows}</ol></details>` : ''}
+    </div>`;
+  };
+  return `<section class="built"><span class="sdl">${IC.chip}Built from<small>read by REA from each compiled file, never run</small></span>
+    ${read.map(card).join('')}
+    ${blank.length ? `<div class="bin" style="--i:${read.length}"><div class="bh"><span class="kchip">No build record</span></div><p class="bn">${blank.slice(0, 6).map(b => `<code class="ic">${esc(b.file)}</code>`).join(' ')}${blank.length > 6 ? ` and ${blank.length - 6} more` : ''}: no Go, Rust or .NET record inside (C and C++ leave none), so what ${blank.length === 1 ? 'it was' : 'they were'} built from stays unseen.</p></div>` : ''}
+  </section>`;
 }
 
 // ---------- the x-ray: the item as a container under the scanner, its files inside, wired to what they can do ----------
@@ -2002,8 +2116,8 @@ function scannerHTML(i, rel) {
   const tagW = Math.min(340, 80 + said.length * 7.8);
   // the readout: what the analysis did on its way to this verdict
   const combos = i.findings.filter(fd => fd.evidence.length > 1).length, notes = (i.facts || []).filter(x => x.label).length;
-  const hud = `${(i.facts || []).length} facts → ${combos} combination${combos === 1 ? '' : 's'} → ${notes} model note${notes === 1 ? '' : 's'}`;
-  const c = i.coverage || {}, cap = c.files ? `${c.read} of ${c.files} file${c.files === 1 ? '' : 's'} read${c.files > 80 ? `, ${N} shown` : ''}. Nothing run.` : 'Read, never run.';
+  const hud = `${pl((i.facts || []).length, 'fact')} → ${combos} combination${combos === 1 ? '' : 's'} → ${notes} model note${notes === 1 ? '' : 's'}`;
+  const c = i.coverage || {}, cap = c.compiled ? 'Build record read, code not.' : c.files ? `${c.read} of ${c.files} file${c.files === 1 ? '' : 's'} read${c.files > 80 ? `, ${N} shown` : ''}. Nothing run.` : 'Read, never run.';
   const relG = rel === 'no' ? '<g class="xrel" transform="translate(384 102) scale(1.25)"><path pathLength="1" d="M10 16h20"/><path pathLength="1" d="M10 24h20" style="animation-delay:.42s"/><path pathLength="1" d="M26 8L14 32" style="animation-delay:.72s"/></g>'
     : rel === 'yes' ? '<g class="xrel yes" transform="translate(384 102) scale(1.25)"><path pathLength="1" d="M10 16h20"/><path pathLength="1" d="M10 24h20" style="animation-delay:.42s"/></g>' : '';
   return `<figure class="scanner" data-fp="${esc(i.fp)}"><button class="xi xq" data-explain="xray" aria-label="How to read the x-ray">?</button>
@@ -2662,6 +2776,8 @@ function blind() {
   let big = 0, lines = 0, tests = 0, broken = 0;
   for (const i of G) { const c = i.coverage || {}; tests += c.tests || 0; broken += (c.errors || []).filter(x => x.includes('unparseable')).length; big += (c.skipped || []).filter(x => !x.includes('dependencies')).length; lines += c.lineLevel?.length || 0; }
   for (const u of r.unread || []) notes.push({ ic: 'lock', t: u.key.replace(/^mcp:/, 'MCP server '), w: u.why, src: u.source });
+  const bins = G.flatMap(i => i.map?.binaries || []), blank = bins.filter(b => !b.lang).length;
+  if (bins.length) notes.push({ ic: 'chip', t: `${pl(bins.length, 'compiled file')} read as far as ${bins.length === 1 ? 'its' : 'their'} build record`, w: `REA read what Go, Rust and .NET files were built from, without running them. Their code isn’t decompiled${blank ? `, and ${blank} left no build record at all` : ''}.` });
   if (tests) notes.push({ ic: 'files', t: `${tests.toLocaleString()} test and example files left out`, w: 'On purpose. Tests, examples, benchmarks and docs ship inside many packages but don’t run when you use them.' });
   if (broken) notes.push({ ic: 'code', t: `${pl(broken, 'file')} that wouldn’t parse`, w: 'Unusual syntax the parser couldn’t follow, so these were skipped rather than guessed at.' });
   if (big) notes.push({ ic: 'big', t: `${pl(big, 'file')} too large`, w: 'Over the size limit, so not parsed. Big bundles are usually generated code.' });
