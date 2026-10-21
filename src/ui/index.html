@@ -398,8 +398,20 @@ html.vt-theme::view-transition-new(root){animation:reveal .75s var(--io)}
 .qprog .bar2{flex:1;height:6px;border-radius:3px;background:var(--rule);overflow:hidden;min-width:120px}
 .qprog .bar2 i{display:block;height:100%;background:var(--clear);border-radius:3px;transition:width .9s var(--spring)}
 .keys{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink3);margin-top:8px}
-.review{display:grid;grid-template-columns:minmax(0,350px) minmax(0,1fr);gap:28px;align-items:start}
-.queue{position:sticky;top:132px;display:grid;gap:2px;max-height:calc(100vh - 150px);overflow:hidden auto;scrollbar-width:thin;padding:2px}
+.review{display:grid;grid-template-columns:minmax(0,374px) minmax(0,1fr);gap:24px;align-items:start}
+.qwrap{position:sticky;top:132px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+.queue{position:relative;display:grid;gap:2px;max-height:calc(100vh - 150px);overflow:hidden auto;scrollbar-width:none;scroll-behavior:smooth;scroll-snap-type:y proximity;padding:2px}
+.queue::-webkit-scrollbar{display:none}
+.qc{scroll-snap-align:start;scroll-margin-top:6px}
+/* the list's own rail instead of a scrollbar: one mark per item in its colour, a frame round what you can see */
+.qrail{position:relative;display:none;align-self:stretch;width:12px;margin-block:4px;border-radius:6px;background:color-mix(in oklab,var(--ink) 5%,transparent);cursor:pointer;touch-action:none}
+.qwrap.over .qrail{display:block}
+.qrail i{position:absolute;left:3px;right:3px;border-radius:2px;background:var(--noted);opacity:.5;transform:scaleY(.62);transition:opacity .25s,transform .4s var(--spring),left .3s,right .3s}
+.qrail i.hold{background:var(--hold)}.qrail i.glance{background:var(--glance)}
+.qrail i.sel{opacity:1;left:1px;right:1px;transform:scaleY(.8)}
+.qrail:hover i{opacity:.85}
+.qwin{position:absolute;left:-3px;right:-3px;border:1.5px solid var(--ink);border-radius:8px;background:color-mix(in oklab,var(--sheet) 25%,transparent);pointer-events:none;box-shadow:0 4px 12px -6px rgb(15 32 44 / .5)}
+.qrail.drag .qwin{border-width:2px}
 .qsel{position:absolute;left:2px;right:2px;top:0;height:0;border-radius:12px;background:var(--sheet);border:1px solid var(--rule2);box-shadow:inset 3px 0 0 var(--ink),0 10px 24px -18px rgb(15 32 44 / .5);opacity:0;pointer-events:none;
   transition:top .5s var(--spring),height .5s var(--spring),opacity .3s}
 .queue.has .qsel{opacity:1}
@@ -423,7 +435,7 @@ html.vt-theme::view-transition-new(root){animation:reveal .75s var(--io)}
 @keyframes fromDown{from{opacity:0;transform:translateY(16px)}}
 @keyframes fromUp{from{opacity:0;transform:translateY(-16px)}}
 .review.done{grid-template-columns:1fr}
-.review.done .queue{display:none}
+.review.done .qwrap{display:none}
 .calm{display:flex;gap:18px;align-items:center;padding:26px 28px}
 .calm svg.mf{width:60px;height:60px;flex:none;animation:hopIn 1s var(--spring) both}
 @keyframes hopIn{from{transform:translateY(16px) scale(.6);opacity:0}}
@@ -1114,28 +1126,38 @@ body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opa
 .thm[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 3px var(--rule)}
 @media (max-width:640px){.dialrow{grid-template-columns:1fr;justify-items:center}.rcards{grid-template-columns:1fr}}
 
-/* clearing: the button becomes a tick, the stamp slams, the box goes green from the inside out and is lifted away */
+/* clearing: the button becomes a tick, then the x-ray plays the scene below */
 .dta .btn.done{position:relative;background:var(--clear-ink);color:#fff;border-color:transparent;animation:okpop .55s var(--spring)}
 @keyframes okpop{35%{transform:scale(1.1)}}
 .dta .btn.done svg.i{stroke-width:2.4}
 .dta .btn.done svg.i path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .45s var(--out) .1s forwards}
 .btn .ring2{position:absolute;inset:-2px;border-radius:inherit;border:2px solid var(--clear);pointer-events:none;animation:ringout .9s var(--out) forwards}
 @keyframes ringout{from{opacity:.9}to{opacity:0;transform:scale(1.35,1.9)}}
-.scanner.cleared .xbeam{opacity:0;transition:opacity .2s}
-.scanner.cleared .tile{fill:#60C99A;opacity:1;animation:none;transition:fill .35s calc(.25s + var(--w) * 14ms),opacity .35s calc(.25s + var(--w) * 14ms)}
-.scanner.cleared .ln{stroke:#60C99A;transition:stroke .4s .3s}
-.scanner.cleared .tok .ring{stroke:#60C99A;transition:stroke .4s .35s}
-.scanner.cleared .halo{display:none}
-.scanner.cleared .badge circle{fill:#70CDA2}
-.scanner.cleared svg{animation:thump .45s var(--out) .12s}
-@keyframes thump{25%{transform:translate(2px,3px)}50%{transform:translate(-2px,-1px)}75%{transform:translate(1px,1px)}}
-.scanner .slam text{font:800 46px var(--display);letter-spacing:.06em;fill:rgb(96 201 154 / .12);stroke:#70CDA2;stroke-width:2.6;transform-box:fill-box;transform-origin:center;animation:slam .5s cubic-bezier(.2,1.5,.4,1) both}
-@keyframes slam{from{opacity:0;transform:scale(2.6)}55%{opacity:1}}
-.scanner .shock{fill:none;stroke:#70CDA2;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:shock .9s var(--out) .12s both}
-@keyframes shock{from{opacity:.9;transform:scale(.2)}to{opacity:0;transform:scale(3.4)}}
-.scanner.lift .xbox,.scanner.lift .slam,.scanner.lift .tag{transition:transform .6s var(--io),opacity .45s;transform:translateY(-40px);opacity:0}
-.spark{position:absolute;width:7px;height:5px;border-radius:1.5px;pointer-events:none;animation:spark 1s cubic-bezier(.15,.7,.3,1) both}
-@keyframes spark{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r))}}
+.scanner.cleared .tile{fill:#60C99A;opacity:1;animation:none}
+/* the clearing scene: the box painted green, a ship, a painter, a stencil */
+.scanner.fx{pointer-events:none}
+.scanner.fx .tile{transition:fill .35s,opacity .35s}
+.scanner.fx .xtop,.scanner.fx .xside,.scanner.fx .xface,.scanner.fx .xedge{transition:fill .7s linear var(--pd,0s),stroke .7s linear var(--pd,0s),opacity .7s linear var(--pd,0s)}
+.scanner.cleared .xtop{fill:#4FB487;opacity:1}
+.scanner.cleared .xside{fill:#2B8A63;opacity:1}
+.scanner.cleared .xface{fill:#60C99A;opacity:.3}
+.scanner.cleared .xedge{stroke:#9BE3C2}
+.scanner.inst,.scanner.inst *{transition:none!important}
+.fxsea path{animation:swell 3.2s linear infinite}
+.fxsea .w1{fill:#12384F}
+.fxsea .w2{fill:#1A4C68;stroke:#3C7FA3;stroke-width:1.5;animation-duration:2.3s}
+@keyframes swell{to{transform:translateX(-48px)}}
+.fxship .hull{fill:#E4EDF0}.fxship .keel{fill:#24506B}.fxship .rail{fill:none;stroke:#A9BDC6;stroke-width:2}
+.fxship .bridge{fill:#F4F8F9}.fxship .win{fill:#0F202C}.fxship .funnel{fill:#0C8A5E}.fxship .fband{fill:#0F202C}
+.fxsmoke circle{fill:#C9D6DC;opacity:0;transform-box:fill-box;transform-origin:center}
+.fxsplash circle{fill:#9AD3EE;opacity:0}
+.fxpaint{fill:#60C99A;opacity:.38;transform-box:fill-box;transform-origin:100% 50%;transform:scaleX(0)}
+.fxmark{opacity:0;transform-box:fill-box;transform-origin:center}
+.fxmark text{font:800 36px var(--display);letter-spacing:.06em;fill:#F4FBF7}
+.fxmark path{fill:none;stroke:#F4FBF7;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.fxpainter .pb{fill:#F6B84D}.fxpainter .pe,.fxpainter .pcap{fill:#0F202C}
+.fxpainter .pole{fill:#DCE6EA;transform-box:fill-box;transform-origin:50% 100%}
+.fxpainter .roll{fill:#7BD8AE;stroke:#2B8A63;stroke-width:1.2}
 #toastmsg{display:flex;align-items:center;gap:10px}
 .toast .tck{width:20px;height:20px;color:#70CDA2;stroke-width:2.4}
 .toast .tck path{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s var(--out) .2s forwards}
@@ -1147,10 +1169,13 @@ body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opa
 
 /* settings: a window that opens out of the gear, over a softened page */
 .drawer .scrim{background:rgb(5 16 23 / .36);backdrop-filter:blur(6px) saturate(1.15)}
-.dpanel{top:50%;left:50%;right:auto;bottom:auto;width:min(780px,calc(100% - 32px));max-height:min(88vh,860px);border-radius:22px;
+.dpanel{top:50%;left:50%;right:auto;bottom:auto;width:min(780px,calc(100% - 32px));max-height:min(88vh,860px);border-radius:22px;border:1px solid var(--rule2);scrollbar-width:none;
   transform:translate(-50%,-50%) scale(.97);opacity:0;clip-path:circle(0 at var(--cx,95%) var(--cy,0));
   transition:clip-path .75s var(--io),transform .6s var(--spring),opacity .2s}
-.drawer.on .dpanel{transform:translate(-50%,-50%);opacity:1;clip-path:circle(150% at var(--cx,95%) var(--cy,0))}
+.dpanel::-webkit-scrollbar{display:none}
+/* the reveal grows to the panel's farthest corner, measured when it opens, so no corner is ever left cut */
+.drawer.on .dpanel{transform:translate(-50%,-50%);opacity:1;clip-path:circle(var(--r,150%) at var(--cx,95%) var(--cy,0))}
+.dhead::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink);transform-origin:left;transform:scaleX(0)}
 @media (min-width:761px){.dbody{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-flow:row dense;column-gap:32px}.sgrp.wide{grid-column:1/-1}.sgrp.tall{grid-row:span 2}.sgrp.tall .dialrow{grid-template-columns:1fr;justify-items:center;text-align:left}}
 @media (max-width:640px){.dpanel{top:auto;left:0;right:0;bottom:0;width:100%;max-height:92vh;border-radius:20px 20px 0 0;transform:translateY(100%);clip-path:none;opacity:1}.drawer.on .dpanel{transform:none;clip-path:none}}
 
@@ -1176,7 +1201,19 @@ body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opa
   @keyframes gaugem{to{top:100%}}
   @keyframes depthn{to{--dep:42}}
   @media (max-width:1320px){.gauge{display:none}}
+  /* settings: a thin line under the title fills as you read down */
+  .dhead::after{animation:sread linear both;animation-timeline:scroll()}
+  @keyframes sread{to{transform:scaleX(1)}}
+  /* the review list turns like a drum: cards tip away and shrink as they roll over its edges, which fade */
+  @media (min-width:980px){
+    .queue{perspective:760px;-webkit-mask-image:linear-gradient(#0000,#000 var(--qt),#000 calc(100% - var(--qb)),#0000);mask-image:linear-gradient(#0000,#000 var(--qt),#000 calc(100% - var(--qb)),#0000);animation:qedge linear both;animation-timeline:scroll(self)}
+    @keyframes qedge{0%{--qt:0px;--qb:44px}7%{--qt:44px}93%{--qb:44px}100%{--qt:44px;--qb:0px}}
+    .qc{animation:qin .55s var(--out) both,drum linear both;animation-delay:calc(var(--i) * 35ms),0s;animation-timeline:auto,view()}
+    @keyframes drum{entry 0%{rotate:x -42deg;scale:.86}entry 100%{rotate:x 0deg;scale:1}exit 0%{rotate:x 0deg;scale:1}exit 100%{rotate:x 42deg;scale:.86}}
+  }
 }
+@property --qt{syntax:'<length>';inherits:false;initial-value:0px}
+@property --qb{syntax:'<length>';inherits:false;initial-value:0px}
 
 body.boot,body.boot *{transition:none!important}  /* the first paint lands in its colours; later changes animate */
 body.empty .holds,body.empty .clearance{display:none}
@@ -1189,7 +1226,8 @@ body.empty .holds,body.empty .clearance{display:none}
   .review{grid-template-columns:1fr}
   .inspector{display:none}
   .review.done .inspector{display:block}
-  .queue{position:static;max-height:none;overflow:visible}
+  .qwrap{position:static;display:block}
+  .queue{max-height:none;overflow:visible}
   .qsel{display:none}
   .route{grid-template-columns:1fr;gap:34px}
   .route::before{left:8px;right:auto;top:8px;bottom:8px;border-top:0;border-left:2px dashed var(--rule2);transform-origin:top;animation-name:drawY}
@@ -1274,7 +1312,7 @@ body.empty .holds,body.empty .clearance{display:none}
 <main class="wrap">
   <section class="panel" id="p-review" role="tabpanel" aria-labelledby="t-review">
     <div class="ph"><div><h2>Before you ship</h2><p class="lede" id="needlede"></p><p class="keys"><kbd>J</kbd><kbd>K</kbd> move <kbd>A</kbd> clear <kbd>/</kbd> search <kbd>,</kbd> settings</p></div><div class="qprog" id="qprog"></div></div>
-    <div class="review" id="review"><div class="queue" id="queue" aria-label="To review"></div><div class="inspector" id="insp" aria-live="polite"></div></div>
+    <div class="review" id="review"><div class="qwrap"><div class="queue" id="queue" aria-label="To review"></div><div class="qrail" id="qrail" aria-hidden="true"></div></div><div class="inspector" id="insp" aria-live="polite"></div></div>
   </section>
   <section class="panel" id="p-aboard" role="tabpanel" aria-labelledby="t-aboard" hidden>
     <div class="ph"><div><h2>Everything aboard</h2><p class="lede" id="manlede"></p></div></div>
@@ -1906,12 +1944,12 @@ function scannerHTML(i, rel) {
     <defs><linearGradient id="${id}b" x1="0" x2="1"><stop offset="0" stop-color="#FFF4D6" stop-opacity="0"/><stop offset=".5" stop-color="#FFF4D6" stop-opacity=".6"/><stop offset="1" stop-color="#FFF4D6" stop-opacity="0"/></linearGradient>
       <clipPath id="${id}c"><rect x="40" y="88" width="300" height="118"/></clipPath><clipPath id="${id}h"><rect class="hudclip" x="300" y="228" width="330" height="18"/></clipPath></defs>
     <g class="xbox">
-      <ellipse cx="200" cy="218" rx="172" ry="8" fill="#000" opacity=".45"/>
-      <path d="M40 88 L76 58 H376 L340 88Z" fill="${top}" opacity=".85"/><path d="M340 88 L376 58 V176 L340 206Z" fill="${side}" opacity=".9"/>
-      <rect x="40" y="88" width="300" height="118" fill="${f}" opacity=".22"/>
+      <ellipse class="xsh" cx="200" cy="218" rx="172" ry="8" fill="#000" opacity=".45"/>
+      <path class="xtop" d="M40 88 L76 58 H376 L340 88Z" fill="${top}" opacity=".85"/><path class="xside" d="M340 88 L376 58 V176 L340 206Z" fill="${side}" opacity=".9"/>
+      <rect class="xface" x="40" y="88" width="300" height="118" fill="${f}" opacity=".22"/>
       <path d="${ribs}" stroke="${top}" stroke-opacity=".28" stroke-width="1.4"/>
       ${tiles}
-      <rect x="40" y="88" width="300" height="118" fill="none" stroke="${top}" stroke-width="2"/>
+      <rect class="xedge" x="40" y="88" width="300" height="118" fill="none" stroke="${top}" stroke-width="2"/>
       <g clip-path="url(#${id}c)"><rect class="xbeam" x="10" y="88" width="34" height="118" fill="url(#${id}b)"/></g>
       ${i.approved && needs(i) ? '<g transform="rotate(-8 190 150)"><text class="xstamp" x="190" y="164" text-anchor="middle">CLEARED</text></g>' : ''}
     </g>
@@ -2194,10 +2232,30 @@ function review() {
 }
 // one highlight that travels to the card you pick, instead of each card lighting on its own
 function moveSel() {
+  qrail();
   const q = $('#queue'), sel = q.querySelector('.qc.sel'), h = $('#qsel');
   if (!h || !sel || !wide()) { q.classList.remove('has'); return; }
   h.style.top = sel.offsetTop + 'px'; h.style.height = sel.offsetHeight + 'px';
   q.classList.add('has');
+}
+// the rail beside the list: a mark for each card, a frame for the part in view; press or drag it to scroll
+function qrail() {
+  const q = $('#queue'), r = $('#qrail'), over = wide() && q.scrollHeight > q.clientHeight + 4;
+  r.parentElement.classList.toggle('over', over);
+  if (!over) { r.innerHTML = ''; return; }
+  const H = q.scrollHeight;
+  r.innerHTML = $$('#queue .qc').map(c => `<i class="${['hold', 'glance'].find(k => c.classList.contains(k)) ?? ''}${c.classList.contains('sel') ? ' sel' : ''}" style="top:${(c.offsetTop / H * 100).toFixed(2)}%;height:${(c.offsetHeight / H * 100).toFixed(2)}%"></i>`).join('') + '<b class="qwin"></b>';
+  qwin();
+}
+function qwin() { const q = $('#queue'), w = $('#qrail .qwin'); if (w) { w.style.top = `${q.scrollTop / q.scrollHeight * 100}%`; w.style.height = `${q.clientHeight / q.scrollHeight * 100}%`; } }
+$('#queue').addEventListener('scroll', qwin, { passive: true });
+addEventListener('resize', () => requestAnimationFrame(qrail));
+{
+  const r = $('#qrail'), q = $('#queue');
+  const to = e => { const b = r.getBoundingClientRect(); q.style.scrollBehavior = 'auto'; q.scrollTop = (e.clientY - b.top) / b.height * q.scrollHeight - q.clientHeight / 2; };
+  r.addEventListener('pointerdown', e => { r.setPointerCapture(e.pointerId); r.classList.add('drag'); to(e); });
+  r.addEventListener('pointermove', e => { if (r.classList.contains('drag')) to(e); });
+  r.addEventListener('pointerup', () => { r.classList.remove('drag'); q.style.scrollBehavior = ''; });
 }
 function showInsp(i, animate = true) {
   if (!i) return;
@@ -2213,47 +2271,135 @@ $('#queue').addEventListener('click', e => {
   const c = e.target.closest('.qc'), i = c && G.find(x => x.fp === c.dataset.fp); if (!i) return;
   wide() ? showInsp(i) : openSheet(i);
 });
-// clearing is a small ceremony: the button turns to a tick, a stamp slams onto the box, the x-ray goes green from the
-// inside out, bits of container fly off, and the box is lifted away before the next one comes in
+// clearing is a short scene on the x-ray: a ship sails in under the box and takes it aboard, a painter hops off the
+// bridge and rolls it green, stencils it, and the ship carries it out of frame. Undo rewinds it: the ship backs in from
+// where it left, the box is set down, and the paint comes off
+const EASE = { out: 'cubic-bezier(.16,.84,.3,1)', in: 'cubic-bezier(.55,0,.8,.3)', fall: 'cubic-bezier(.5,0,.9,.5)', pop: 'cubic-bezier(.2,1.5,.4,1)' };
+const play = (el, kf, duration, delay = 0, easing = EASE.out, fill = 'both', more) => el.animate(kf, { duration, delay, easing, fill, ...more });
+const ANALYSIS = '.ln,.tok,.tag,.xrel,.hud,.cur,.xcap,.xbeam,.xsh,.xstamp,.xi';
+const swell = y => `M-48 ${y}${' q12 -5 24 0t24 0'.repeat(16)}V260H-48Z`;
+const tr = (x, y = 0, s = 1) => `translate(${x}px,${y}px) scale(${s})`;
+function stage(sc, painter) {
+  const s = sc.querySelector('svg'), box = s.querySelector('.xbox');
+  box.insertAdjacentHTML('beforebegin', `<g class="fxback"><g class="fxsea"><path class="w1" d="${swell(228)}"/></g>
+    <g class="fxship"><g class="fxsmoke">${'<circle cx="409" cy="146" r="6"/>'.repeat(3)}</g>
+      <rect class="funnel" x="402" y="146" width="14" height="28" rx="2"/><rect class="fband" x="402" y="146" width="14" height="5" rx="1.5"/>
+      <rect class="bridge" x="390" y="172" width="38" height="40" rx="3"/><rect class="win" x="394" y="178" width="30" height="7" rx="2"/>
+      <path class="hull" d="M-8 212H434L431 234H16Q4 226-8 212Z"/><path class="keel" d="M16 234H431Q430 242 424 248H32Q22 242 16 234Z"/><path class="rail" d="M-8 212H434"/></g></g>`);
+  box.insertAdjacentHTML('afterend', `<g class="fxfront"><g class="fxsea"><path class="w2" d="${swell(240)}"/></g><g class="fxsplash">${'<circle r="2.4"/>'.repeat(10)}</g></g>`);
+  box.insertAdjacentHTML('beforeend', `<rect class="fxpaint" x="40" y="88" width="300" height="118"/>
+    <g class="fxmark"><g transform="rotate(-6 195 147)"><path pathLength="1" d="M56 146l11 11 22-24"/><text x="222" y="159" text-anchor="middle">CLEARED</text></g></g>
+    ${painter ? `<g class="fxpainter"><g class="pbob"><rect class="pole" x="-16" y="-110" width="2.6" height="94" rx="1.3"/><rect class="roll" x="-27" y="-114" width="22" height="8" rx="4"/>
+      <path class="pb" d="M-14 0C-16-18-10-31 0-31S16-18 14 0Z"/><rect class="pe" x="-7.5" y="-22" width="4.2" height="9" rx="2.1"/><rect class="pe" x="1.5" y="-22" width="4.2" height="9" rx="2.1"/><path class="pcap" d="M-11-27Q0-38 11-27Z"/></g></g>` : ''}`);
+  sc.classList.add('fx');
+  const q = c => s.querySelector(c), all = c => [...s.querySelectorAll(c)];
+  all('.fxsmoke circle').forEach((c, k) => play(c, [{ transform: 'translate(0,0) scale(.5)', opacity: .7 }, { transform: 'translate(18px,-36px) scale(1.7)', opacity: 0 }], 1300, k * 430, 'ease-out', 'both', { iterations: Infinity }));
+  return { box, ship: q('.fxship'), seas: all('.fxsea'), painter: q('.fxpainter'), paint: q('.fxpaint'), mark: q('.fxmark'), tick: q('.fxmark path'), tiles: all('.tile'), splash: all('.fxsplash circle'), analysis: [...sc.querySelectorAll(ANALYSIS)] };
+}
+const tileX = t => +t.getAttribute('x') + +t.getAttribute('width') / 2;
+function sail(sc) {
+  const f = stage(sc, true), P0 = 1300, PD = 700, D = P0 + PD + 300;  // painting starts, how long it takes, the ship leaves
+  f.analysis.forEach(el => play(el, [{ opacity: 1 }, { opacity: 0 }], 260));
+  f.seas.forEach(g => play(g, [{ transform: 'translateY(36px)' }, { transform: 'none' }], 500));
+  // the box is lifted a little, the ship slides in under it, and it's set down on deck: the hull dips, the water splashes
+  play(f.box, [{ transform: tr(0) }, { transform: tr(0, -12) }], 400, 100);
+  play(f.ship, [{ transform: 'translateX(700px)' }, { transform: 'none' }], 720, 80);
+  play(f.box, [{ transform: tr(0, -12), easing: EASE.fall }, { transform: tr(0, 7.5), offset: .65 }, { transform: tr(0, 5), offset: .85 }, { transform: tr(0, 6) }], 300, 800, 'linear', 'forwards');
+  play(f.ship, [{ transform: 'none' }, { transform: 'translateY(4px)', offset: .35 }, { transform: 'translateY(-1px)', offset: .7 }, { transform: 'none' }], 420, 960, 'ease-out', 'forwards');
+  f.splash.forEach((c, k) => {
+    const x = k < 5 ? -2 + k * 5 : 418 + (k - 5) * 5, dx = (k < 5 ? -1 : 1) * (6 + Math.random() * 16), dy = 12 + Math.random() * 18;
+    play(c, [{ transform: tr(x, 236), opacity: 1 }, { transform: tr(x + dx, 236 - dy), opacity: 1, offset: .45 }, { transform: tr(x + dx * 1.6, 246), opacity: 0 }], 600, 960 + k * 8, 'ease-out');
+  });
+  // the painter hops down off the bridge and walks the deck right to left, rolling green up and down the box
+  const J0 = 1050, T = P0 + PD - J0, land = (P0 - J0) / T, bob = f.painter.firstElementChild;
+  play(f.painter, [{ transform: tr(409, 166, .3), opacity: 0, easing: 'ease-out' }, { transform: tr(404, 150), opacity: 1, offset: land * .25, easing: 'ease-out' },
+    { transform: tr(378, 120), opacity: 1, offset: land * .55, easing: 'ease-in' }, { transform: tr(352, 206), opacity: 1, offset: land }, { transform: tr(56, 206), opacity: 1 }], T, J0, 'linear');
+  play(bob, [{ transform: 'none' }, { transform: 'translateY(-3px)' }], PD / 6, P0, 'ease-in-out', 'none', { iterations: 6, direction: 'alternate' });
+  play(bob.querySelector('.roll'), [{ transform: 'none' }, { transform: 'translateY(80px)' }], PD / 4, P0, 'ease-in-out', 'none', { iterations: 4, direction: 'alternate' });
+  play(bob.querySelector('.pole'), [{ transform: 'none' }, { transform: 'scaleY(.149)' }], PD / 4, P0, 'ease-in-out', 'none', { iterations: 4, direction: 'alternate' });
+  play(f.paint, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], PD, P0, 'linear');
+  f.tiles.forEach(t => { t.style.transitionDelay = `${(P0 + (340 - tileX(t)) / 300 * PD).toFixed(0)}ms`; });
+  sc.style.setProperty('--pd', `${P0}ms`); sc.classList.add('cleared');
+  // done: the stencil lands, the painter jumps for it, and the ship takes the box out of frame
+  play(f.mark, [{ opacity: 0, transform: 'scale(1.35)' }, { opacity: 1, transform: 'none' }], 320, P0 + PD, EASE.pop);
+  play(f.tick, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], 260, P0 + PD + 80);
+  play(bob, [{ transform: 'none' }, { transform: 'translateY(-16px)', offset: .45 }, { transform: 'none' }], 340, P0 + PD + 60, 'ease-out', 'none');
+  play(f.ship, [{ transform: 'none' }, { transform: 'translateX(-660px)' }], 650, D, EASE.in, 'forwards');
+  play(f.box, [{ transform: tr(0, 6) }, { transform: tr(-660, 6) }], 650, D, EASE.in, 'forwards');
+  f.seas.forEach(g => play(g, [{ transform: 'none' }, { transform: 'translateY(36px)' }], 400, D + 450, 'ease-in', 'forwards'));
+  return D + 650;
+}
+function rewind(sc) {
+  const f = stage(sc, false), L = 1000;  // when the box is back in place and the paint starts to come off
+  sc.classList.add('inst', 'cleared'); f.tick.style.strokeDashoffset = 0; f.paint.style.transform = 'none';
+  void sc.offsetWidth; sc.classList.remove('inst');
+  f.analysis.forEach(el => play(el, [{ opacity: 0 }, { opacity: 1 }], 500, 1700).finished.then(a => a.cancel(), () => {}));
+  play(f.ship, [{ transform: 'translateX(-660px)' }, { transform: 'none' }], 750);
+  play(f.box, [{ transform: tr(-660, 6) }, { transform: tr(0, 6) }], 750);
+  play(f.box, [{ transform: tr(0, 6), easing: 'ease-out' }, { transform: tr(0, -12), offset: .3 }, { transform: tr(0, -12), offset: .75, easing: EASE.fall }, { transform: tr(0, 1.5), offset: .92 }, { transform: tr(0) }], 1000, 750, 'linear', 'forwards');
+  play(f.ship, [{ transform: 'none' }, { transform: 'translateX(700px)' }], 650, 1050, EASE.in, 'forwards');
+  play(f.mark, [{ opacity: 1 }, { opacity: 0, transform: 'scale(.85)' }], 300, L - 100);
+  play(f.paint, [{ transform: 'none' }, { transform: 'scaleX(0)' }], 600, L, 'ease-in-out');
+  f.seas.forEach(g => play(g, [{ transform: 'none' }, { transform: 'translateY(36px)' }], 400, 1700, 'ease-in', 'forwards'));
+  setTimeout(() => {
+    f.tiles.forEach(t => { t.style.transitionDelay = `${((tileX(t) - 40) / 300 * 600).toFixed(0)}ms`; });
+    sc.style.setProperty('--pd', '0ms'); sc.classList.remove('cleared');
+  }, L);
+  setTimeout(() => {
+    sc.querySelectorAll('.fxback,.fxfront,.fxpaint,.fxmark').forEach(n => n.remove());
+    f.box.getAnimations().forEach(a => a.cancel()); f.tiles.forEach(t => { t.style.transitionDelay = ''; });
+    sc.classList.remove('fx');
+  }, 2300);
+}
 function celebrate(i) {
-  if (REDUCED) return;
+  if (REDUCED) return 0;
   if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(14);
+  let wait = 700;
   for (const dt of $$('.dt')) {
     if (dt.dataset.fp !== i.fp) continue;
     const b = dt.querySelector('[data-act=clear]');
     if (b) { b.classList.add('done'); b.innerHTML = `${svg('<path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/>')}Cleared<span class="ring2"></span>`; }
-    const sc = dt.querySelector('.scanner'); if (!sc) continue;
-    sc.classList.add('cleared');
-    sc.querySelector('svg').insertAdjacentHTML('beforeend', '<g class="slam"><circle class="shock" cx="190" cy="148" r="40"/><circle class="shock" cx="190" cy="148" r="40" style="animation-delay:.3s"/><g transform="rotate(-8 190 150)"><text x="190" y="166" text-anchor="middle">CLEARED</text></g></g>');
-    const w = sc.clientWidth, x0 = w * 190 / 640, y0 = w * 148 / 640;
-    for (let k = 0; k < 20; k++) {
-      const a = Math.PI * 2 * k / 20 + Math.random() * .3, d = 50 + Math.random() * 80, el = document.createElement('i');
-      el.className = 'spark';
-      el.style.cssText = `left:${x0}px;top:${y0}px;background:${['#60C99A', '#70CDA2', '#E4EDF0', '#2BA779'][k % 4]};--dx:${(Math.cos(a) * d * 1.7).toFixed(0)}px;--dy:${(Math.sin(a) * d).toFixed(0)}px;--r:${(Math.random() * 540 - 270).toFixed(0)}deg;animation-delay:${120 + k * 6}ms`;
-      sc.appendChild(el); setTimeout(() => el.remove(), 1400);
-    }
-    setTimeout(() => sc.classList.add('lift'), 1050);
+    const sc = dt.querySelector('.scanner');
+    if (sc?.offsetParent) wait = Math.max(wait, sail(sc));
   }
+  return wait;
+}
+// undone: the x-ray rewinds, and the card is lowered back into the list where it was
+function arrive(i) {
+  if (REDUCED) return;
+  for (const sc of $$('.scanner')) if (sc.dataset.fp === i.fp && sc.offsetParent) rewind(sc);
+  const c = $(`#queue .qc[data-fp="${CSS.escape(i.fp)}"]`); if (!c) return;
+  c.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  const cs = getComputedStyle(c), h = `${c.offsetHeight}px`, pad = { paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom }, col = cs.getPropertyValue('--sc').trim() || 'currentColor';
+  c.animate([{ height: '0px', paddingTop: '0px', paddingBottom: '0px', opacity: 0, transform: 'translateY(-28px) rotate(-3deg)' },
+    { height: h, ...pad, opacity: 1, transform: 'translateY(5px) rotate(1deg)', offset: .7 }, { height: h, ...pad, opacity: 1, transform: 'none' }],
+  { duration: 760, delay: wide() ? 820 : 120, easing: EASE.out, fill: 'backwards' }).finished.then(() => {
+    moveSel();
+    c.animate([{ outline: `2px solid ${col}`, outlineOffset: '0px' }, { outline: '2px solid transparent', outlineOffset: '9px' }], { duration: 700, easing: 'ease-out' });
+  }, () => {});
 }
 async function clearItem(i) {
   const keys = keysOf(i), next = G.filter(x => !x.approved && needs(x) && x.fp !== i.fp).sort(queueOrder)[0];
   const qc = $(`#queue .qc[data-fp="${CSS.escape(i.fp)}"]`);
-  qc?.classList.add('stamped'); celebrate(i);
-  const t0 = performance.now();
+  if (qc?.classList.contains('stamped')) return;
+  qc?.classList.add('stamped');
+  const wait = celebrate(i), t0 = performance.now();
+  let tm;
   try {
     let run; for (const k of keys) run = await api('/api/approve', { key: k });
     S.sel = next?.fp;
-    setTimeout(() => {
+    tm = setTimeout(() => {
       // the card folds away and the ones below close the gap
       if (qc) { qc.style.height = qc.offsetHeight + 'px'; void qc.offsetWidth; qc.classList.add('gone'); qc.style.height = '0px'; }
-      closeSheet(); setTimeout(() => load(run), REDUCED ? 0 : 420);
-    }, REDUCED ? 0 : Math.max(0, 1250 - (performance.now() - t0)));
-    toast(`<svg class="i tck" viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>${next ? `Cleared <b>${esc(label(i))}</b>. Next: <b>${esc(label(next))}</b>.` : `Cleared <b>${esc(label(i))}</b>. That was the last one.`}</span>`, async () => { let r; for (const k of keys) r = await api('/api/unapprove', { key: k }); S.sel = i.fp; load(r); });
+      closeSheet(); tm = setTimeout(() => load(run), REDUCED ? 0 : 420);
+    }, Math.max(0, wait - (performance.now() - t0)));
+    toast(`<svg class="i tck" viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>${next ? `Cleared <b>${esc(label(i))}</b>. Next: <b>${esc(label(next))}</b>.` : `Cleared <b>${esc(label(i))}</b>. That was the last one.`}</span>`,
+      async () => { clearTimeout(tm); let r; for (const k of keys) r = await api('/api/unapprove', { key: k }); closeSheet(); S.sel = i.fp; load(r); arrive(i); }, wait + 5000);
   } catch (err) { qc?.classList.remove('stamped'); render(); toast(`Couldn’t clear it: ${esc(err.message)}`); }
 }
 async function unclearItem(i) {
   let r; for (const k of keysOf(i)) r = await api('/api/unapprove', { key: k });
-  closeSheet(); S.sel = i.fp; load(r); toast(`Took back the clearance for <b>${esc(label(i))}</b>. It’s in the review again.`);
+  closeSheet(); S.sel = i.fp; load(r); arrive(i); toast(`Took back the clearance for <b>${esc(label(i))}</b>. It’s in the review again.`);
 }
 
 // ---------- the item sheet: open any item from anywhere ----------
@@ -2436,8 +2582,9 @@ function openSettings(focus) {
   renderSettings();
   // the window opens out of the gear: the reveal is centred on it
   const p = $('.dpanel'), g = $('#gear').getBoundingClientRect();
-  p.style.setProperty('--cx', `${(g.left + g.width / 2 - (innerWidth - p.offsetWidth) / 2).toFixed(0)}px`);
-  p.style.setProperty('--cy', `${(g.top + g.height / 2 - (innerHeight - p.offsetHeight) / 2).toFixed(0)}px`);
+  const cx = g.left + g.width / 2 - (innerWidth - p.offsetWidth) / 2, cy = g.top + g.height / 2 - (innerHeight - p.offsetHeight) / 2;
+  p.style.setProperty('--cx', `${cx.toFixed(0)}px`); p.style.setProperty('--cy', `${cy.toFixed(0)}px`);
+  p.style.setProperty('--r',`${Math.ceil(Math.hypot(Math.max(cx, p.offsetWidth - cx), Math.max(cy, p.offsetHeight - cy))) + 4}px`);
   SET.classList.add('on', 'opening'); SET.setAttribute('aria-hidden', 'false'); $('#gear').setAttribute('aria-expanded', 'true');
   setTimeout(() => SET.classList.remove('opening'), 900);  // sections rise in on opening, not on every save
   requestAnimationFrame(themeThumb);
@@ -2580,11 +2727,11 @@ function render() {
   S.drawn = true;
   if (SET.classList.contains('on')) renderSettings();
 }
-function toast(html, undo) {
+function toast(html, undo, ms = 5500) {
   const t = $('#toast'), b = $('#toastundo');
   $('#toastmsg').innerHTML = html; b.hidden = !undo; S.undo = undo || null;
   t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
-  clearTimeout(t._h); t._h = setTimeout(() => { t.classList.remove('show'); S.undo = null; }, 5500);
+  clearTimeout(t._h); t._h = setTimeout(() => { t.classList.remove('show'); S.undo = null; }, ms);
   b.onclick = async () => { t.classList.remove('show'); const u = S.undo; S.undo = null; if (u) await u(); };
 }
 
