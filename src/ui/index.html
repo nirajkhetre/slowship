@@ -106,6 +106,12 @@ mark{background:color-mix(in oklab,var(--glance) 38%,transparent);color:inherit;
 .cta{height:52px;padding:0 22px;font-size:16.5px;border-radius:12px;position:relative}
 .cta.beacon::after{content:"";position:absolute;inset:-1px;border-radius:inherit;box-shadow:0 0 0 0 var(--accent);animation:beaconRing 2.8s var(--out) 1.6s infinite;pointer-events:none}
 .cta.beacon:hover::after{animation:none}
+/* the main button: an arrow that leans forward, and a glint that crosses it on hover */
+.cta{isolation:isolate}
+.cta .arr{width:18px;height:18px;margin-left:2px;stroke-width:2.2;transition:transform .45s var(--spring)}
+.cta:hover .arr{transform:translateX(5px)}
+.cta::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgb(255 255 255 / .3) 50%,transparent 60%) no-repeat 130% 0/250% 100%}
+.cta:hover::before{background-position:-30% 0;transition:background-position .8s var(--out)}
 @keyframes beaconRing{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--accent) 55%,transparent)}70%,100%{box-shadow:0 0 0 14px transparent}}
 
 /* ---------- the bar: what is watched, when it next runs, run it now, settings ---------- */
@@ -189,8 +195,15 @@ mark{background:color-mix(in oklab,var(--glance) 38%,transparent);color:inherit;
 @keyframes radar{from{opacity:.6}to{opacity:0;transform:scale(3.4)}}
 h1{font:800 clamp(42px,5vw,76px)/1 var(--display);letter-spacing:-.03em;margin:14px 0 16px;text-wrap:balance;min-height:1em}
 h1 .w{display:inline-block;white-space:nowrap}
-h1 .ch{display:inline-block;animation:chIn .9s var(--out) both;animation-delay:calc(var(--i) * 24ms)}
+h1 .ch{display:inline-block;animation:chIn .9s var(--out) backwards;animation-delay:calc(var(--i) * 24ms);transition:transform .7s var(--spring),color .3s}
 @keyframes chIn{from{opacity:0;transform:translateY(.32em) rotate(5deg);filter:blur(7px)}}
+/* the letters ride a swell as your pointer passes over them */
+h1 .ch:hover{transform:translateY(-.12em) rotate(-5deg);transition-duration:.18s}
+h1 .ch:hover + .ch,h1 .ch:has(+ .ch:hover){transform:translateY(-.06em) rotate(-2deg);transition-duration:.25s}
+h1 .acc{position:relative;display:inline-block;color:var(--accent-ink,var(--ink))}
+h1 .uw{position:absolute;left:0;right:.08em;bottom:-.14em;width:calc(100% - .08em);height:.2em;overflow:visible;pointer-events:none}
+h1 .uw path{fill:none;stroke:var(--lamp);stroke-width:3.2;stroke-linecap:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--io) .75s forwards,uwave 2.6s ease-in-out 2s infinite}
+@keyframes uwave{50%{transform:translateY(-1.5px)}}
 .vsub{font-size:clamp(16.5px,1.3vw,19px);line-height:1.5;color:var(--ink2);max-width:36ch;text-wrap:pretty}
 .vsub b{color:var(--ink);font-weight:700}
 .vsub code{font-size:.9em}
@@ -199,14 +212,25 @@ h1 .ch{display:inline-block;animation:chIn .9s var(--out) both;animation-delay:c
 .vact{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:24px;animation:rise .7s var(--out) .25s both}
 .clearance{margin-top:28px;max-width:470px}
 .clearance[hidden]{display:none}
-.meter{display:flex;gap:3px;height:12px}
-.meter i{flex:1;min-width:3px;border-radius:2px;cursor:pointer;transform-origin:left;transition:background-color .6s,box-shadow .6s,transform .35s var(--spring)}
+/* the passage: one container per thing to review, a ship riding along how far through you are, a flag at the end */
+.passage{position:relative;padding-top:22px}
+.mboat{position:absolute;top:0;left:0;width:30px;height:20px;margin-left:-15px;color:var(--ink);transition:left 1.2s var(--spring);pointer-events:none}
+.mboat svg{display:block;width:100%;height:100%;animation:bob 2.4s ease-in-out infinite}
+.mboat .cg{fill:var(--accent,var(--ink))}
+.mboat::after{content:"";position:absolute;left:-14px;top:15px;width:14px;height:2px;border-radius:1px;background:linear-gradient(90deg,transparent,color-mix(in oklab,var(--ink) 30%,transparent));transform-origin:right;animation:wake 1.2s ease-in-out infinite alternate}
+@keyframes wake{from{transform:scaleX(.4)}}
+.mflag{position:absolute;right:-6px;top:1px;width:15px;height:20px;pointer-events:none}
+.mflag path:first-child{stroke:var(--ink2);stroke-width:1.6}
+.mflag .fl{fill:var(--clear);transform-box:fill-box;transform-origin:0 50%;animation:flutter 2.6s ease-in-out infinite}
+.meter{display:flex;gap:3px;height:14px}
+.meter i{flex:1;min-width:3px;border-radius:2px;cursor:pointer;transform-origin:left;transition:background-color .6s,box-shadow .6s,transform .35s var(--spring);
+  background-image:repeating-linear-gradient(90deg,transparent 0 3px,rgb(15 32 44 / .1) 3px 4px)}
 .meter i:hover{transform:scaleY(1.6)}
 .meter.grow i{animation:grow .7s var(--out) both;animation-delay:calc(.35s + var(--i) * 45ms)}
 @keyframes grow{from{transform:scaleX(0);opacity:0}}
-.meter i.hold{background:var(--hold-bg);box-shadow:inset 0 0 0 1.5px var(--hold)}
-.meter i.review{background:var(--glance-bg);box-shadow:inset 0 0 0 1.5px var(--glance)}
-.meter i.done{background:var(--clear);box-shadow:none}
+.meter i.hold{background-color:var(--hold-bg);box-shadow:inset 0 0 0 1.5px var(--hold)}
+.meter i.review{background-color:var(--glance-bg);box-shadow:inset 0 0 0 1.5px var(--glance)}
+.meter i.done{background-color:var(--clear);box-shadow:none}
 .meter i.just{animation:fillin .9s var(--out)}
 @keyframes fillin{0%{transform:scaleY(2.4);background:var(--clear-ink);box-shadow:0 0 14px var(--clear)}}
 .meter.progress{display:block;border-radius:3px;background:var(--rule);overflow:hidden}
@@ -376,17 +400,30 @@ h1 .ch{display:inline-block;animation:chIn .9s var(--out) both;animation-delay:c
 .tab b{font:500 12.5px/1 var(--mono);padding:4px 7px;border-radius:6px;background:var(--shoal);color:var(--ink2);transition:background-color .25s,color .25s}
 .tab[aria-selected=true] b{background:color-mix(in oklab,var(--paper) 18%,transparent);color:var(--paper)}
 .tab b.hot{background:var(--accent-bg);color:var(--accent-ink,var(--ink))}
-.tthumb{position:absolute;top:8px;height:38px;left:0;border-radius:10px;background:var(--ink);transition:transform .5s var(--spring),width .5s var(--spring)}
+.tthumb{position:absolute;top:8px;height:38px;left:0;border-radius:10px;background:var(--ink)}
 main{padding:30px 0 0;min-height:60vh}
 .panel[hidden]{display:none}
 main>.panel:not([hidden]){view-transition-name:panel}
+/* only the panel is a picture during a switch; the rest of the page stays live, so the tab pill can be seen moving */
 ::view-transition-old(root),::view-transition-new(root){animation:none}
-::view-transition-old(panel){animation:vtOut .22s var(--out) both}
-::view-transition-new(panel){animation:vtIn .5s var(--out) both}
-html[data-dir=back]::view-transition-new(panel){animation-name:vtInBack}
-@keyframes vtOut{to{opacity:0;transform:translateY(-6px)}}
-@keyframes vtIn{from{opacity:0;transform:translateX(26px)}}
-@keyframes vtInBack{from{opacity:0;transform:translateX(-26px)}}
+html:not(.vt-theme)::view-transition-old(root){display:none}
+::view-transition-old(panel),::view-transition-new(panel){mix-blend-mode:normal}
+::view-transition-group(panel){animation-duration:.6s;animation-timing-function:var(--out)}
+::view-transition-old(panel){animation:vtOut .3s var(--out) both}
+@keyframes vtOut{to{opacity:0;filter:blur(6px);transform:scale(.985)}}
+/* and each place arrives its own way: the review is scanned in from the top, the cargo lands in container slats,
+   the blind spots are swept in like sonar, and how it works unfolds like a chart */
+@property --vp{syntax:'<length>';inherits:false;initial-value:300vh}
+@property --vs{syntax:'<length>';inherits:false;initial-value:60px}
+@property --va{syntax:'<angle>';inherits:false;initial-value:420deg}
+html[data-to=review]::view-transition-new(panel){-webkit-mask-image:linear-gradient(#000 calc(var(--vp) - 160px),#0008 calc(var(--vp) - 24px),#0000 var(--vp));mask-image:linear-gradient(#000 calc(var(--vp) - 160px),#0008 calc(var(--vp) - 24px),#0000 var(--vp));animation:vtScan .8s var(--io) both}
+@keyframes vtScan{from{--vp:0px;filter:blur(4px) brightness(1.15)}to{--vp:300vh}}
+html[data-to=aboard]::view-transition-new(panel){-webkit-mask-image:repeating-linear-gradient(90deg,#000 0 var(--vs),#0000 var(--vs) 60px);mask-image:repeating-linear-gradient(90deg,#000 0 var(--vs),#0000 var(--vs) 60px);animation:vtSlats .7s var(--out) both}
+@keyframes vtSlats{from{--vs:0px;transform:translateY(22px)}to{--vs:60px}}
+html[data-to=blind]::view-transition-new(panel){-webkit-mask-image:conic-gradient(from 0deg at 30% 260px,#000 calc(var(--va) - 60deg),#0000 var(--va));mask-image:conic-gradient(from 0deg at 30% 260px,#000 calc(var(--va) - 60deg),#0000 var(--va));animation:vtSweep .85s var(--io) both}
+@keyframes vtSweep{from{--va:0deg}to{--va:420deg}}
+html[data-to=how]::view-transition-new(panel){transform-origin:50% 0;animation:vtUnfold .85s var(--out) both}
+@keyframes vtUnfold{from{opacity:0;transform:perspective(1600px) rotateX(-58deg) translateY(-14px)}45%{opacity:1}}
 html.vt-theme main>.panel{view-transition-name:none}
 html.vt-theme::view-transition-new(root){animation:reveal .75s var(--io)}
 @keyframes reveal{from{clip-path:circle(0 at var(--vx,90%) var(--vy,0))}to{clip-path:circle(160vmax at var(--vx,90%) var(--vy,0))}}
@@ -856,11 +893,7 @@ dialog.proj[open]{animation:dlg .45s var(--spring)}
 
 /* ---------- the chart under everything, and a little grain, so the page has a surface ---------- */
 .chartbg{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
-.chartbg .drift{animation:chartdrift 90s ease-in-out infinite alternate}
-@keyframes chartdrift{to{transform:translate(-46px,20px)}}
-.chartbg path{fill:none;stroke:var(--ink);stroke-opacity:.055;stroke-width:1.1}
-.chartbg path.deep{stroke-dasharray:2 6;stroke-opacity:.075}
-.chartbg text{font:italic 500 12px var(--display);fill:var(--ink);fill-opacity:.1}
+body.onshoal{cursor:pointer}
 body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.045;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
 
 /* the tab icons act out their tab while it's open: a lens looks, a container settles, a sonar sweeps, a needle finds north */
@@ -886,8 +919,19 @@ body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opa
 .qc.hold{--sc:var(--hold)}.qc.glance{--sc:var(--glance)}
 .qc::before{content:"";position:absolute;left:9px;top:12px;bottom:10px;width:7px;border-inline:1.5px solid color-mix(in oklab,var(--sc) 70%,transparent);border-radius:1px}
 .qc:hover:not(.sel){transform:translateY(-2px);box-shadow:inset 0 3px 0 var(--sc),0 12px 22px -16px rgb(15 32 44 / .5)}
-.qc.sel{transform:translateX(6px);border-color:var(--ink);box-shadow:inset 0 3px 0 var(--sc),0 16px 30px -18px rgb(15 32 44 / .6)}
-.queue .qsel{left:0;right:auto;width:4px;border-radius:2px;background:var(--ink);border:0;box-shadow:none}
+/* the picked card is lit in its own colour, its door rails filled; a light passes over it once */
+.qc.sel{border-color:color-mix(in oklab,var(--sc) 50%,var(--rule));background-color:color-mix(in oklab,var(--sc) 7%,var(--sheet));box-shadow:inset 0 3px 0 var(--sc),0 18px 34px -22px color-mix(in oklab,var(--sc) 80%,#000)}
+.qc.sel::before{border-color:var(--sc);background:repeating-linear-gradient(transparent 0 3px,color-mix(in oklab,var(--sc) 40%,transparent) 3px 5px)}
+.qc.sel .qn{font-weight:800}
+.qc.sel:not(.stamped)::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 30%,color-mix(in oklab,var(--sc) 24%,transparent) 50%,transparent 70%);transform:translateX(-100%);animation:qsweep 1s var(--out) .15s}
+@keyframes qsweep{to{transform:translateX(100%)}}
+/* the selection is a lock-on: four corner marks travel to the card you pick and close in on it */
+.queue{padding:8px 7px 8px 12px}
+.queue .qsel{left:5px;right:0;width:auto;border:0;border-radius:0;box-shadow:none;--b:var(--ink);background:
+  linear-gradient(var(--b) 0 0) 0 0/14px 2px,linear-gradient(var(--b) 0 0) 0 0/2px 14px,linear-gradient(var(--b) 0 0) 100% 0/14px 2px,linear-gradient(var(--b) 0 0) 100% 0/2px 14px,
+  linear-gradient(var(--b) 0 0) 0 100%/14px 2px,linear-gradient(var(--b) 0 0) 0 100%/2px 14px,linear-gradient(var(--b) 0 0) 100% 100%/14px 2px,linear-gradient(var(--b) 0 0) 100% 100%/2px 14px;background-repeat:no-repeat}
+.qsel.lock{animation:lockon .65s var(--spring)}
+@keyframes lockon{from{transform:scale(1.06,1.3);opacity:.25}}
 
 /* the x-ray: the item as a container under the scanner, its files inside, wired to what they can do */
 .scanner{position:relative;margin:0;border-radius:16px;overflow:hidden;isolation:isolate;background:radial-gradient(110% 90% at 30% 0%,#183449 0%,#0B1A24 58%,#071219 100%);box-shadow:inset 0 0 0 1px rgb(255 255 255 / .05)}
@@ -1184,8 +1228,6 @@ body::after{content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opa
 .gauge{display:none}
 @property --dep{syntax:'<integer>';inherits:false;initial-value:0}
 @supports (animation-timeline:scroll()){
-  .chartbg .par{animation:chartpar linear both;animation-timeline:scroll(root)}
-  @keyframes chartpar{to{transform:translateY(-280px) scale(1.08)}}
   .depth{animation:deepen linear both;animation-timeline:scroll(root)}
   @keyframes deepen{to{opacity:1}}
   .hero .hgrid{animation:heroout linear both;animation-timeline:scroll(root);animation-range:0 560px}
@@ -1292,7 +1334,10 @@ body.empty .holds,body.empty .clearance{display:none}
       <h1 id="headline"></h1>
       <p class="vsub" id="sub"></p>
       <div class="vact" id="vact"></div>
-      <div class="clearance" id="clearance" hidden><div class="meter" id="meter" aria-hidden="true"></div><p class="mlabel" id="mlabel"></p></div>
+      <div class="clearance" id="clearance" hidden><div class="passage" aria-hidden="true">
+        <span class="mboat" id="mboat"><svg viewBox="0 0 30 20"><rect class="cg" x="8" y="7" width="8" height="6" rx="1"/><rect x="17" y="4" width="5" height="9" rx="1" fill="currentColor"/><path d="M2 13h26l-4 6H6z" fill="currentColor"/></svg></span>
+        <svg class="mflag" viewBox="0 0 15 20"><path d="M2 2v18"/><path class="fl" d="M3 2.5h10l-3 3.5 3 3.5H3z"/></svg>
+        <div class="meter" id="meter"></div></div><p class="mlabel" id="mlabel"></p></div>
     </div>
     <div class="scene" id="scene">
       <svg class="harbour" id="harbour" viewBox="0 96 640 236" role="img" aria-label="Your project as a ship in harbour" data-v="night"></svg>
@@ -1642,12 +1687,16 @@ function verdict() {
   return r.level === 'hold' ? 'hold' : r.level === 'review' ? 'review' : 'clear';
 }
 // the headline arrives letter by letter, and changes the same way when the verdict does
+const ARR = '<svg class="i arr" viewBox="0 0 24 24"><path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5"/></svg>';
+// the part after "|" is the state itself: it takes the state's colour and a wave is drawn under it
 function setHeadline(text) {
   const h = $('#headline');
   if (h.dataset.t === text) return;
-  h.dataset.t = text; h.setAttribute('aria-label', text);
+  h.dataset.t = text; h.setAttribute('aria-label', text.replace('|', ' '));
   let n = 0;
-  h.innerHTML = text.split(' ').map(w => `<span class="w" aria-hidden="true">${[...w].map(c => `<span class="ch" style="--i:${n++}">${esc(c)}</span>`).join('')}</span>`).join(' ');
+  const words = s => s.split(' ').map(w => `<span class="w" aria-hidden="true">${[...w].map(c => `<span class="ch" style="--i:${n++}">${esc(c)}</span>`).join('')}</span>`).join(' ');
+  const [a, b] = text.split('|');
+  h.innerHTML = words(a) + (b ? ` <span class="acc">${words(b)}<svg class="uw" viewBox="0 0 120 10" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M1 5q7.25-5 14.5 0t14.5 0 14.5 0 14.5 0 14.5 0 14.5 0 14.5 0 14.5 0"/></svg></span>` : '');
 }
 function hero() {
   const v = verdict(), r = S.run && !S.run.empty ? S.run : null;
@@ -1662,10 +1711,10 @@ function hero() {
     : d ? `<span class="dot"></span><span>${dayWord(d)}’s watch over <b>${esc(name)}</b>, finished ${hm(d)}</span>`
     : v === 'error' ? '<span class="dot"></span><span>Offline</span>' : '<span class="dot"></span><span>Welcome aboard</span>';
   const H = {
-    hold: ['Held in port.', `<b>${pl(holdsN, 'thing does', 'things do')}</b> more than ${holdsN === 1 ? 'it says' : 'they say'}. Look at ${holdsN === 1 ? 'it' : 'them'} before you ship${glances ? `, then glance at ${glances} more` : ''}.`],
-    review: ['Ready after a glance.', `Nothing serious. <b>${pl(glances, 'thing is', 'things are')}</b> worth a quick look before you ship.`],
-    clear: ['Cleared to sail.', notable ? `Nothing needs you. ${pl(notable, 'thing uses', 'things use')} powers you’d expect from ${notable === 1 ? 'it' : 'them'}.` : 'Nothing needs you this morning.'],
-    night: ['No watch yet.', 'Choose a project. slowship reads everything it brings aboard, overnight or right now, and leaves one verdict here.'],
+    hold: ['Held|in port.', `<b>${pl(holdsN, 'thing does', 'things do')}</b> more than ${holdsN === 1 ? 'it says' : 'they say'}. Look at ${holdsN === 1 ? 'it' : 'them'} before you ship${glances ? `, then glance at ${glances} more` : ''}.`],
+    review: ['Ready after|a glance.', `Nothing serious. <b>${pl(glances, 'thing is', 'things are')}</b> worth a quick look before you ship.`],
+    clear: ['Cleared|to sail.', notable ? `Nothing needs you. ${pl(notable, 'thing uses', 'things use')} powers you’d expect from ${notable === 1 ? 'it' : 'them'}.` : 'Nothing needs you this morning.'],
+    night: ['No watch|yet.', 'Choose a project. slowship reads everything it brings aboard, overnight or right now, and leaves one verdict here.'],
     watch: ['Keeping watch…', S.watch?.total ? `Read <b>${S.watch.done} of ${S.watch.total}</b>${S.watch.now ? `, now <code>${esc(S.watch.now.name)}</code>` : ''}. ${S.watch.now?.phase === 'judge' ? `${modelName()} is comparing it with what it says it does.` : 'Anything unchanged since last time takes no time at all.'}` : 'Finding everything aboard…'],
     error: ['Can’t reach the report.', 'Run <code>slowship ui</code> in a terminal, then reload this page.'],
   }[v];
@@ -1673,9 +1722,9 @@ function hero() {
   if (v === 'watch') $('#sub').innerHTML = H[1]; else swapIn($('#sub'), H[1]);  // live text updates in place, it doesn't fade in twice a second
   // one primary action, chosen by the state
   const act = {
-    hold: `<button class="btn accent cta beacon" data-go="review">Review ${pl(open.length, 'thing')}</button><button class="link" data-explain="verdict">What do these words mean?</button>`,
-    review: `<button class="btn accent cta beacon" data-go="review">Review ${pl(open.length, 'thing')}</button><button class="link" data-explain="verdict">What do these words mean?</button>`,
-    clear: `<button class="btn cta" data-go="aboard">See everything aboard</button><button class="link" data-go="how">How does this work?</button>`,
+    hold: `<button class="btn accent cta beacon" data-go="review">Review ${pl(open.length, 'thing')}${ARR}</button><button class="link" data-explain="verdict">What do these words mean?</button>`,
+    review: `<button class="btn accent cta beacon" data-go="review">Review ${pl(open.length, 'thing')}${ARR}</button><button class="link" data-explain="verdict">What do these words mean?</button>`,
+    clear: `<button class="btn cta" data-go="aboard">See everything aboard${ARR}</button><button class="link" data-go="how">How does this work?</button>`,
     night: `<button class="btn primary cta beacon" data-browse="project">${IC.folder}Choose a project</button><button class="link" data-go="how">How does this work?</button>`,
     watch: `<button class="btn cta" data-go="live">Watch it live</button>`,
     error: '',
@@ -1687,13 +1736,14 @@ function hero() {
     cl.hidden = false;
     const pct = S.watch.total ? S.watch.done / S.watch.total * 100 : 3;
     if (!m.classList.contains('progress')) { m.className = 'meter progress'; m.innerHTML = '<b style="width:0"></b>'; }
-    m.firstChild.style.width = pct + '%';
+    m.firstChild.style.width = pct + '%'; $('#mboat').style.left = pct + '%';
     $('#mlabel').innerHTML = `<span><b>${Math.round(pct)}%</b> read</span><span>Nothing is run</span>`;
   } else if (r && need.length) {
     cl.hidden = false;
     const was = new Set($$('#meter i.done').map(i => i.dataset.k)), first = !$$('#meter i').length;
     m.className = 'meter' + (first && !REDUCED ? ' grow' : '');
     m.innerHTML = [...need].sort((a, b) => ORDER[b.level] - ORDER[a.level]).map((i, k) => `<i data-k="${esc(i.fp)}" style="--i:${k}" class="${i.approved ? 'done' + (!first && !was.has(i.fp) ? ' just' : '') : i.level}"></i>`).join('');
+    $('#mboat').style.left = `${done / need.length * 100}%`;
     $('#mlabel').innerHTML = `<span><b id="mdone">${done}</b>&nbsp;of ${need.length} reviewed</span>${holdsN ? `<span><i class="pip hold"></i>${holdsN} held</span>` : ''}${glances ? `<span><i class="pip glance"></i>${glances} to glance at</span>` : ''}${info('clearance')}`;
   } else cl.hidden = true;
   scene(v);
@@ -1739,9 +1789,14 @@ document.addEventListener('click', e => { if (MENU.classList.contains('on') && !
 
 // ---------- tabs: one place at a time, sliding between ----------
 const TABS = ['review', 'aboard', 'blind', 'how'];
+// the pill moves like a drop of ink: it stretches to reach the new tab, then lets go of the old one
 function thumbTo() {
-  const on = $(`.tab[data-tab="${S.tab}"]`), th = $('#tthumb');
-  if (on) { th.style.width = on.offsetWidth + 'px'; th.style.transform = `translateX(${on.offsetLeft}px)`; }
+  const on = $(`.tab[data-tab="${S.tab}"]`), th = $('#tthumb'); if (!on) return;
+  const x = on.offsetLeft, w = on.offsetWidth, x0 = th._x ?? x, w0 = th._w ?? w;
+  th.style.width = w + 'px'; th.style.transform = `translateX(${x}px)`; th._x = x; th._w = w;
+  if (x0 !== x && !REDUCED) th.animate([{ transform: `translateX(${x0}px)`, width: w0 + 'px' },
+    { transform: `translateX(${Math.min(x0, x)}px)`, width: Math.max(x0 + w0, x + w) - Math.min(x0, x) + 'px', offset: .42 },
+    { transform: `translateX(${x}px)`, width: w + 'px' }], { duration: 600, easing: 'cubic-bezier(.3,.7,.2,1)' });
 }
 function showPanels() {
   for (const t of TABS) { $(`#p-${t}`).hidden = t !== S.tab; $(`#t-${t}`).setAttribute('aria-selected', t === S.tab); }
@@ -1751,10 +1806,9 @@ function showPanels() {
 }
 function setTab(t) {
   if (!TABS.includes(t) || t === S.tab) return;
-  const dir = TABS.indexOf(t) > TABS.indexOf(S.tab) ? 'fwd' : 'back';
   S.tab = t;  // decided now, drawn when the transition is ready, so quick clicks always land on the last tab
   const go = () => showPanels();
-  document.documentElement.dataset.dir = dir;
+  document.documentElement.dataset.to = t;
   if (document.startViewTransition && !REDUCED && !document.hidden) { const vt = document.startViewTransition(go); vt.ready.catch(() => {}); vt.finished.catch(() => {}); } else go();
   history.replaceState(null, '', '#' + t);
 }
@@ -2187,19 +2241,111 @@ const thumbSVG = t => {
     <rect x="97" y="22" width="6" height="24" fill="#F6FAFB"/><circle cx="100" cy="20" r="3.4" fill="#F4D58A"/></svg>`;
 };
 
-// ---------- the chart under everything: depth contours and soundings ----------
+// ---------- the chart under everything: a live sea chart of this watch. Every open finding is a shoal on it, the held
+// ones the biggest; clearing one lets it sink. Your pointer parts the water, scrolling carries you over the chart, a
+// shoal shows its name when you come near, and clicking one opens it. The soundings are read off the chart itself ----------
+const SHOALS = new Map();
+const hash01 = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; };
+let chartDirty = true;
+function chartShoals() {
+  const open = new Set();
+  for (const i of G) {
+    if (i.approved || !needs(i)) continue;
+    open.add(i.fp);
+    const s = SHOALS.get(i.fp) ?? { fp: i.fp, a: 0, x: .04 + hash01(i.fp) * .92, y: .08 + hash01(i.fp + '~') * .9 };
+    Object.assign(s, { name: label(i), lv: i.level === 'hold' ? 2 : 1, to: i.level === 'hold' ? 1.35 : .9, r: i.level === 'hold' ? 120 : 92 });
+    SHOALS.set(i.fp, s);
+  }
+  for (const s of SHOALS.values()) if (!open.has(s.fp)) s.to = 0;
+  chartDirty = true;
+}
 function chartBg() {
-  let s = 11; const rnd = () => (s = s * 16807 % 2147483647) / 2147483647;
-  const blob = (cx, cy, r) => {
-    const n = 30, pts = Array.from({ length: n }, (_, k) => { const a = k / n * Math.PI * 2, w = 1 + .16 * Math.sin(a * 3 + cx * .01) + .08 * Math.cos(a * 5 + cy * .02); return [cx + Math.cos(a) * r * w, cy + Math.sin(a) * r * w * .6]; });
-    const mid = k => { const p = pts[k % n], q = pts[(k + 1) % n]; return `${((p[0] + q[0]) / 2).toFixed(1)} ${((p[1] + q[1]) / 2).toFixed(1)}`; };
-    let d = `M${mid(n - 1)}`; for (let k = 0; k < n; k++) d += ` Q${pts[k][0].toFixed(1)} ${pts[k][1].toFixed(1)} ${mid(k)}`;
-    return d + 'Z';
+  document.body.insertAdjacentHTML('afterbegin', `<canvas class="chartbg" aria-hidden="true"></canvas><div class="depth" aria-hidden="true"></div><div class="gauge" aria-hidden="true"><span class="gt"></span><span class="gm"><i></i></span><span class="gv"></span></div>`);
+  const cv = $('.chartbg'), g = cv.getContext('2d'), C = 24, LV = [-.55, -.3, -.05, .2, .45, .7, .95, 1.2];
+  // which edges of a grid cell a contour crosses, for each of the 16 ways its corners can sit above or below the level
+  const SEG = [[], [3, 0], [0, 1], [3, 1], [1, 2], [3, 0, 1, 2], [0, 2], [3, 2], [2, 3], [0, 2], [0, 1, 2, 3], [1, 2], [3, 1], [0, 1], [3, 0], []];
+  const SOUND = Array.from({ length: 30 }, (_, k) => [hash01('s' + k), hash01('t' + k)]);
+  const BG = 'body,main,.hero,.hgrid,.vcol,.panel,.ph,.review,.qwrap,footer,.wrap';
+  const P = { x: -1e4, y: -1e4, tx: -1e4, ty: -1e4, s: 0, at: -1e4 };
+  let W, H, cols, rows, f, own, ink, tint, font, frame = 0, hot = null;
+  let X, Y, A, B, Cc, D, L;  // the cell being traced
+  const ex = e => e === 0 ? X + C * (L - A) / (B - A) : e === 1 ? X + C : e === 2 ? X + C * (L - D) / (Cc - D) : X;
+  const ey = e => e === 0 ? Y : e === 1 ? Y + C * (L - B) / (Cc - B) : e === 2 ? Y + C : Y + C * (L - A) / (D - A);
+  const size = () => {
+    const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+    cv.width = W * d; cv.height = H * d; g.setTransform(d, 0, 0, d, 0, 0);
+    cols = Math.ceil(W / C) + 2; rows = Math.ceil(H / C) + 2; f = new Float32Array(cols * rows); own = new Uint8Array(cols * rows); chartDirty = true;
   };
-  const isles = [[1320, 180, [50, 100, 160, 230, 310, 400]], [180, 860, [70, 140, 220, 310]], [760, 1120, [120, 220, 330]]];
-  const paths = isles.flatMap(([x, y, rs]) => rs.map((r, k) => `<path${k % 2 ? ' class="deep"' : ''} d="${blob(x, y, r)}"/>`)).join('');
-  const nums = Array.from({ length: 34 }, () => `<text x="${(rnd() * 1600).toFixed(0)}" y="${(rnd() * 1000).toFixed(0)}">${Math.floor(rnd() * 28) + 2}</text>`).join('');
-  document.body.insertAdjacentHTML('afterbegin', `<svg class="chartbg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="par"><g class="drift">${paths}${nums}</g></g></svg><div class="depth" aria-hidden="true"></div><div class="gauge" aria-hidden="true"><span class="gt"></span><span class="gm"><i></i></span><span class="gv"></span></div>`);
+  const colours = () => { const cs = getComputedStyle(document.documentElement); ink = cs.getPropertyValue('--ink').trim(); tint = [ink, cs.getPropertyValue('--glance').trim(), cs.getPropertyValue('--hold').trim()]; font = cs.getPropertyValue('--display').trim(); };
+  function draw(now) {
+    const t = REDUCED ? 0 : now / 1000, so = scrollY * .35, VH = H * 2.4;
+    P.x += (P.tx - P.x) * .16; P.y += (P.ty - P.y) * .16;
+    P.s += ((!REDUCED && now - P.at < 900 ? 1 : 0) - P.s) * .07;
+    const sh = [...SHOALS.values()];
+    for (const s of sh) {
+      s.a += (s.to - s.a) * (REDUCED ? 1 : .035); s.px = s.x * W; s.py = s.y * VH - so;
+      if (s.to === 0 && s.a < .01) SHOALS.delete(s.fp);
+    }
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      const x = i * C, y = j * C, yy = y + so;
+      let h = .3 * Math.sin(x * .0042 + t * .11) * Math.cos(yy * .005 - t * .08) + .22 * Math.sin((x + yy) * .0028 + t * .05) + .12 * Math.cos(x * .011 - yy * .008 + t * .09), best = .25, o = 0;
+      for (const s of sh) {
+        const dx = x - s.px, dy = y - s.py, d2 = dx * dx + dy * dy, r2 = s.r * s.r;
+        if (d2 < r2 * 9) { const v = s.a * Math.exp(-d2 / r2); h += v; if (v > best) { best = v; o = s.lv; } }
+      }
+      if (P.s > .01) { const dx = x - P.x, dy = y - P.y; h -= P.s * .85 * Math.exp(-(dx * dx + dy * dy) / 9000); }
+      f[j * cols + i] = h; own[j * cols + i] = o;
+    }
+    g.clearRect(0, 0, W, H); g.lineWidth = 1.1;
+    for (const lv of LV) {
+      const paths = [new Path2D(), new Path2D(), new Path2D()]; L = lv;
+      for (let j = 0; j < rows - 1; j++) for (let i = 0; i < cols - 1; i++) {
+        A = f[j * cols + i]; B = f[j * cols + i + 1]; Cc = f[(j + 1) * cols + i + 1]; D = f[(j + 1) * cols + i];
+        const sg = SEG[(A > lv) | (B > lv) << 1 | (Cc > lv) << 2 | (D > lv) << 3]; if (!sg.length) continue;
+        X = i * C; Y = j * C;
+        const p = paths[own[j * cols + i]];
+        for (let k = 0; k < sg.length; k += 2) { p.moveTo(ex(sg[k]), ey(sg[k])); p.lineTo(ex(sg[k + 1]), ey(sg[k + 1])); }
+      }
+      g.setLineDash(lv < 0 ? [2, 6] : []);
+      g.strokeStyle = ink; g.globalAlpha = lv < 0 ? .07 : .06; g.stroke(paths[0]);
+      g.setLineDash([]); g.globalAlpha = .34;
+      g.strokeStyle = tint[1]; g.stroke(paths[1]);
+      g.strokeStyle = tint[2]; g.stroke(paths[2]);
+    }
+    // soundings, in metres, read off the chart where they sit
+    g.font = `italic 500 11px ${font}`; g.textAlign = 'center'; g.fillStyle = ink; g.globalAlpha = .13;
+    for (const [sx, sy] of SOUND) {
+      const x = sx * W, y = ((sy * VH - so) % VH + VH) % VH; if (y > H) continue;
+      const v = f[Math.min(rows - 1, Math.round(y / C)) * cols + Math.min(cols - 1, Math.round(x / C))];
+      g.fillText(Math.max(1, Math.round((1.6 - v) * 11)), x, y);
+    }
+    // a shoal names itself as you come near; the one under the pointer is marked, ready to open
+    g.font = `italic 700 13px ${font}`;
+    for (const s of sh) {
+      const near = Math.max(0, 1 - Math.hypot(P.x - s.px, P.y - s.py) / 260) * P.s * Math.min(1, s.a);
+      if (near < .02) continue;
+      g.globalAlpha = s === hot ? .95 : near * .8; g.fillStyle = tint[s.lv]; g.fillText(s.name, s.px, s.py + 4);
+      if (s === hot) { g.strokeStyle = tint[s.lv]; g.setLineDash([4, 5]); g.beginPath(); g.arc(s.px, s.py, s.r * .7, 0, Math.PI * 2); g.stroke(); g.setLineDash([]); g.font = `600 11px ${font}`; g.fillText('open ↗', s.px, s.py + 20); g.font = `italic 700 13px ${font}`; }
+    }
+    g.globalAlpha = 1;
+  }
+  size(); colours();
+  addEventListener('resize', size);
+  addEventListener('scroll', () => { chartDirty = true; }, { passive: true });
+  addEventListener('pointermove', e => {
+    P.tx = e.clientX; P.ty = e.clientY; P.at = performance.now(); chartDirty = true;
+    const bg = e.target.matches?.(BG) && !e.target.closest('header,.tabs,.drawer,.sheet,dialog');
+    hot = bg ? [...SHOALS.values()].find(s => s.a > .35 && Math.hypot(e.clientX - s.px, e.clientY - s.py) < s.r * .7) ?? null : null;
+    document.body.classList.toggle('onshoal', !!hot);
+  }, { passive: true });
+  addEventListener('click', e => { if (hot && e.target.matches?.(BG)) { const i = G.find(x => x.fp === hot.fp); if (i) openSheet(i); } });
+  // about 30 frames a second while the sea moves; with reduced motion it's drawn still, and only again when something changes
+  const loop = now => {
+    if (++frame % 30 === 0) colours();
+    if (frame % 2 === 0 && (!REDUCED || chartDirty)) { chartDirty = false; draw(now); }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
 }
 
 // ---------- review: the queue on the left, the inspector on the right ----------
@@ -2235,7 +2381,8 @@ function moveSel() {
   qrail();
   const q = $('#queue'), sel = q.querySelector('.qc.sel'), h = $('#qsel');
   if (!h || !sel || !wide()) { q.classList.remove('has'); return; }
-  h.style.top = sel.offsetTop + 'px'; h.style.height = sel.offsetHeight + 'px';
+  h.style.top = sel.offsetTop - 5 + 'px'; h.style.height = sel.offsetHeight + 10 + 'px';
+  if (h.dataset.fp !== sel.dataset.fp) { h.dataset.fp = sel.dataset.fp; h.classList.remove('lock'); void h.offsetWidth; h.classList.add('lock'); }
   q.classList.add('has');
 }
 // the rail beside the list: a mark for each card, a frame for the part in view; press or drag it to scroll
@@ -2720,7 +2867,7 @@ function load(run) { S.run = run; G = run && !run.empty ? group(run) : []; rende
 function render() {
   const r = S.run, empty = !r || !!r.empty;
   document.body.classList.toggle('empty', empty && !S.watch);
-  hero(); bar(); how();
+  hero(); bar(); how(); chartShoals();
   if (!empty) { holds(); review(); filters(); powers(); table(); blind(); tabCounts(); if (S.tab === 'blind') blindOpen(); }
   else { $('#queue').innerHTML = ''; $('#insp').innerHTML = `<div class="calm">${miniFace('sleepy')}<div><b>No watch yet.</b><p>Choose a project and run the first watch. The review list appears here.</p></div></div>`; $('#review').classList.add('done'); $('#qprog').innerHTML = ''; $('#needlede').textContent = ''; }
   $('#footmeta').textContent = projOf();

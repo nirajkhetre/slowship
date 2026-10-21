@@ -71,7 +71,7 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 - **A project switcher and Settings.** Switch to a recent project, or browse to any folder on this computer. Settings hold the nightly watch, what to read, your build folder, the model and the theme, and save as you change them.
 - **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run: the ship docks, a gantry scans each thing aboard, and every step from fingerprint to verdict lights up as it happens.
 
-Colours come from nautical charts: magenta marks what's held (no red anywhere), amber what's worth a glance, green what's cleared. A `?` next to any part explains it, and a short tour runs on your first visit.
+Colours come from nautical charts: magenta marks what's held (no red anywhere), amber what's worth a glance, green what's cleared. Behind the report is a live sea chart of the watch: every open finding is a shoal on it, and it sinks once you clear it. Come near one to read its name, click it to open it. A `?` next to any part explains it, and a short tour runs on your first visit.
 
 ## Measured so far
 
