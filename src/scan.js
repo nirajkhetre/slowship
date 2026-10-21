@@ -10,7 +10,7 @@ import { appFacts } from './app.js';
 import { fingerprint, load, newSince, save } from './state.js';
 
 // Bump when what gets read changes, so results cached by an older slowship are read again (approvals stay: same bytes).
-const RULES = 2;
+const RULES = 3;
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
 export async function checkItems(items, { model = true, onItem = () => {}, onStep = () => {} } = {}) {

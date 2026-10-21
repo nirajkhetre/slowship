@@ -144,6 +144,29 @@ test('a .NET assembly: P/Invoke into CreateProcess is "starts programs"; harmles
   assert.match(r.facts[1].detail, /CreateProcess in kernel32\.dll: starts programs/);
 });
 
+test('.NET, method by method: decode-and-load and read-and-post are held; an update check and Load(name) are not', async () => {
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const dll = join(mkdtempSync(join(tmpdir(), 'slowship-')), 'Loader.dll');
+  writeFileSync(dll, 'MZ inert stand-in: REA\'s recorded answers describe test/fixtures/dotnet-loader/Loader.cs');
+  const answers = JSON.parse(readFileSync(join(FX, 'rea', 'dotnet-loader.json'), 'utf8'));
+  const r = binaryFacts(dll, 'Loader.dll', args => answers[args[0]]);
+  const v = verdict(r), kinds = v.findings.map(f => f.kind);
+  assert.equal(v.level, 'hold');
+  assert.ok(kinds.includes('hidden-code') && kinds.includes('exfil'), kinds.join());
+  const code = r.facts.filter(f => f.cap === 'code');
+  assert.deepEqual(code.map(f => f.code), ['in Loader.Start'], 'Assembly.Load(name) in LoadPlugin is ordinary');
+  assert.ok(!v.findings.some(f => f.level === 'hold' && f.evidence.some(id => v.short.find(s => s.id === id)?.code === 'in Loader.CheckForUpdates')));
+});
+
+test('Electron fuses as shipped: RunAsNode, NODE_OPTIONS and --inspect are worth a glance', async () => {
+  const { fuseFacts } = await import('../src/binary.js');
+  const answer = JSON.parse(readFileSync(join(FX, 'rea', 'electron-fuses.json'), 'utf8'));
+  const r = fuseFacts('app.exe', 'app.exe', () => answer);
+  assert.deepEqual(r.facts.map(f => f.cap), ['fuse-node', 'fuse-node', 'fuse-node', 'fuse-asar']);
+  assert.equal(verdict(r).level, 'review');
+  assert.equal(fuseFacts('tool.exe', 'tool.exe', () => ({ normalized_result: { slices: [{ sentinels: [] }] } })), null, 'not Electron: nothing to say');
+});
+
 test('unpacking a tarball never writes outside the quarantine folder', async () => {
   const { untar } = await import('../src/agents.js');
   const { gzipSync } = await import('node:zlib');

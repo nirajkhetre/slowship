@@ -47,8 +47,8 @@ To get the model: `ollama pull gemma4:e2b`. Choose another with `SLOWSHIP_MODEL`
 | **Packages** | your lockfile (`package-lock.json`), so it reads what you'll actually ship |
 | **Agent skills** | the skill folders that coding agents use, in your home folder and in the project (for example `~/.agents/skills` and `~/.codex/skills`), plugin folders included |
 | **MCP servers** | the MCP configs of the popular coding agents and editors (Cursor, VS Code, Codex and others). `npx` servers are downloaded into a quarantine folder with scripts disabled and read there; compiled servers are read as far as their build record (see below). None are ever started |
-| **Compiled files** (with [REA](https://github.com/morluto/rea)) | Go and Rust programs and .NET assemblies, whether a compiled MCP server or a `.node`, `.exe` or `.dll` inside a package: what they were built from (modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes) and, for .NET, the native functions they declare (starting programs, raw network, keystroke hooks, writing into other programs, decrypting what Windows protects for the user) |
-| **Your build** (`--app`) | secrets that slipped in (redacted in every output), shipped `.env` files and source maps, Electron switches like `nodeIntegration` or `contextIsolation: false`, DevTools left on, and, if REA is installed, a map of every IPC handler: which page function (`window.api.x`) reaches it, whether it checks who sent the message, and what it does |
+| **Compiled files** (with [REA](https://github.com/morluto/rea)) | Go and Rust programs and .NET assemblies, whether a compiled MCP server or a `.node`, `.exe` or `.dll` inside a package: what they were built from (modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes) and, for .NET, the native functions they declare (starting programs, raw network, keystroke hooks, writing into other programs, decrypting what Windows protects for the user) plus, method by method, the framework calls each method makes and the strings it loads. So a .NET method that decodes base64 and loads it as code, or names the browser's password file and posts, is held just like the same JavaScript function |
+| **Your build** (`--app`) | secrets that slipped in (redacted in every output), shipped `.env` files and source maps, Electron switches like `nodeIntegration` or `contextIsolation: false`, DevTools left on, and, if REA is installed, a map of every IPC handler: which page function (`window.api.x`) reaches it, whether it checks who sent the message, and what it does. A packaged Electron executable gets its fuses read: whether it still lets anyone run it as plain Node.js, inject code through `NODE_OPTIONS`, attach a debugger with `--inspect`, or change its code after signing |
 
 ## How it works
 
@@ -99,6 +99,8 @@ Reading compiled programs installed on the same laptop (REA 6.7.0, nothing start
 | `uv.exe` | Rust, 572 crates | 2.6 s |
 | PowerShell's `System.Management.Automation.dll` | .NET, 62 references, 192 native imports, two flagged: `CreateProcess` and `CryptUnprotectData` | 5.6 s |
 | a C++ `.node` addon (node-pty) | no record: named, not read | 3.8 s |
+| VS Code's `Code.exe` (a packaged Electron app) | fuses as shipped: run as Node, `NODE_OPTIONS` and `--inspect` on, asar integrity off | 1.5 s |
+| slowship's inert `test/fixtures/dotnet-loader/Loader.cs`, compiled | held twice: decode-then-load in one method, "Login Data" then a POST in another. Its update check and `Assembly.Load(name)` are left alone | 6.1 s |
 
 ### Against known malware
 
@@ -117,7 +119,8 @@ Put plainly: a hold is usually right (12 of 14), but it catches about one malici
 slowship reads code; it never runs it. So:
 
 - Code fetched or built while a program runs is invisible. It reports the capability ("downloads and runs code") but not the payload.
-- Compiled code isn't decompiled. With REA installed, Go, Rust and .NET files are read as far as their build record: what they were built from, not what they do. C and C++ leave no record, so those are only named.
+- Compiled code isn't decompiled. With REA installed, Go and Rust files are read as far as their build record: what they were built from, not what they do. .NET is read further, method by method, unless an assembly is too big for REA's member reader (PowerShell's 13 MB engine is). C and C++ leave no record, so those are only named.
+- REA's map of an Electron app is slow on very big builds: on VS Code's 6,187 files it got through 156 in 13 minutes. slowship gives it 5 minutes and says so when it gives up. A packaged app gets its fuses read, but its `app.asar` isn't mapped; point `--app` at the unpacked build for the IPC map.
 - In your build, only inline IPC handler bodies are searched for what they do; a handler that hands off to a function elsewhere isn't followed.
 - Python and shell inside skills are read line by line, not with a full parser. Treat quiet there as "nothing obvious".
 - TypeScript isn't read yet, and code inside markdown code blocks isn't read as code.
@@ -129,7 +132,7 @@ slowship reads code; it never runs it. So:
 ## Safety
 
 - **It never executes scanned code.** No `require`, no install scripts, no starting MCP servers.
-- **REA runs only its static readers** (`analyze-javascript-application`, `inspect-go-binary`, `inspect-rust-binary`, `inspect-managed-artifact`, `inspect-managed-native-boundaries`), with fixed arguments, a timeout and a cap on output. None of them loads or starts the file it reads.
+- **REA runs only its static readers** (`analyze-javascript-application`, `inspect-go-binary`, `inspect-rust-binary`, `inspect-managed-artifact`, `inspect-managed-native-boundaries`, `inspect-managed-members`, `inspect-electron-fuses`), with fixed arguments, a timeout and a cap on output. None of them loads or starts the file it reads.
 - **No shell anywhere.** Programs are started with `execFile` and fixed arguments. Package names are validated before `npm pack`, and tarballs are unpacked by our own reader, which refuses paths that try to leave the quarantine folder.
 - **The report server answers only this machine.** It checks the `Host` header (no DNS rebinding) and the `Origin`, takes JSON only, and caps request bodies.
 - **Code context is safe to serve.** The code shown around a finding is read only from inside that item's own folder, and secrets are cut down before they reach the page.
@@ -153,11 +156,11 @@ node site/record.mjs <project>   # record one real watch for the web demo (publi
 node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
-There are 19 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, and Go and .NET build records (from recorded REA answers). One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+There are 21 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, and Electron fuses (the last four from recorded REA answers). One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 
-- [REA](https://github.com/morluto/rea) (MIT) maps the structure of Electron builds and reads the build records of compiled Go, Rust and .NET files.
+- [REA](https://github.com/morluto/rea) (MIT) maps the structure of Electron builds and reads compiled Go, Rust and .NET files and Electron fuses, all without running them.
 - [acorn](https://github.com/acornjs/acorn) (MIT) parses JavaScript.
 - [Ollama](https://ollama.com) and Google's Gemma 4 (under the Gemma terms) are the local model.
 - Fonts (SIL Open Font License): [Besley](https://github.com/indestructible-type/Besley) for the verdict, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else, drawn so that 0/O and 1/l/I can't be mistaken. They're bundled, so the report makes no outside requests.

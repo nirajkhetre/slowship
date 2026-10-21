@@ -6,7 +6,7 @@ import { basename, extname, join, relative } from 'node:path';
 import * as acorn from 'acorn';
 import * as loose from 'acorn-loose';
 import * as walk from 'acorn-walk';
-import { binaryFacts, isBinary, rea } from './binary.js';
+import { binaryFacts, fuseFacts, isBinary, rea, reaScript } from './binary.js';
 import { entropy, fileFacts } from './facts.js';
 
 // Known secret shapes. A few are public by design (a Firebase web key), so they are notable, not hold.
@@ -162,7 +162,10 @@ export function appFacts(root, { rea: useRea = true } = {}) {
       if (/^\.env(\.|$)/.test(e.name) && !/\.(example|sample|template)$/.test(e.name)) facts.push({ cap: 'env-file', detail: `${e.name} is in the build: it usually holds secrets`, file: rel, line: 0, scope: `${rel}#0`, code: '' });
       if (ext === '.map') facts.push({ cap: 'sourcemap', detail: 'ships a source map: your original source code is readable', file: rel, line: 0, scope: `${rel}#0`, code: '' });
       if (useRea && isBinary(p)) {
-        const b = binaryFacts(p, rel);
+        const b = binaryFacts(p, rel), fz = ['.dll', '.node', '.so', '.dylib'].includes(ext) ? null : fuseFacts(p, rel);
+        // ponytail: a packaged app's fuses are read, but its app.asar isn't sent to REA's app map (on VS Code's 6,187 files
+        // that map read 156 in 13 minutes); point --app at the unpacked build to get the IPC map
+        if (fz) { facts.push(...fz.facts); b.built.fuses = fz.fuses; }
         facts.push(...b.facts); (map.binaries ??= []).push({ file: rel, ...b.built });
         continue;
       }
@@ -181,7 +184,8 @@ export function appFacts(root, { rea: useRea = true } = {}) {
   statSync(root).isDirectory() ? visit(root) : facts.push(...secretFacts(readFileSync(root, 'utf8'), basename(root)));
   if (useRea && electron) {
     const r = statSync(root).isDirectory() ? reaApp(root) : null;
-    coverage.rea = r ? 'read by REA' : 'REA not installed: structure checks skipped (npm i -g rea-agents)';
+    coverage.rea = r ? 'read by REA' : reaScript() ? 'REA couldn\'t map this app (too large, or it failed): structure checks skipped'
+      : 'REA not installed: structure checks skipped (npm i -g rea-agents)';
     if (r) {
       map.ipc = ipcMap(r.graph);
       const ipc = ipcFacts(map.ipc, root, facts), sunk = new Set(ipc.filter(f => f.cap === 'ipc-sink').map(f => `${f.file}:${f.line}`));

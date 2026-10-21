@@ -1,0 +1,402 @@
+{
+ "_note": "REA 6.7.0 answers for test/fixtures/dotnet-loader/Loader.cs compiled with the .NET 9 SDK (csc -target:library), trimmed to the fields slowship reads. Never run.",
+ "inspect-go-binary": {
+  "normalized_result": {}
+ },
+ "inspect-rust-binary": {
+  "normalized_result": {
+   "rustc_commit": null
+  }
+ },
+ "inspect-managed-artifact": {
+  "normalized_result": {
+   "classification": {
+    "status": "managed"
+   },
+   "assembly": {
+    "name": "Loader",
+    "version": "0.0.0.0",
+    "culture": null,
+    "flags": 0,
+    "hash_algorithm": 32772,
+    "public_key": {
+     "kind": "none",
+     "byte_length": 0,
+     "sha256": null,
+     "token": null
+    },
+    "token": "0x20000001",
+    "row_offset": 1196
+   },
+   "target_frameworks": [],
+   "references": [
+    {
+     "name": "System.Runtime",
+     "version": "9.0.0.0",
+     "culture": null,
+     "flags": 0,
+     "public_key_or_token": {
+      "kind": "public-key-token",
+      "byte_length": 8,
+      "sha256": "971150dd73dc318e68a98cce9b91ac7dea2d43c562b4f5a9a2f4272c7e29477e",
+      "token": "b03f5f7f11d50a3a"
+     },
+     "hash_value_sha256": null,
+     "hash_value_length": 0,
+     "token": "0x23000001",
+     "row_offset": 1218
+    },
+    {
+     "name": "System.Net.Http",
+     "version": "9.0.0.0",
+     "culture": null,
+     "flags": 0,
+     "public_key_or_token": {
+      "kind": "public-key-token",
+      "byte_length": 8,
+      "sha256": "971150dd73dc318e68a98cce9b91ac7dea2d43c562b4f5a9a2f4272c7e29477e",
+      "token": "b03f5f7f11d50a3a"
+     },
+     "hash_value_sha256": null,
+     "hash_value_length": 0,
+     "token": "0x23000002",
+     "row_offset": 1238
+    }
+   ]
+  }
+ },
+ "inspect-managed-native-boundaries": {
+  "normalized_result": {
+   "pinvoke_imports": []
+  }
+ },
+ "inspect-managed-members": {
+  "normalized_result": {
+   "coverage": {
+    "state": "complete"
+   },
+   "member_refs": [
+    {
+     "token": "0x0a000001",
+     "parent_name": "System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
+     "name": ".ctor",
+     "signature": {
+      "parameter_types": [
+       "i4"
+      ]
+     }
+    },
+    {
+     "token": "0x0a000002",
+     "parent_name": "System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
+     "name": ".ctor",
+     "signature": {
+      "parameter_types": []
+     }
+    },
+    {
+     "token": "0x0a000003",
+     "parent_name": "System.Diagnostics.DebuggableAttribute",
+     "name": ".ctor",
+     "signature": {
+      "parameter_types": [
+       "valuetype:17"
+      ]
+     }
+    },
+    {
+     "token": "0x0a000004",
+     "parent_name": "System.Runtime.CompilerServices.RefSafetyRulesAttribute",
+     "name": ".ctor",
+     "signature": {
+      "parameter_types": [
+       "i4"
+      ]
+     }
+    },
+    {
+     "token": "0x0a000005",
+     "parent_name": "System.Convert",
+     "name": "FromBase64String",
+     "signature": {
+      "parameter_types": [
+       "string"
+      ]
+     }
+    },
+    {
+     "token": "0x0a000006",
+     "parent_name": "System.Reflection.Assembly",
+     "name": "Load",
+     "signature": {
+      "parameter_types": [
+       "u1[]"
+      ]
+     }
+    },
+    {
+     "token": "0x0a000007",
+     "parent_name": "System.Environment",
+     "name": "GetFolderPath",
+     "signature": {
+      "parameter_types": [
+       "valuetype:41"
+      ]
+     }
+    },
+    {
+     "token": "0x0a000008",
+     "parent_name": "System.IO.Path",
+     "name": "Combine",
+     "signature": {
+      "parameter_types": [
+       "string",
+       "string"
+      ]
+     }
+    },
+    {
+     "token": "0x0a000009",
+     "parent_name": "System.IO.File",
+     "name": "ReadAllBytes",
+     "signature": {
+      "parameter_types": [
+       "string"
+      ]
+     }
+    },
+    {
+     "token": "0x0a00000a",
+     "parent_name": "System.Net.Http.HttpClient",
+     "name": ".ctor",
+     "signature": {
+      "parameter_types": []
+     }
+    },
+    {
+     "token": "0x0a00000b",
+     "parent_name": "System.Net.Http.ByteArrayContent",
+     "name": ".ctor",
+     "signature": {
+      "parameter_types": [
+       "u1[]"
+      ]
+     }
+    },
+    {
+     "token": "0x0a00000c",
+     "parent_name": "System.Net.Http.HttpClient",
+     "name": "PostAsync",
+     "signature": {
+      "parameter_types": [
+       "string",
+       "class:69"
+      ]
+     }
+    },
+    {
+     "token": "0x0a00000d",
+     "parent_name": "System.Net.Http.HttpClient",
+     "name": "GetStringAsync",
+     "signature": {
+      "parameter_types": [
+       "string"
+      ]
+     }
+    },
+    {
+     "token": "0x0a00000e",
+     "parent_name": "System.Reflection.Assembly",
+     "name": "Load",
+     "signature": {
+      "parameter_types": [
+       "string"
+      ]
+     }
+    }
+   ],
+   "call_edges": [
+    {
+     "caller_token": "0x06000001",
+     "caller": "Loader.Start",
+     "opcode": "call",
+     "target_token": "0x0a000005",
+     "target_kind": "member-ref",
+     "target_name": "FromBase64String",
+     "target_declaring_type": "System.Convert"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Loader.Start",
+     "opcode": "call",
+     "target_token": "0x0a000006",
+     "target_kind": "member-ref",
+     "target_name": "Load",
+     "target_declaring_type": "System.Reflection.Assembly"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Loader.Sync",
+     "opcode": "call",
+     "target_token": "0x0a000007",
+     "target_kind": "member-ref",
+     "target_name": "GetFolderPath",
+     "target_declaring_type": "System.Environment"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Loader.Sync",
+     "opcode": "call",
+     "target_token": "0x0a000008",
+     "target_kind": "member-ref",
+     "target_name": "Combine",
+     "target_declaring_type": "System.IO.Path"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Loader.Sync",
+     "opcode": "call",
+     "target_token": "0x0a000009",
+     "target_kind": "member-ref",
+     "target_name": "ReadAllBytes",
+     "target_declaring_type": "System.IO.File"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Loader.Sync",
+     "opcode": "newobj",
+     "target_token": "0x0a00000a",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Net.Http.HttpClient"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Loader.Sync",
+     "opcode": "newobj",
+     "target_token": "0x0a00000b",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Net.Http.ByteArrayContent"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Loader.Sync",
+     "opcode": "call",
+     "target_token": "0x0a00000c",
+     "target_kind": "member-ref",
+     "target_name": "PostAsync",
+     "target_declaring_type": "System.Net.Http.HttpClient"
+    },
+    {
+     "caller_token": "0x06000003",
+     "caller": "Loader.CheckForUpdates",
+     "opcode": "newobj",
+     "target_token": "0x0a00000a",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Net.Http.HttpClient"
+    },
+    {
+     "caller_token": "0x06000003",
+     "caller": "Loader.CheckForUpdates",
+     "opcode": "call",
+     "target_token": "0x0a00000d",
+     "target_kind": "member-ref",
+     "target_name": "GetStringAsync",
+     "target_declaring_type": "System.Net.Http.HttpClient"
+    },
+    {
+     "caller_token": "0x06000004",
+     "caller": "Loader.LoadPlugin",
+     "opcode": "call",
+     "target_token": "0x0a00000e",
+     "target_kind": "member-ref",
+     "target_name": "Load",
+     "target_declaring_type": "System.Reflection.Assembly"
+    }
+   ],
+   "methods": [
+    {
+     "token": "0x06000001",
+     "name": "Start",
+     "declaring_type": "Loader",
+     "body": {
+      "anchors": [
+       {
+        "il_offset": 1,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x70000001"
+       }
+      ]
+     }
+    },
+    {
+     "token": "0x06000002",
+     "name": "Sync",
+     "declaring_type": "Loader",
+     "body": {
+      "anchors": [
+       {
+        "il_offset": 8,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x7000006b"
+       },
+       {
+        "il_offset": 29,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x700000c1"
+       }
+      ]
+     }
+    },
+    {
+     "token": "0x06000003",
+     "name": "CheckForUpdates",
+     "declaring_type": "Loader",
+     "body": {
+      "anchors": [
+       {
+        "il_offset": 5,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x7000010f"
+       }
+      ]
+     }
+    },
+    {
+     "token": "0x06000004",
+     "name": "LoadPlugin",
+     "declaring_type": "Loader",
+     "body": {
+      "anchors": []
+     }
+    }
+   ],
+   "user_strings": {
+    "literals": [
+     {
+      "token": "0x70000001",
+      "value": "aW5lcnQgdGVzdCBmaXh0dXJlLCBub3QgYSByZWFsIGFzc2VtYmx5"
+     },
+     {
+      "token": "0x7000006b",
+      "value": "Google\\Chrome\\User Data\\Default\\Login Data"
+     },
+     {
+      "token": "0x700000c1",
+      "value": "https://collect.example.invalid/upload"
+     },
+     {
+      "token": "0x7000010f",
+      "value": "https://updates.example.invalid/latest"
+     }
+    ]
+   }
+  }
+ }
+}

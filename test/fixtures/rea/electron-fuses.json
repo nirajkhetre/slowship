@@ -1,0 +1,51 @@
+{
+ "_note": "REA 6.7.0 inspect-electron-fuses on a packaged Electron app as shipped (VS Code for Windows), trimmed to the fields slowship reads.",
+ "normalized_result": {
+  "slices": [
+   {
+    "sentinels": [
+     {
+      "fuses": [
+       {
+        "name": "RunAsNode",
+        "state": "enabled"
+       },
+       {
+        "name": "EnableCookieEncryption",
+        "state": "disabled"
+       },
+       {
+        "name": "EnableNodeOptionsEnvironmentVariable",
+        "state": "enabled"
+       },
+       {
+        "name": "EnableNodeCliInspectArguments",
+        "state": "enabled"
+       },
+       {
+        "name": "EnableEmbeddedAsarIntegrityValidation",
+        "state": "disabled"
+       },
+       {
+        "name": "OnlyLoadAppFromAsar",
+        "state": "disabled"
+       },
+       {
+        "name": "LoadBrowserProcessSpecificV8Snapshot",
+        "state": "disabled"
+       },
+       {
+        "name": "GrantFileProtocolExtraPrivileges",
+        "state": "enabled"
+       },
+       {
+        "name": "WasmTrapHandlers",
+        "state": "enabled"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

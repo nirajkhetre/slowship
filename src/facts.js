@@ -36,6 +36,18 @@ export function entropy(s) {
   return Object.values(n).reduce((h, k) => h - (k / s.length) * Math.log2(k / s.length), 0);
 }
 
+/** What a string literal points at: credential files, places that start code again, web addresses, encoded blobs.
+ *  Shared with compiled .NET code, whose string literals REA lists (binary.js). */
+export function stringFacts(s) {
+  const out = [], sec = s.match(SECRET_PATH), per = s.match(PERSIST_PATH);
+  if (sec) out.push(['secret-path', `mentions "${sec[0]}"`]);
+  if (per) out.push(['persist-path', `mentions "${per[0]}"`]);
+  const url = s.match(/\b(?:https?|wss?):\/\/([a-z0-9.-]+\.[a-z]{2,}|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?/i);
+  if (url) out.push(['url', `URL to ${url[1]}`]);
+  if (BLOB.test(s) && entropy(s) > 4.5) out.push(['obfuscated', `${s.length}-character encoded blob`]);
+  return out;
+}
+
 function parse(src) {
   const opts = { ecmaVersion: 'latest', locations: true, allowHashBang: true, allowReturnOutsideFunction: true, allowAwaitOutsideFunction: true };
   for (const sourceType of ['module', 'script']) {
@@ -129,13 +141,7 @@ export function fileFacts(src, file) {
       }
       case 'Literal': case 'TemplateLiteral': {
         const s = str(node);
-        if (!s) break;
-        const sec = s.match(SECRET_PATH), per = s.match(PERSIST_PATH);
-        if (sec) add('secret-path', `mentions "${sec[0]}"`, node);
-        if (per) add('persist-path', `mentions "${per[0]}"`, node);
-        const url = s.match(/\b(?:https?|wss?):\/\/([a-z0-9.-]+\.[a-z]{2,}|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?/i);
-        if (url) add('url', `URL to ${url[1]}`, node);
-        if (BLOB.test(s) && entropy(s) > 4.5) add('obfuscated', `${s.length}-character encoded blob`, node);
+        if (s) for (const [cap, detail] of stringFacts(s)) add(cap, detail, node);
         break;
       }
     }

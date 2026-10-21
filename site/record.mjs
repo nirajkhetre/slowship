@@ -21,8 +21,10 @@ const { findSkills, skillFacts } = await import('../src/agents.js');
 const { appFacts } = await import('../src/app.js');
 const { codeWindow } = await import('../src/server.js');
 
-const app = join(FX, 'my-electron-app'), items = [];
-items.push({ kind: 'app', key: `app:${app}`, name: 'my-app', dir: app, claim: '', fp: `app-${fingerprint(app)}`, noModel: true, read: () => appFacts(app) });
+// two builds: a careless one, and a notes window whose IPC map has one handler that checks its sender and two that don't
+const app = join(FX, 'my-electron-app'), notes = join(FX, 'ipc-app'), items = [];
+for (const [dir, name] of [[app, 'my-app'], [notes, 'notes-window']])
+  items.push({ kind: 'app', key: `app:${dir}`, name, dir, claim: '', fp: `app-${fingerprint(dir)}`, noModel: true, read: () => appFacts(dir) });
 for (const p of npmPackages(project).packages) items.push({ kind: 'npm', key: p.key, name: p.name, dir: p.dir, manifest: p.manifest, claim: claimOf(p.dir, p.manifest), fp: fingerprint(p.dir, p.integrity) });
 for (const f of ['evil-pkg', 'injected-pkg']) {
   const dir = join(FX, f), m = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
@@ -38,7 +40,7 @@ const run = await checkItems(items, {
 });
 run.finished = new Date().toISOString();
 run.options = { project, model: true, packages: true, agents: true, fetch: false, app };
-run.unread = [{ key: 'mcp:a-compiled-server', why: 'server.exe is a compiled program: its source can’t be read here', source: join(home, '.cursor', 'mcp.json') }];
+run.unread = [{ key: 'mcp:a-remote-server', why: 'remote server: its code runs elsewhere and can’t be read', source: join(home, '.cursor', 'mcp.json') }];
 
 // the code around every finding worth opening, read now so the demo can show it
 const codes = {};
@@ -53,6 +55,7 @@ const swap = (from, to) => {
   for (const f of [from, from.replaceAll('\\', '/')]) text = text.split(JSON.stringify(f).slice(1, -1)).join(to);
 };
 swap(join(FX, 'my-electron-app'), '/home/you/code/my-app/dist');
+swap(join(FX, 'ipc-app'), '/home/you/code/my-app/notes-window');
 for (const f of ['evil-pkg', 'injected-pkg']) swap(join(FX, f), `/home/you/code/my-app/node_modules/${JSON.parse(readFileSync(join(FX, f, 'package.json'), 'utf8')).name}`);
 swap(project, '/home/you/code/my-app');
 swap(home, '/home/you');

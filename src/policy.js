@@ -7,7 +7,7 @@ const RISK = {
   'electron-node': 2, 'electron-isolation-off': 2, 'electron-sandbox-off': 1, 'electron-websec-off': 2,
   'ipc-unchecked': 2, 'ipc-sink': 1, bridge: 0, native: 0,
   // compiled files, from their build record (binary.js)
-  'built-from': 0, 'swapped-dep': 1, 'dirty-build': 1, keys: 2, inject: 2, dpapi: 1,
+  'built-from': 0, 'swapped-dep': 1, 'dirty-build': 1, keys: 2, inject: 2, dpapi: 1, 'fuse-node': 2, 'fuse-asar': 1,
   code: 2, exec: 2, net: 2, 'install-script': 2,
   'fs-write': 1, 'env-secret': 1, 'secret-path': 1, 'persist-path': 1, 'dynamic-load': 1, imports: 0,
   decode: 0, 'fs-read': 0, fs: 0, os: 0, env: 0, url: 0,
@@ -56,7 +56,8 @@ export function combos(raw) {
       }
       // near: every needed part sits in the same function as, or within 60 lines of, a fact of the first part
       for (const a of fs.filter(f => c.needs[0].includes(f.cap))) {
-        const close = fs.filter(f => f.scope === a.scope || Math.abs(f.line - a.line) <= 60);
+        // line 0 is "no line" (a compiled file, a manifest): there only the same function counts as near
+        const close = fs.filter(f => f.scope === a.scope || (f.line > 0 && a.line > 0 && Math.abs(f.line - a.line) <= 60));
         if (c.needs.every(group => close.some(f => group.includes(f.cap)))) close.forEach(f => keys.add(factKey(f)));
       }
     }

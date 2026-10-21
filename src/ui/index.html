@@ -581,6 +581,16 @@ html.vt-theme::view-transition-new(root){animation:reveal .75s var(--io)}
 .mani .dv{color:var(--ink2);white-space:nowrap}
 .mani li.odd .dn{color:var(--glance-ink);font-weight:700}
 .mani .sw{flex-basis:100%;padding-left:14px;font-size:12px;color:var(--glance-ink)}
+/* fuses: little switches, the knob where the fuse is set; the ones set the risky way are lit amber */
+.fz{display:flex;flex-wrap:wrap;gap:6px}
+.fs{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px 0 6px;border-radius:8px;border:1px solid var(--rule2);font:600 12.5px var(--mono);color:var(--ink2);background:var(--sheet)}
+.fs i{position:relative;width:22px;height:12px;border-radius:6px;background:var(--quiet);transition:background .3s}
+.fs i::after{content:"";position:absolute;top:2px;left:2px;width:8px;height:8px;border-radius:50%;background:var(--sheet);transition:transform .45s var(--spring);transition-delay:calc(.3s + var(--n) * 60ms)}
+.fs.on i::after{transform:translateX(10px)}
+.fs.bad{border-color:transparent;background:var(--glance-bg);color:var(--glance-ink)}
+.fs.bad i{background:var(--glance)}
+.bin .fs i::after{animation:knob .6s var(--spring) both;animation-delay:calc(.3s + var(--n) * 60ms)}
+@keyframes knob{from{transform:translateX(5px)}}
 
 /* a path that reads like one */
 .crumb{display:flex;flex-wrap:wrap;align-items:center;gap:1px;font:500 13px/1 var(--mono);color:var(--ink2);min-width:0}
@@ -1504,7 +1514,7 @@ const TOUCH = [
   ['code', 'Builds code at runtime', ['code', 'dynamic-load', 'obfuscated', 'hidden-chars']],
   ['box', 'Runs at install', ['install-script']],
   ['speech', 'Instructs your agent', ['conceal', 'override']],
-  ['app', 'Risky app settings', ['electron-node', 'electron-isolation-off', 'electron-sandbox-off', 'electron-websec-off', 'ipc-unchecked', 'ipc-sink', 'devtools', 'open-external', 'sourcemap']],
+  ['app', 'Risky app settings', ['electron-node', 'electron-isolation-off', 'electron-sandbox-off', 'electron-websec-off', 'ipc-unchecked', 'ipc-sink', 'fuse-node', 'fuse-asar', 'devtools', 'open-external', 'sourcemap']],
   ['chip', 'Compiled code', ['built-from', 'swapped-dep', 'dirty-build', 'keys', 'inject']],
 ];
 // a bare call like "fetch()" gets a plain-words lead-in
@@ -1529,6 +1539,8 @@ const WHY = {
   'ipc-unchecked': 'Electron’s security checklist asks every IPC handler to check who sent the message (event.senderFrame). Without that, any page in the window can call it.',
   'swapped-dep': 'The build record says this dependency was replaced or came from outside the public registry. Sometimes that’s a quick fix; it’s also how a tampered build hides.',
   'dirty-build': 'Built from changes that were never committed, so no published source matches it exactly.',
+  'fuse-node': 'Fuses are switches baked into the Electron executable when it’s packaged, and Electron ships them open. With these on, anything that can start your app can run code under its name and signature. Turn them off with @electron/fuses when you package.',
+  'fuse-asar': 'Without asar integrity checks (or with code allowed outside app.asar), someone who can write to the install folder can change your app’s code and it still runs as your signed app.',
 };
 const whyOf = f => WHY[f.kind] ?? (f.matches_claim === 'no'
   ? 'The local model compared this with the description and found the description doesn’t need it. Clear it once and slowship won’t ask again until the code changes.'
@@ -1948,7 +1960,7 @@ const codeRows = (start, lines, hot, lang, note, sev, ctx) => lines.map((l, k) =
 }).join('');
 function editor(i, e, sev, note) {
   // no single line to show (a whole file, a package.json script, REA's view of the app): say what was found, where
-  if (!e.code || !e.line) return `<div class="filecard">${e.file === '(REA)' ? IC.app : TG(e.cap) === 'chip' ? IC.chip : IC.files}<div><b>${esc(e.file === '(REA)' ? 'REA · how the app is built' : e.file)}</b><span>${esc(e.detail || (e.file === '(REA)' ? 'Found in REA’s map of the app’s structure.' : 'The whole file.'))}</span></div></div>`;
+  if (!e.code || !e.line) return `<div class="filecard">${e.file === '(REA)' ? IC.app : TG(e.cap) === 'chip' ? IC.chip : IC.files}<div><b>${esc(e.file === '(REA)' ? 'REA · how the app is built' : e.file)}</b><span>${esc(e.detail || (e.file === '(REA)' ? 'Found in REA’s map of the app’s structure.' : 'The whole file.'))}${TG(e.cap) && e.code ? ` <code class="ic">${esc(e.code)}</code>` : ''}</span></div></div>`;
   return `<figure class="ed ${sev}" data-key="${esc(i.key)}" data-file="${esc(e.file)}" data-line="${e.line}" data-sev="${sev}" data-note="${esc(note)}">
     <figcaption class="edbar">${IC.files}<span class="fn" title="${esc(joinPath(itemPath(i), e.file))}">${esc(e.file)}</span><span class="sp"></span><span class="at">line ${e.line}</span><button class="cbtn" data-copy="${esc(e.code)}" aria-label="Copy this line" title="Copy the line">${IC.copy}</button></figcaption>
     <div class="edbody">${codeRows(e.line, [e.code], e.line, langOf(e.file), note, sev)}</div></figure>`;
@@ -1972,7 +1984,7 @@ const COVER = i => {
   return `<div class="cov">${IC.eye}<span>Read <b>${c.read} of ${c.files}</b> file${c.files === 1 ? '' : 's'}${c.lineLevel?.length ? `, ${c.lineLevel.length} of them line by line` : ''}${big ? `. ${big} too large to read` : ''}${c.rea ? `. ${esc(cap1(c.rea))}` : ''}. Read, never run.</span></div>`;
 };
 function evidence(i, f) {
-  const at = e => `${e.file}${e.line ? ':' + e.line : ''}`, seen = new Set();
+  const at = e => `${e.file}${e.line ? ':' + e.line : '|' + e.detail}`, seen = new Set();  // no line (a compiled file): each fact is its own place
   return f.evidence.map(id => i.facts.find(x => x.id === id)).filter(e => e && !seen.has(at(e)) && seen.add(at(e))).slice(0, 3);
 }
 const WORDS = { expected: 'As described', unexpected: 'Not in the description', unclear: 'Not sure' };
@@ -2051,19 +2063,26 @@ function ipcHTML(i) {
 
 // ---------- built from: what REA read from each compiled file's build record ----------
 const LANG = { go: 'Go', rust: 'Rust', dotnet: '.NET' };
+// Electron's fuses as a row of switches, each one lit when it's set the risky way. [label, the safe setting]
+const FUSE = { RunAsNode: ['Run as Node', false], EnableNodeOptionsEnvironmentVariable: ['NODE_OPTIONS', false], EnableNodeCliInspectArguments: ['--inspect', false],
+  EnableEmbeddedAsarIntegrityValidation: ['asar integrity', true], OnlyLoadAppFromAsar: ['only app.asar', true], EnableCookieEncryption: ['cookie encryption', true],
+  GrantFileProtocolExtraPrivileges: ['file:// privileges', false] };
+const fusesHTML = fz => `<p class="bn">Its fuses, as packaged:</p><div class="fz">${Object.entries(FUSE).filter(([k]) => k in fz).map(([k, [name, safe]], n) =>
+  `<span class="fs${fz[k] === safe ? '' : ' bad'}${fz[k] ? ' on' : ''}" style="--n:${n}" title="${esc(k)}: ${fz[k] ? 'on' : 'off'}"><i></i>${esc(name)}</span>`).join('')}</div>`;
 const UNIT = { go: ['module', 'modules'], rust: ['crate', 'crates'], dotnet: ['assembly', 'assemblies'] };
 function builtHTML(i) {
   const bins = i.map?.binaries;
   if (!bins?.length) return '';
-  const read = bins.filter(b => b.lang), blank = bins.filter(b => !b.lang);
+  const read = bins.filter(b => b.lang || b.fuses), blank = bins.filter(b => !b.lang && !b.fuses);
   const card = (b, k) => {
     const deps = b.deps || [], odd = deps.filter(d => d.swap || (d.source && d.source !== 'crates.io' && d.source !== 'local'));
     const rows = [...odd, ...deps.filter(d => !odd.includes(d))].map(d => `<li${odd.includes(d) ? ' class="odd"' : ''}><span class="dn" title="${esc(d.name)}">${esc(d.name)}</span><span class="dl"></span><span class="dv">${esc(d.version || '')}</span>${d.swap ? `<span class="sw">swapped for ${esc(d.swap)}</span>` : odd.includes(d) ? `<span class="sw">from ${esc(d.source)}</span>` : ''}</li>`).join('');
     return `<div class="bin" style="--i:${k}">
-      <div class="bh"><code class="bf">${esc(b.file)}</code><span class="kchip">${LANG[b.lang]}</span>${b.tool ? `<span class="bt">${esc(b.tool)}</span>` : ''}</div>
+      <div class="bh"><code class="bf">${esc(b.file)}</code><span class="kchip">${b.fuses ? 'Electron' : LANG[b.lang]}</span>${b.tool ? `<span class="bt">${esc(b.tool)}</span>` : ''}</div>
+      ${b.fuses ? fusesHTML(b.fuses) : ''}
       ${b.main ? `<p class="bm">${esc(b.main)}${deps.length ? ` and <b>${pl(deps.length, ...UNIT[b.lang])}</b>` : ''}</p>` : ''}
       ${b.native?.length ? `<p class="bn">Calls into ${b.native.slice(0, 8).map(n => `<code class="ic">${esc(n)}</code>`).join(' ')}${b.native.length > 8 ? ` and ${b.native.length - 8} more` : ''}</p>` : ''}
-      ${b.note ? `<p class="bn">${esc(b.note)}</p>` : ''}
+      ${b.note && !b.fuses ? `<p class="bn">${esc(b.note)}</p>` : ''}
       ${rows ? `<details class="mani"${odd.length ? ' open' : ''}><summary>The manifest${odd.length ? ` · <b>${pl(odd.length, 'not from the public registry', 'not from the public registry')}</b>` : ''}</summary><ol>${rows}</ol></details>` : ''}
     </div>`;
   };

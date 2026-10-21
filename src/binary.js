@@ -4,6 +4,7 @@
 import { execFileSync } from 'node:child_process';
 import { closeSync, existsSync, openSync, readSync } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
+import { stringFacts } from './facts.js';
 
 /** Where REA's entry script lives: SLOWSHIP_REA (the script, or a bin wrapper next to it), or a global npm install. */
 export function reaScript() {
@@ -45,6 +46,62 @@ const WIN32 = [
   { cap: 'inject', re: /^(WriteProcessMemory|CreateRemoteThread(Ex)?|VirtualAllocEx|NtUnmapViewOfSection)$/i, says: 'writes into other programs\' memory' },
   { cap: 'dpapi', re: /^CryptUnprotectData$/i, says: 'decrypts data Windows keeps for this user (where browsers store saved passwords)' },
 ];
+
+// Managed calls that matter, by declaring type and member: [cap, type, member, what it does, needs a byte[] argument].
+const MANAGED = [
+  ['exec', /^System\.Diagnostics\.Process$/, /^Start$/, 'starts a program'],
+  ['net', /^System\.Net\.Http\.HttpClient$/, /^(Send|Get|Post|Put|Patch|Delete)/, 'makes a web request'],
+  ['net', /^System\.Net\.(WebClient|WebRequest|HttpWebRequest)$/, /^(Download|Upload|Create$|GetResponse|GetRequestStream)/, 'makes a web request'],
+  ['net', /^System\.Net\.Sockets\.(Socket|TcpClient|UdpClient)$/, /^(Connect|Send)/, 'opens a network connection'],
+  ['net', /^System\.Net\.WebSockets\.ClientWebSocket$/, /^ConnectAsync$/, 'opens a web socket'],
+  ['code', /^System\.Reflection\.Assembly$/, /^Load$/, 'loads code from bytes in memory', true],
+  ['code', /(CodeDomProvider|CSharpCodeProvider)$/, /^CompileAssemblyFrom/, 'compiles code at runtime'],
+  ['decode', /^System\.Convert$/, /^FromBase64(String|CharArray)$/, 'decodes base64'],
+  ['fs-write', /^System\.IO\.File$/, /^(WriteAll|AppendAll|Copy$|Move$|Delete$|OpenWrite$)/, 'writes files'],
+  ['fs-write', /^Microsoft\.Win32\.RegistryKey$/, /^SetValue$/, 'writes the registry'],
+  ['dpapi', /^System\.Security\.Cryptography\.ProtectedData$/, /^Unprotect$/, 'decrypts data Windows keeps for this user (where browsers store saved passwords)'],
+];
+
+/** Inside a .NET assembly, method by method: the framework calls it makes and the strings it loads, as facts scoped
+ *  to the method, so "reads a credential file, then sends" must happen in one method, as in a JS function. */
+export function managedFacts(file, rel, run = rea) {
+  const r = run(['inspect-managed-members', file, '--filter-output', 'normalized_result.coverage.state,normalized_result.member_refs,normalized_result.call_edges,normalized_result.methods,normalized_result.user_strings'], 64 << 20);
+  const m = r?.normalized_result;
+  if (!m || m.coverage?.state === 'unavailable') return { facts: [], note: 'REA\'s member reader couldn\'t take it (too large, or it failed): its calls and strings weren\'t read' };
+  const facts = [], refs = new Map((m.member_refs ?? []).map(x => [x.token, x])), strings = new Map((m.user_strings?.literals ?? []).map(x => [x.token, x.value]));
+  const at = (token, caller, cap, detail) => facts.push({ cap, detail, file: rel, line: 0, scope: `${rel}#${token}`, code: `in ${caller}` });
+  for (const e of m.call_edges ?? []) {
+    const hit = MANAGED.find(([, type, name]) => type.test(e.target_declaring_type ?? '') && name.test(e.target_name ?? ''));
+    if (!hit || (hit[4] && !refs.get(e.target_token)?.signature?.parameter_types?.includes('u1[]'))) continue;  // Load(name) is ordinary; Load(bytes) isn't
+    at(e.caller_token, e.caller, hit[0], `${e.target_declaring_type.split('.').pop()}.${e.target_name}() ${hit[3]}`);
+  }
+  for (const fn of m.methods ?? []) for (const a of fn.body?.anchors ?? []) {
+    if (a.opcode !== 'ldstr' || !strings.has(a.operand)) continue;
+    for (const [cap, detail] of stringFacts(strings.get(a.operand))) at(fn.token, `${fn.declaring_type}.${fn.name}`, cap, detail);
+  }
+  return { facts, note: null };
+}
+
+// Electron's fuses: switches baked into the executable when it's packaged. Electron ships them open.
+const FUSES = {
+  RunAsNode: 'ELECTRON_RUN_AS_NODE works: anything that can start your app can run it as plain Node.js',
+  EnableNodeOptionsEnvironmentVariable: 'NODE_OPTIONS is honoured: code can be slipped in at startup through the environment',
+  EnableNodeCliInspectArguments: '--inspect is honoured: a debugger can attach and run code inside your app',
+};
+
+/** The fuses of a packaged Electron executable, or null when it isn't one (no fuse wire inside). */
+export function fuseFacts(file, rel, run = rea) {
+  const r = run(['inspect-electron-fuses', file, '--filter-output', 'normalized_result.slices']);
+  const wire = r?.normalized_result?.slices?.flatMap(s => s.sentinels ?? []).find(s => s.fuses?.length);
+  if (!wire) return null;
+  const on = Object.fromEntries(wire.fuses.map(f => [f.name, f.state === 'enabled']));
+  const facts = [], add = (cap, detail, code) => facts.push({ cap, detail, file: rel, line: 0, scope: `${rel}#0`, code });
+  for (const [name, says] of Object.entries(FUSES)) if (on[name]) add('fuse-node', says, `${name}: on`);
+  if (on.EnableEmbeddedAsarIntegrityValidation === false || on.OnlyLoadAppFromAsar === false)
+    add('fuse-asar', 'the app\'s code can be changed on disk after it\'s signed (asar integrity isn\'t checked, or code loads from outside app.asar)',
+      `EnableEmbeddedAsarIntegrityValidation: ${on.EnableEmbeddedAsarIntegrityValidation ? 'on' : 'off'}, OnlyLoadAppFromAsar: ${on.OnlyLoadAppFromAsar ? 'on' : 'off'}`);
+  return { facts, fuses: on };
+}
 
 /** What a compiled file was built from: { facts, built }. `built` is for the report: language, toolchain, deps.
  *  `run` is REA (swapped for recorded answers in tests). */
@@ -92,7 +149,9 @@ export function binaryFacts(file, rel = basename(file), run = rea) {
         const hit = WIN32.find(w => w.re.test(fn));
         if (hit) add(hit.cap, `calls ${fn} in ${lib}: ${hit.says}`, `[DllImport("${lib}")] ${p.member_name}`);
       }
-      return { facts, built: { lang: 'dotnet', tool: m.target_frameworks?.[0] ?? null, main: name, deps, native: [...native] } };
+      const read = managedFacts(file, rel, run);
+      facts.push(...read.facts);
+      return { facts, built: { lang: 'dotnet', tool: m.target_frameworks?.[0] ?? null, main: name, deps, native: [...native], note: read.note } };
     }
   }
   add('built-from', 'compiled code with no build record REA can read: its code and what it\'s built from stay unseen');
