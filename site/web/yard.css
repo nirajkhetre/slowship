@@ -226,9 +226,13 @@
 .towpage{position:fixed;inset:0;z-index:60;display:none;width:100%;height:100%;border:0;background:#F4F2EE;transform:translateX(-100%);
   box-shadow:5px 0 0 #0A1633,40px 0 80px -30px rgb(1 4 13 / .55)}
 html.towing{overflow:hidden}
-html.towing .hcopy,html.towing .caps,html.towing .hint{opacity:0!important;translate:0 -26px;pointer-events:none;transition:opacity .42s var(--out),translate .6s var(--out)}
-html.towing .nav{opacity:0;pointer-events:none;transition:opacity .35s}
-html.towing .scene .far,html.towing .scene .mid,html.towing #glints{opacity:0!important;transition:opacity .5s var(--out)}
+/* the words, the buttons, the bar and the lighthouse are hauled up on strings (tow.js); the sky things just fade */
+html.towing .caps,html.towing .hint{opacity:0!important;transition:opacity .3s}
+html.towing .hcopy *,html.towing .nav *{pointer-events:none}
+html.towing .scene .far,html.towing #glints{opacity:0!important;transition:opacity .7s var(--out)}
+.strings{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
+.strings .str{position:absolute;top:0;width:2px;margin-left:-1px;border-radius:1px;background:linear-gradient(#6F8BFF,#DCE3F7);box-shadow:0 0 6px rgb(156 176 255 / .45);transform:translateY(calc(-100% - 24px))}
+.strings .str::after{content:"";position:absolute;top:100%;left:-10px;width:16px;height:22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 22'%3E%3Cpath d='M11 0v14a4.5 4.5 0 0 1-9 0v-2' fill='none' stroke='%23FFC21A' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat;filter:drop-shadow(0 0 4px rgb(255 194 26 / .45))}
 #wake{opacity:0;transition:opacity .5s}
 html.towing #wake{opacity:.9}
 html.towing #wake path{stroke-dasharray:14 10;animation:wakeflow .5s linear infinite}

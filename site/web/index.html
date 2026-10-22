@@ -778,7 +778,7 @@ h1.poster .acc{color:var(--glance);text-shadow:.05em .04em 0 #2B50FF}
     if (!a || !isFinite(a)) return;
     const w = Math.max(840, 900 * a), h = w / a, cx = 850;
     const vb = a >= 1.25 ? `0 ${-OFF} 1600 900` : `${cx - w / 2} ${900 - OFF - h} ${w} ${h}`;
-    $('.scene').forEach(sc => sc.setAttribute('viewBox', vb));  // all three layers see the same harbour
+    $$('.scene').forEach(sc => sc.setAttribute('viewBox', vb));  // all three layers see the same harbour
   }
   fit(); frame();
   if (!REDUCED && matchMedia('(pointer: fine)').matches) addEventListener('pointermove', e => {
