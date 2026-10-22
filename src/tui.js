@@ -424,7 +424,7 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
     c.right(W - 36, 1, 34, [[`${open.filter(i => i.level === 'hold').length} held · ${open.filter(i => i.level === 'review').length} to glance`, { fg: N.ink3, bg: N.sheet }]]);
     // the tabs
     let x = 2;
-    const counts = { review: G.filter(needs).length, aboard: G.length, keys: ledger().length, blind: (() => { const b = blindNotes(); return b.code ? `${(100 * b.read / b.code).toFixed(b.read === b.code ? 0 : 1)}%` : '—'; })() };
+    const counts = { review: G.filter(needs).length, aboard: G.length, keys: G.some(i => 'keys' in i) ? ledger().length : '–', blind: (() => { const b = blindNotes(); return b.code ? `${(100 * b.read / b.code).toFixed(b.read === b.code ? 0 : 1)}%` : '—'; })() };
     S.tabX = [];
     for (const [k, name] of TABS) {
       const on = S.tab === k, t = ` ${name} `, n = ` ${counts[k]} `;
@@ -451,7 +451,7 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
   function drawList(c, x, y, w, h, items, sel) {
     S.listBox = [x, y, w, h];
     if (!items.length) {
-      const msg = S.q ? `Nothing matches "${S.q}".` : S.tab === 'review' ? 'Nothing needs you before you ship.' : S.tab === 'keys' ? 'None of your agent\'s tools hold a key to an outside account.' : 'Nothing here.';
+      const msg = S.q ? `Nothing matches "${S.q}".` : S.tab === 'review' ? 'Nothing needs you before you ship.' : S.tab === 'keys' ? (G.some(i => 'keys' in i) ? 'None of your agent\'s tools hold a key to an outside account.' : 'This watch is older than the keys ledger. Press r to watch again.') : 'Nothing here.';
       if (S.tab === 'review' && !S.q) { c.pixels(x + 4, y + 2, MASCOT, MPAL); c.text(x + 4, y + 8, [['Cleared to sail.', { fg: N.clear, bg: N.bg, a: BOLD }]]); c.text(x + 4, y + 9, [[clip(msg, w - 6), { fg: N.ink2, bg: N.bg }]]); }
       else c.text(x + 2, y + 1, [[clip(msg, w - 4), { fg: N.ink2, bg: N.bg }]]);
       return;
