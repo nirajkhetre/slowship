@@ -48,6 +48,8 @@
     if (path === '/api/schedule') return init.method === 'POST' ? json({ error: 'this demo can’t schedule anything. Install slowship to have it watch every night' }, 400) : json({ off: true });
     if (path === '/api/folder' || path === '/api/browse') return json({ error: 'this demo can’t look at folders on your computer. Install slowship to watch your own project' }, 404);
     if (path === '/api/settings') return init.method === 'POST' ? json({ error: 'this demo can’t change settings. Install slowship to make them yours' }, 400) : json({ options: d.run.options, recent: [d.run.options.project], schedule: null });
+    if (path === '/api/notify') return json({ discord: { on: false }, telegram: { on: false }, when: 'always', manual: false });
+    if (path.startsWith('/api/notify/')) return json({ error: 'this demo can’t connect anything. Install slowship to get the morning ping' }, 400);
     if (path === '/api/watch') return json(replay ? snapshot() : { idle: true });
     if (path === '/api/scan') {
       if (body.project && body.project !== d.run.options.project) return json({ error: 'this demo can only replay its recorded watch. Install slowship to watch your own project' }, 400);

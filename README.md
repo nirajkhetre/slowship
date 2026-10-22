@@ -6,7 +6,7 @@
 
 It reads the code (it never runs it), lets a small open model on your own laptop compare what the code does with what the description claims, and leaves you one verdict in the morning: **cleared to sail**, **ready after a glance**, or **held in port**, with the exact line of code behind every finding.
 
-Nothing is uploaded. The model runs on your machine through [Ollama](https://ollama.com).
+Nothing is uploaded. The model runs on your machine through [Ollama](https://ollama.com). The one exception is optional and off until you connect it: a morning ping to your own Discord channel or Telegram chat, with the verdict and nothing else (see below).
 
 ---
 
@@ -74,6 +74,17 @@ Run `slowship` in a terminal and it draws instead of printing (no dependencies, 
 - **Kind to small and odd terminals.** Below 110 columns the inspector opens over the list; below 60×16 it asks for room. Esc only ever steps back; `q` quits, and the terminal is always put back as it was.
 
 Piped, in CI, overnight, with `NO_COLOR` or with `--plain`, it prints plain text exactly as before, and the exit code is the same. `--no-motion` (or `SLOWSHIP_NO_MOTION`) keeps everything still.
+
+## Morning ping (optional)
+
+The overnight watch can send its verdict to where you'll see it when you wake: a Discord channel or a Telegram chat. It's off until you connect one, and only a summary ever leaves this computer: the verdict, the counts, the names of what needs you and slowship's own words for why. Never code, file paths, key names or any text a scanned package wrote. Discord mentions are switched off, so a package called `@everyone` pings nobody.
+
+- **Discord:** a webhook you make in a channel's settings (Integrations, Webhooks, New Webhook, Copy Webhook URL). No bot to run.
+- **Telegram:** a bot you make with @BotFather. Paste its token, press Start in its chat, and slowship finds where to write.
+
+Set it up in the browser report (Settings, Morning ping): each step has a short animated film of exactly what to click, the one thing to paste, and a test you can send. Or in the terminal, with `slowship discord` or `slowship telegram`, or `/discord` and `/telegram` inside `slowship review`. The webhook or token stays in a file only you can read (`notify.json` in slowship's folder); pages and the terminal only ever see a hint.
+
+It sends after each nightly watch. You can make it send only when something needs you, and also after watches you start; `slowship notify` shows what's connected, `slowship notify test` sends one, `slowship notify off` stops it.
 
 ## The morning report
 
@@ -153,14 +164,16 @@ slowship reads code; it never runs it. So:
 - **No shell anywhere.** Programs are started with `execFile` and fixed arguments. Package names are validated before `npm pack`, and tarballs are unpacked by our own reader, which refuses paths that try to leave the quarantine folder.
 - **The report server answers only this machine.** It checks the `Host` header (no DNS rebinding) and the `Origin`, takes JSON only, and caps request bodies.
 - **Code context is safe to serve.** The code shown around a finding is read only from inside that item's own folder, and secrets are cut down before they reach the page.
-- **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read; `--offline` turns that off.
+- **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read (`--offline` turns that off), and the morning ping if you connect one: it talks only to `discord.com` and `api.telegram.org`, with the summary described above.
 - **Key names, never values.** The "who can spend your money" ledger keeps only the names of keys an MCP config hands a server (`env` and auth headers); their values are never read into the report.
 
 ## Command reference
 
 ```text
-slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app build/] [--json out.json] [--approve <name|notable|review>] [--plain] [--no-motion]
+slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app build/] [--json out.json] [--approve <name|notable|review>] [--plain] [--no-motion] [--notify]
 slowship review
+slowship discord | telegram
+slowship notify [test | off [discord|telegram|all] | when needs|always | manual on|off]
 slowship ui [--port 7798] [--no-open]
 slowship schedule [dir] [--at 03:00] [same flags] | --status | --off
 ```
@@ -175,7 +188,7 @@ node site/record.mjs <project>   # record one real watch for the web demo (publi
 node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
-There are 23 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, and the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+There are 26 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 

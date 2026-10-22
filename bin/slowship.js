@@ -20,8 +20,8 @@ const noModel = flag('--no-model'), json = opt('--json'), approveWhat = opt('--a
 const onlyPackages = flag('--packages-only'), onlyAgents = flag('--agents-only'), offline = flag('--offline');
 const app = opt('--app'), at = opt('--at'), off = flag('--off'), status = flag('--status');
 const plain = flag('--plain'); flag('--no-motion');  // read by term.caps()
-const asksHelp = flag('--help') || flag('-h');
-const COMMANDS = ['scan', 'ui', 'schedule', 'review', 'help'];
+const asksHelp = flag('--help') || flag('-h'), forcePing = flag('--notify');
+const COMMANDS = ['scan', 'ui', 'schedule', 'review', 'help', 'discord', 'telegram', 'notify'];
 const [cmd = 'scan', target = '.'] = COMMANDS.includes(args[0]) ? args : ['scan', ...args];
 const options = { project: resolve(target), model: !noModel, packages: !onlyAgents, agents: !onlyPackages, fetch: !offline, app: app && resolve(app) };
 // drawn only where a person is watching: a real terminal both ways, colour allowed, and not asked for plain text
@@ -40,6 +40,21 @@ if (cmd === 'ui') {  // the morning report, on this machine only
   else if (status) { const s = scheduleOf(); console.log(s ? `watching ${s.project} every night at ${s.at}. log: ${s.log}` : 'no nightly watch. turn it on with: slowship schedule [dir] [--at 03:00]'); }
   else { const s = schedule({ project: options.project, at: at || '03:00', options }); console.log(`every night at ${s.at}, slowship will read ${s.project} (or when this computer next wakes). the report waits in: slowship ui
 turn it off with: slowship schedule --off`); }
+} else if (cmd === 'discord' || cmd === 'telegram') {  // the morning ping: set it up
+  const tui = await import('../src/tui.js');
+  process.exitCode = (await tui.connect(cmd, drawn ? undefined : { depth: 0, motion: false })) ? 0 : 1;
+} else if (cmd === 'notify') {  // the morning ping: see it, test it, change it, turn it off
+  const n = await import('../src/notify.js'), [, what, arg] = args;
+  try {
+    if (what === 'test') {
+      const r = await n.send(n.summary(lastRun() ?? { items: [] }, { test: true }));
+      if (!Object.keys(r).length) console.log('  Nothing connected yet: slowship discord, or slowship telegram');
+      for (const [p, v] of Object.entries(r)) console.log(`  ${p}: ${v.ok ? 'sent' : v.error}`);
+    } else if (what === 'off') { n.off(arg || 'all'); console.log(`  The morning ping is off${arg && arg !== 'all' ? ` for ${arg}` : ''}.`); }
+    else if (what === 'when') { n.prefs({ when: arg }); console.log(arg === 'needs' ? '  It sends only when something needs you.' : '  It sends after every nightly watch.'); }
+    else if (what === 'manual') { n.prefs({ manual: arg === 'on' }); console.log(arg === 'on' ? '  It also sends after watches you start.' : '  It sends only after the nightly watch.'); }
+    if (!what || ['when', 'manual', 'off'].includes(what)) await (await import('../src/tui.js')).pingStatus(drawn ? undefined : { depth: 0, motion: false });
+  } catch (e) { console.log(`  ${e.message}`); process.exitCode = 1; }
 } else if (cmd === 'help' || asksHelp) {
   if (drawn) (await import('../src/tui.js')).help();
   else console.log(`slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app build/] [--json out.json] [--approve <name|notable|review>] [--plain]
@@ -52,6 +67,8 @@ turn it off with: slowship schedule --off`); }
   --plain prints plain text even in a terminal (it does anyway when piped, in CI, or with NO_COLOR).
 
 slowship review             reviews the last watch in the terminal
+slowship discord | telegram   sends the verdict after each nightly watch (optional: only the summary, never code, paths or keys)
+slowship notify [test | off [discord|telegram|all] | when needs|always | manual on|off]
 slowship ui [--port 7798]   opens the morning report for the last run
 slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itself (--off to stop, --status to check)`);
   process.exitCode = cmd === 'help' || asksHelp ? 0 : 1;
@@ -74,6 +91,8 @@ slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itse
   if (process.stderr.isTTY) process.stderr.write('\r\x1b[K');
   console.log(terminal(run));
   finish(run);
+  const pinged = await ping(run, false);  // the nightly watch lands here: it sends, if a ping is connected
+  for (const [p, v] of Object.entries(pinged ?? {})) console.log(`morning ping, ${p}: ${v.ok ? 'sent' : v.error}`);
   console.log('morning report: npx slowship ui');
   process.exitCode = run.level === 'hold' ? 2 : 0;
 } else {
@@ -83,6 +102,7 @@ slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itse
   await interactive(run, options, tui, true);
 }
 
+async function ping(run, manual) { return (await import('../src/notify.js')).after(run, { manual }); }
 function finish(run) {
   if (json) writeFileSync(json, JSON.stringify(run, null, 1));
   saveRun(run, options);
@@ -92,6 +112,7 @@ async function watchOnce(tui) {
   const t0 = Date.now(), run = await tui.watch(scanProject, options.project, options);
   run.options = { ...options };  // the card says what was read, and from where
   finish(run);
+  run.pinged = await ping(run, !forcePing);  // a watch you started sends only if you asked (or said --notify)
   tui.card(run, Date.now() - t0);
   return run;
 }
@@ -101,6 +122,13 @@ async function interactive(run, opts, tui, fresh = false) {
   let next = fresh ? await tui.choose() : 'review';
   while (next === 'review') {
     const how = await tui.review(run);
+    if (how.startsWith?.('cmd:')) {  // /discord, /telegram or /notify from the review: set it up here, then back
+      const what = how.slice(4);
+      if (what === 'notify') await tui.pingStatus(); else await tui.connect(what);
+      console.log('  ↵ back to the review    q done');
+      if ((next = await tui.choose()) === 'review') continue;
+      break;
+    }
     if (how !== 'rerun') break;
     Object.assign(options, opts);
     run = await watchOnce(tui);

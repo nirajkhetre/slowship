@@ -9,6 +9,7 @@ import { approve } from './scan.js';
 import { schedule, scheduleOf, unschedule } from './schedule.js';
 import { HOME, load, save } from './state.js';
 import { worst } from './policy.js';
+import * as ping from './notify.js';
 
 const UI = join(import.meta.dirname, 'ui');
 const LAST = join(HOME, 'last-run.json'), SETTINGS = join(HOME, 'settings.json');
@@ -103,6 +104,7 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       if (url.pathname === '/api/settings') return send(res, 200, { ...settingsOf(), schedule: scheduleOf() });
       if (url.pathname === '/api/watch') return send(res, 200, watch ?? { idle: true });
       if (url.pathname === '/api/schedule') return send(res, 200, scheduleOf() ?? { off: true });
+      if (url.pathname === '/api/notify') return send(res, 200, ping.status());
       return send(res, 404, { error: 'not found' });
     }
     if (req.method !== 'POST') return send(res, 405, { error: 'method' });
@@ -152,6 +154,24 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       try { return send(res, 200, schedule({ project: o.project, at: String(body.at || '03:00'), options: o })); }
       catch (e) { return send(res, 400, { error: String(e.message).slice(0, 200) }); }
     }
+    // the morning ping: connect, find the Telegram chat, test, disconnect. The page only ever gets status() back.
+    if (url.pathname.startsWith('/api/notify/')) {
+      const str = k => typeof body[k] === 'string' ? body[k] : '';
+      try {
+        switch (url.pathname.slice(12)) {
+          case 'discord': return send(res, 200, ping.setDiscord(str('webhook')));
+          case 'telegram': return send(res, 200, await ping.setTelegram(str('token')));
+          case 'telegram/chat': return send(res, 200, await ping.findChat({ wait: 20 }));
+          case 'test': {
+            if (!['discord', 'telegram'].includes(body.platform)) return send(res, 400, { error: 'discord or telegram' });
+            return send(res, 200, (await ping.send(ping.summary(run ?? { items: [] }, { test: true }), { only: body.platform }))[body.platform] ?? { ok: false, error: 'not connected' });
+          }
+          case 'off': return send(res, 200, ping.off(str('platform')));
+          case 'prefs': return send(res, 200, ping.prefs({ when: body.when, manual: body.manual }));
+        }
+      } catch (e) { return send(res, 400, { error: String(e.message).slice(0, 200) }); }
+      return send(res, 404, { error: 'not found' });
+    }
     if (url.pathname === '/api/scan') {
       if (watch && !watch.finished) return send(res, 409, { error: 'already watching' });
       let o = settingsOf().options ?? {};
@@ -181,7 +201,7 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
           w.log.unshift({ n: w.done, name: name(item), kind: item.kind, how, ms, level: item.approved ? 'cleared' : item.level });
           w.log.length = Math.min(w.log.length, 12);
         }
-        else if (m.type === 'done') { saveRun(m.run, o); end(); }
+        else if (m.type === 'done') { saveRun(m.run, o); end(); ping.after({ ...m.run, options: o }, { manual: true }); }  // a watch you started: pinged only if you asked
         else if (m.type === 'error') end(m.message);
       });
       worker.on('error', e => end(e.message));

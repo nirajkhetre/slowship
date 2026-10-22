@@ -115,6 +115,10 @@ export function help(io) {
     ['--packages-only, --agents-only', 'read only one side'], ['--offline', 'don\'t fetch npx MCP packages to read them'],
     ['--json <file>', 'write everything found as JSON'], ['--approve <name|notable|review>', 'mark results as seen'],
     ['--plain', 'plain text: no colour, no screens (also when piped)'], ['--no-motion', 'no animation']]) L.push([['  ' + a.padEnd(36), { fg: M.glance }], [b, { fg: M.quiet }]]);
+  head('Morning ping (optional)');
+  cmd('slowship discord', 'send the verdict to a Discord channel after each nightly watch');
+  cmd('slowship telegram', 'or to a Telegram chat, through a bot you make');
+  cmd('slowship notify [test|off]', 'what\'s connected; send a test; disconnect');
   head('In the review');
   L.push([['  ', {}], ...[['↑↓', 'move'], ['←→', 'tabs'], ['↵', 'open'], ['c', 'clear'], ['u', 'undo'], ['/', 'search'], ['o', 'browser'], ['?', 'keys'], ['q', 'quit']]
     .flatMap(([k, t]) => [[k, { fg: M.sea2, a: BOLD }], [` ${t}   `, { fg: M.quiet }]])]);
@@ -207,6 +211,8 @@ export function card(run, ms, io) {
     ['MCP servers', o.agents === false ? [['not read (--packages-only)', { fg: M.quiet }]]
       : [[String(n('mcp')), { a: BOLD }], ['  from your editors\' settings', { fg: M.quiet }], ...(unread.length ? [[` · ${unread.length} unreadable: `, { fg: M.glance }], [unread.map(u => `${u.key.replace(/^mcp:/, '')} (${/compiled/.test(u.why) ? 'compiled' : /remote/.test(u.why) ? 'remote' : /container/.test(u.why) ? 'a container' : /not fetched/.test(u.why) ? 'not fetched' : 'see Blind spots'})`).join(', '), { fg: M.quiet }]] : [])]],
     ['Your build', o.app ? [[home(o.app), { a: BOLD }]] : [['not checked', { fg: M.quiet }], ['  (add --app <folder>)', { fg: M.quiet, a: DIM }]]],
+    ...(run.pinged && Object.keys(run.pinged).length ? [['Morning ping', Object.entries(run.pinged).flatMap(([p, r], k) =>
+      [[k ? '   ' : '', {}], [r.ok ? '✓ ' : '✗ ', { fg: r.ok ? M.clear : M.hold, a: BOLD }], [`${p === 'discord' ? 'Discord' : 'Telegram'}${r.ok ? '' : `: ${r.error}`}`, { fg: r.ok ? undefined : M.hold }]])]] : []),
   ];
   const note = noProject ? wrap(`${where.charAt(0).toUpperCase() + where.slice(1)} has no package-lock.json, so there were no packages to read. Run slowship inside a project, or give it one: slowship <folder>`, w - 12) : [];
   const base = 10 + rows.length, ky = note.length ? base + note.length + 3 : base + 1, H = ky + 3;  // rows, a gap, the note, a gap, the keys
@@ -264,6 +270,110 @@ export function bye(run, io) {
   out.write(c.lines(depth).join('\n') + '\n\n');
 }
 
+// ---------- the morning ping, set up from the terminal ----------
+const PING = {
+  discord: { name: 'Discord', steps: [
+    ['Open your channel\'s settings', 'the gear next to the channel\'s name (you need Manage Webhooks)'],
+    ['Integrations, then Webhooks, then New Webhook', 'name it slowship if you like; pick the channel it posts in'],
+    ['Copy Webhook URL', 'the button under the new webhook'],
+  ] },
+  telegram: { name: 'Telegram', steps: [
+    ['Message @BotFather in Telegram', 'https://t.me/BotFather'],
+    ['Send /newbot, then a name, then a username ending in bot', 'BotFather walks you through it'],
+    ['Copy the token BotFather sends back', 'it looks like 123456789:AAH…'],
+  ] },
+};
+/** One line of input with the characters hidden, in raw mode. Resolves with the text, or null on Ctrl+C or Esc. */
+function ask(label, { mask = true, out = process.stdout } = {}) {
+  return new Promise(res => {
+    const inp = process.stdin;
+    let v = '';
+    const show = () => out.write(`\r\x1b[2K  ${label} ${mask ? '•'.repeat(Math.min(v.length, 48)) + (v.length > 48 ? '…' : '') : v}`);
+    if (!inp.isTTY) { let all = ''; inp.setEncoding('utf8'); inp.on('data', d => { all += d; }); inp.on('end', () => res(all.split(/\r?\n/)[0].trim() || null)); return; }
+    inp.setRawMode(true); inp.setEncoding('utf8'); inp.resume(); show();
+    const done = r => { inp.off('data', on); inp.setRawMode(false); inp.pause(); out.write('\n'); res(r); };
+    const on = chunk => {
+      for (const k of parseKeys(chunk)) {
+        if (k.name === 'enter') return done(v.trim() || null);
+        if (k.name === 'ctrl-c' || k.name === 'escape') return done(null);
+        if (k.name === 'backspace') v = v.slice(0, -1); else if (k.ch && k.ch >= ' ') v += k.ch;
+      }
+      show();
+    };
+    inp.on('data', on);
+  });
+}
+const yes = async (q, io) => { const a = await ask(`${q} [Y/n]`, { mask: false, out: io?.out }); return a === null ? false : !/^n/i.test(a); };
+
+/** slowship discord | telegram: the steps, the paste, the check, a test if you want one. */
+export async function connect(platform, io) {
+  const { depth, W, out, motion } = inline(io), p = PING[platform], n = await import('./notify.js');
+  const line = parts => {  // one styled line, carried onto the next (indented) when it's wider than the terminal
+    const c = new Canvas(W, Math.ceil(parts.reduce((n, [t]) => n + width(t), 0) / (W - 8)) + 1);
+    let x = 0, y = 0;
+    for (const [t, st] of parts) for (const ch of t) { if (x >= W - 1) { y++; x = 6; } x = c.text(x, y, ch, st); }
+    out.write(c.lines(depth).slice(0, y + 1).join('\n') + '\n');
+  };
+  const pause = ms => new Promise(r => setTimeout(r, motion ? ms : 0));
+  out.write('\n');
+  line([['  ◆ ', { fg: M.sea2, a: BOLD }], ['Morning ping', { a: BOLD }], [`  ·  ${p.name}`, { fg: M.sea2, a: BOLD }]]);
+  line([['    The verdict, the counts and the names of what needs you, sent after each nightly watch.', { fg: M.quiet }]]);
+  line([['    Never code, file paths or keys. Off again with: slowship notify off ' + platform, { fg: M.quiet, a: DIM }]]);
+  out.write('\n');
+  for (const [k, [t, d]] of p.steps.entries()) {  // the steps arrive one after another, as if being read out
+    line([[`  ${k + 1}  `, { fg: '#0B1820', bg: M.foam, a: BOLD }], [`  ${t}`, { a: BOLD }]]);
+    line([[`      ${d}`, { fg: M.quiet }]]);
+    await pause(140);
+  }
+  const step = k => [[`  ${k}  `, { fg: '#0B1820', bg: M.foam, a: BOLD }], ['  ', {}]];
+  line([...step(4), [platform === 'discord' ? 'Paste the webhook link' : 'Paste the token', { a: BOLD }], ['   (hidden as you type; Esc to stop)', { fg: M.quiet, a: DIM }]]);
+  const secret = await ask('    ▸', { out });
+  if (!secret) { line([['    Stopped. Nothing was saved.', { fg: M.quiet }]]); return false; }
+  try {
+    if (platform === 'discord') { const s = n.setDiscord(secret); line([['    ✓ ', { fg: M.clear, a: BOLD }], [`A Discord ${s.discord.hint}. Saved where only you can read it.`, {}]]); }
+    else {
+      const s = await n.setTelegram(secret);
+      line([['    ✓ ', { fg: M.clear, a: BOLD }], [`Your bot is @${s.telegram.bot}. Saved where only you can read it.`, {}]]);
+      out.write('\n');
+      line([...step(5), [`Open https://t.me/${s.telegram.bot} and press Start`, { a: BOLD }]]);
+      const region = new Region(out), t0 = Date.now();
+      let found = null, f = 0;
+      const wait = () => {
+        const c = new Canvas(W, 1);
+        c.text(4, 0, [[SPIN[f++ % 4], { fg: M.sea2, a: BOLD }], [`  Waiting for your message to @${s.telegram.bot}…  ${Math.round((Date.now() - t0) / 1000)} s`, { fg: M.quiet }]]);
+        region.draw(c.lines(depth));
+      };
+      wait();
+      const timer = setInterval(wait, 120);
+      try { for (let k = 0; k < 9 && !found; k++) { const r = await n.findChat({ wait: 20 }); if (r.found) found = r.telegram.chat; } }
+      finally { clearInterval(timer); region.draw([]); region.done(); }
+      if (!found) { line([['    ', {}], ['No message yet. Run slowship telegram again once you\'ve pressed Start.', { fg: M.glance }]]); return false; }
+      line([['    ✓ ', { fg: M.clear, a: BOLD }], [`Found you: ${found}. The morning ping goes to this chat.`, {}]]);
+    }
+  } catch (e) { line([['    ✗ ', { fg: M.hold, a: BOLD }], [e.message, { fg: M.hold }]]); return false; }
+  out.write('\n');
+  if (await yes(`  ${platform === 'discord' ? 5 : 6}  Send a test now?`, { out })) {
+    const { lastRun } = await import('./server.js');
+    const r = (await n.send(n.summary(lastRun() ?? { items: [] }, { test: true }), { only: platform }))[platform];
+    line(r?.ok ? [['    ✓ ', { fg: M.clear, a: BOLD }], [`Sent. Look in your ${platform === 'discord' ? 'channel' : 'chat'}.`, {}]] : [['    ✗ ', { fg: M.hold, a: BOLD }], [r?.error || 'not sent', { fg: M.hold }]]);
+  }
+  out.write('\n');
+  return true;
+}
+
+/** slowship notify: what's connected, and how to change it. */
+export async function pingStatus(io) {
+  const { depth, W, out } = inline(io), s = (await import('./notify.js')).status();
+  const c = new Canvas(W, 12), row = (y, name, on, t) => c.text(4, y, [[on ? '● ' : '○ ', { fg: on ? M.clear : M.quiet, a: BOLD }], [name.padEnd(10), { a: BOLD }], [t, { fg: M.quiet }]]);
+  c.text(2, 1, [['Morning ping', { a: BOLD }], ['   the verdict after each nightly watch; never code, paths or keys', { fg: M.quiet, a: DIM }]]);
+  row(3, 'Discord', s.discord.on, s.discord.on ? s.discord.hint : 'not connected · slowship discord');
+  row(4, 'Telegram', s.telegram.on, s.telegram.on ? `@${s.telegram.bot} → ${s.telegram.chat}` : s.telegram.bot ? `@${s.telegram.bot}, waiting for Start · slowship telegram` : 'not connected · slowship telegram');
+  c.text(4, 6, [['Sends ', { fg: M.quiet }], [s.when === 'needs' ? 'only when something needs you' : 'after every nightly watch', {}], [s.manual ? ', and after watches you start' : '', {}]]);
+  [['test', 'send one now'], ['off discord|telegram|all', 'disconnect'], ['when needs|always', 'only when needed, or always'], ['manual on|off', 'also after watches you start']]
+    .forEach(([a, b], k) => c.text(4, 8 + k, [[`slowship notify ${a}`.padEnd(42), { fg: M.sea2, a: BOLD }], [b, { fg: M.quiet }]], {}, W - 6));
+  out.write(c.lines(depth).join('\n') + '\n\n');
+}
+
 export function openBrowser() {
   const bin = join(import.meta.dirname, '..', 'bin', 'slowship.js');
   spawn(process.execPath, [bin, 'ui'], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
@@ -271,6 +381,10 @@ export function openBrowser() {
 
 // ---------- the review, full screen ----------
 const TABS = [['review', 'Review'], ['aboard', 'Aboard'], ['keys', 'Keys'], ['blind', 'Blind spots']];
+// the / box searches, and also takes a command: typed exactly, ↵ runs it
+const CMDS = [['discord', 'send the morning verdict to a Discord channel'], ['telegram', 'send it to a Telegram chat, through your own bot'],
+  ['notify', 'what the morning ping is connected to; send a test'], ['browser', 'open the morning report in your browser'], ['rewatch', 'watch again'], ['keys', 'every key in this review']];
+const cmdOf = q => CMDS.find(([k]) => k === q.trim().toLowerCase().replace(/^\//, ''));
 const KINDS = [['all', 'All'], ['npm', 'Packages'], ['skill', 'Skills'], ['mcp', 'MCP'], ['app', 'Build']];
 const RX = /(\/\/.*|#.*$)|(`[^`]*`?|"(?:\\.|[^"\\])*"?|'(?:\\.|[^'\\])*'?)|\b(const|let|var|function|return|if|else|for|while|await|async|new|import|from|export|require|class|try|catch|throw|true|false|null|undefined|def|self|None)\b|\b(\d[\d_.]*)\b/g;
 function code(line, base) {  // a small, honest highlighter
@@ -528,7 +642,17 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
   }
   function drawFooter(c, W, H) {
     c.fill(0, H - 1, W, 1, N.sheet);
-    if (S.searching) { c.text(2, H - 1, [[' / ', { fg: N.bg, bg: N.foam, a: BOLD }], [' ' + S.q, { fg: N.ink, bg: N.sheet }], ['▌', { fg: N.foam, bg: N.sheet }], ['   ↵ keep  esc clear', { fg: N.ink3, bg: N.sheet }]]); return; }
+    if (S.searching) {
+      const q = S.q.trim().toLowerCase().replace(/^\//, ''), hits = CMDS.filter(([k]) => k.startsWith(q)), run = cmdOf(S.q);
+      if (hits.length) {  // the palette rises above the box: commands that match what's typed so far
+        const w = Math.min(W - 4, 64), h = hits.length + 2, y = H - 1 - h;
+        c.box(1, y, w, h, N.rule, N.sheet, [[' Commands ', { fg: N.ink3, bg: N.sheet }]]);
+        hits.forEach(([k, t], i) => c.text(3, y + 1 + i, [[`/${k}`.padEnd(11), { fg: run?.[0] === k ? N.foam : N.ink, bg: N.sheet, a: BOLD }], [clip(t, w - 16), { fg: N.ink3, bg: N.sheet }]]));
+      }
+      c.text(2, H - 1, [[' / ', { fg: N.bg, bg: N.foam, a: BOLD }], [' ' + S.q, { fg: N.ink, bg: N.sheet }], ['▌', { fg: N.foam, bg: N.sheet }],
+        [run ? `   ↵ runs /${run[0]}  esc clears` : '   ↵ keeps the search  esc clears', { fg: N.ink3, bg: N.sheet }]]);
+      return;
+    }
     if (S.toast && Date.now() < S.toast.until) { c.text(2, H - 1, [[S.toast.t, { fg: S.toast.fg || N.clear, bg: N.sheet, a: BOLD }]]); return; }
     const k = (key, t) => [[` ${key} `, { fg: N.bg, bg: N.ink2, a: BOLD }], [` ${t}  `, { fg: N.ink3, bg: N.sheet }]];
     const hints = [k('↑↓', 'move'), k('←→', 'tabs'), ...(S.narrow ? [k('↵', S.focus === 'list' ? 'open' : 'back')] : [k('PgDn', 'read')]),
@@ -589,7 +713,17 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
     scr.start(k => {
       if (S.help) { S.help = false; return draw(); }
       if (S.searching) {
-        if (k.name === 'enter') S.searching = false;
+        if (k.name === 'enter') {
+          const cmd = cmdOf(S.q)?.[0];
+          S.searching = false;
+          if (cmd) {
+            S.q = '';
+            if (cmd === 'discord' || cmd === 'telegram' || cmd === 'notify') return quit(`cmd:${cmd}`);  // set up in the terminal, then back here
+            if (cmd === 'rewatch') return quit('rerun');
+            if (cmd === 'browser') { openBrowser(); toast('Opening the morning report in your browser…', N.sea3); }
+            if (cmd === 'keys') S.help = true;
+          }
+        }
         else if (k.name === 'escape') { S.searching = false; S.q = ''; }
         else if (k.name === 'backspace') S.q = S.q.slice(0, -1);
         else if (k.name === 'ctrl-c') return quit('quit');

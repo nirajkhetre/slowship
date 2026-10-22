@@ -937,6 +937,88 @@ dialog.proj{margin:auto;border:0;padding:0;border-radius:18px;background:var(--s
 dialog.proj::backdrop{background:rgb(5 16 23 / .45)}
 dialog.proj[open]{animation:dlg .45s var(--spring)}
 @keyframes dlg{from{opacity:0;transform:translateY(14px) scale(.97)}}
+/* ---------- the morning ping ---------- */
+.pings{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:8px 0 6px}
+.ptile{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;align-items:center;padding:14px;border-radius:14px;border:1px solid var(--rule2);background:var(--paper);overflow:hidden;
+  transition:border-color .3s,box-shadow .4s var(--out),transform .4s var(--spring)}
+.ptile:hover{box-shadow:0 14px 30px -22px rgb(15 32 44 / .45);transform:translateY(-1px)}
+.ptile .pico{grid-row:span 2;display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--shoal);color:var(--ink);transition:background-color .3s,color .3s}
+.ptile .pico svg.i{width:22px;height:22px}
+.ptile b{font-size:15.5px}
+.ptile small{font-size:13px;color:var(--ink2);overflow-wrap:anywhere}
+.ptile .pact{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ptile .led2{position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--rule2)}
+.ptile.on{border-color:color-mix(in oklab,var(--clear) 40%,var(--rule2))}
+.ptile.on .pico{background:var(--clear-bg);color:var(--clear-ink)}
+.ptile.on .led2{background:var(--clear);animation:led 2.6s ease-out infinite}
+@keyframes led{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--clear) 55%,transparent)}70%,100%{box-shadow:0 0 0 9px transparent}}
+
+dialog.ping{margin:auto;border:0;padding:0;border-radius:24px;background:var(--sheet);color:var(--ink);width:min(1000px,calc(100% - 24px));max-height:calc(100dvh - 24px);box-shadow:var(--float);overflow:hidden}
+dialog.ping::backdrop{background:rgb(5 16 23 / .5);backdrop-filter:blur(4px)}
+dialog.ping[open]{animation:pingin .6s var(--spring)}
+@keyframes pingin{from{opacity:0;transform:translateY(22px) scale(.95)}}
+.pg{display:grid;grid-template-columns:270px minmax(0,1fr);height:min(640px,calc(100dvh - 24px))}
+.prail{display:grid;align-content:start;gap:16px;padding:26px 22px;background:var(--paper);border-right:1px solid var(--rule);overflow:auto}
+.pbrand{display:flex;gap:12px;align-items:center}
+.pbrand .pico{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:var(--ink);color:var(--paper)}
+.pbrand .pico svg.i{width:24px;height:24px}
+.pbrand small{font-size:12.5px;font-weight:700;color:var(--ink3)}
+.pbrand h3{font:700 25px/1.05 var(--display)}
+.prail>p{font-size:13.5px;color:var(--ink2);line-height:1.5}
+.steps{list-style:none;margin:4px 0 0;padding:0;display:grid;position:relative}
+.steps::before{content:"";position:absolute;left:15px;top:16px;bottom:16px;width:2px;background:var(--rule2);border-radius:2px}
+.steps .fillv{position:absolute;left:15px;top:16px;width:2px;height:var(--fill,0);background:var(--ink);border-radius:2px;transition:height .8s var(--out),width .8s var(--out)}
+.steps li{position:relative;display:flex;gap:12px;align-items:center;padding:7px 0;cursor:pointer;color:var(--ink3);font-size:14px;font-weight:650;transition:color .3s}
+.steps li:hover{color:var(--ink2)}
+.steps li .nd{position:relative;flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--sheet);border:2px solid var(--rule2);font:800 13px var(--mono);color:var(--ink3);
+  transition:background-color .4s,border-color .4s,color .4s,transform .5s var(--spring)}
+.steps li.done{color:var(--ink2)}
+.steps li.done .nd{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.steps li.cur{color:var(--ink)}
+.steps li.cur .nd{border-color:var(--ink);color:var(--ink);transform:scale(1.1)}
+.steps li.cur .nd::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--ink);animation:stepring 2.2s ease-out infinite}
+@keyframes stepring{0%{transform:scale(.85);opacity:.35}100%{transform:scale(1.35);opacity:0}}
+.pfine{display:flex;gap:8px;font-size:12.5px;color:var(--ink3);line-height:1.5;margin-top:4px}
+.pfine svg.i{flex:none;width:15px;height:15px;margin-top:2px}
+.pfine code{font:600 12px var(--mono)}
+.pstage{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:16px;padding:22px 28px 22px;min-width:0;overflow:hidden}
+.ptop{display:flex;align-items:center;gap:10px}
+.ptop .cnt{font:700 13px var(--mono);color:var(--ink3)}
+.ptop .x{margin-left:auto;width:36px;padding:0}
+.pbody{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:18px;min-height:0;min-width:0}
+.slab{position:relative;display:grid;place-items:center;min-height:0;border-radius:20px;background:radial-gradient(120% 100% at 50% 0%,var(--shoal),var(--paper) 72%);border:1px solid var(--rule);padding:16px;overflow:hidden;isolation:isolate}
+.slab::before{content:"";position:absolute;inset:0;z-index:-1;background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);background-size:28px 28px;opacity:.5;
+  mask-image:radial-gradient(80% 70% at 50% 40%,#000,transparent)}
+.slab .ghost{position:absolute;right:14px;bottom:-34px;z-index:-1;font:800 170px/1 var(--display);color:var(--ink);opacity:.06;pointer-events:none;letter-spacing:-.05em}
+.film{display:block;width:100%;height:100%;max-height:330px;filter:drop-shadow(0 18px 26px rgb(15 32 44 / .16))}
+.ptext{display:grid;gap:10px;align-content:start}
+.ptext h4{font:700 25px/1.15 var(--display);letter-spacing:-.01em}
+.ptext>p{font-size:15.5px;line-height:1.55;color:var(--ink2);max-width:64ch}
+.ptext>p a{color:var(--ink);font-weight:700;text-underline-offset:3px}
+.pfield{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pfield .pathin{flex:1;min-width:220px}
+.pmsg{display:flex;gap:8px;align-items:center;font-size:14.5px;font-weight:700;animation:rise .4s var(--out)}
+.pmsg svg.i{width:18px;height:18px}
+.pmsg.ok{color:var(--clear-ink)} .pmsg.err{color:var(--hold-ink)}
+.pnav{display:flex;gap:8px;justify-content:space-between;align-items:center}
+.pnav .btn[disabled]{opacity:.4;pointer-events:none}
+.listen{display:inline-flex;align-items:center;gap:14px;font-weight:650;color:var(--ink2);margin-right:8px}
+.listen i{position:relative;width:12px;height:12px;border-radius:50%;background:var(--ink)}
+.listen i::before,.listen i::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:2px solid var(--ink);animation:sonar3 1.9s ease-out infinite}
+.listen i::after{animation-delay:.95s}
+@keyframes sonar3{from{transform:scale(1);opacity:.55}to{transform:scale(3.2);opacity:0}}
+@media (max-width:780px){
+  .pg{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);height:calc(100dvh - 24px)}
+  .prail{border-right:0;border-bottom:1px solid var(--rule);padding:16px 18px;gap:12px}
+  .prail>p,.pfine{display:none}
+  .steps{grid-auto-flow:column;grid-auto-columns:1fr}
+  .steps::before{left:16px;right:16px;top:15px;bottom:auto;width:auto;height:2px}
+  .steps .fillv{top:15px;left:16px;height:2px;width:var(--fillh,0)}
+  .steps li{flex-direction:column;gap:0;padding:0}
+  .steps li>span:last-child{display:none}
+  .pstage{padding:16px 18px}
+  .ptext h4{font-size:21px}
+}
 .dlg{display:grid;gap:12px;padding:24px 26px 22px}
 .dlg h3{font:700 26px/1.15 var(--display);letter-spacing:-.01em}
 .dlg>p{color:var(--ink2);font-size:15px}
@@ -1459,7 +1541,7 @@ body.empty .holds,body.empty .clearance{display:none}
 </main>
 
 <footer><div class="wrap">
-  <div><b>Read, never run.</b> <span class="muted">slowship reads code. It never runs what it checks, and nothing leaves this computer.</span></div>
+  <div><b>Read, never run.</b> <span class="muted">slowship reads code. It never runs what it checks, and nothing leaves this computer, except the morning ping if you connect one.</span></div>
   <p id="footmeta"></p>
 </div></footer>
 
@@ -1475,6 +1557,7 @@ body.empty .holds,body.empty .clearance{display:none}
 <div id="peek" class="peek" aria-hidden="true"></div>
 <div id="tourblock"></div><div id="spot"></div><div id="tourcard" role="dialog" aria-modal="true" aria-label="How to read this page"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastmsg"></span><button id="toastundo" hidden>Undo</button></div>
+<dialog class="ping" id="pingdlg" aria-labelledby="pgh"><div class="pg"><aside class="prail" id="prail"></aside><section class="pstage" id="pstage"></section></div></dialog>
 <dialog class="proj" id="browse" aria-labelledby="bh"><form class="dlg" method="dialog" id="bform">
   <h3 id="bh">Choose a project</h3>
   <p id="bp"></p>
@@ -1526,6 +1609,7 @@ const IC = {
   play: svg('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>'),
   warn: svg('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>'),
   coin: svg('<circle cx="12" cy="12" r="8.5"/><path d="M14.6 9.4c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2s1.2 1.6 2.6 2 2.6.8 2.6 2-1.1 2-2.6 2c-1.2 0-2.2-.5-2.7-1.4M12 6.4V8M12 16v1.6"/>'),
+  plane: svg('<path d="M21 3.5L3 10.8l6.8 2.6L12.3 20z"/><path d="M9.8 13.4L21 3.5"/>'),
   chip: svg('<rect x="6.5" y="6.5" width="11" height="11" rx="2"/><path d="M10 3.5v3M14 3.5v3M10 17.5v3M14 17.5v3M3.5 10h3M3.5 14h3M17.5 10h3M17.5 14h3"/>'),
 };
 // the four kinds of cargo, drawn: a crate, a scroll, a plug, a window
@@ -2920,11 +3004,285 @@ function settingsHTML() {
   <section class="sgrp" style="--i:${g++}"><h3>The model</h3>
     <div class="srow"><div><b>Second opinion from ${m}</b><small>A small model on this laptop compares what code does with what it says. Off: rules only. Faster, but more to glance at.</small></div>${sw('model', o.model !== false, 'Use the local model')}</div>
   </section>
+  ${pingHTML(g++)}
   <section class="sgrp" style="--i:${g++}"><h3>Appearance</h3>
     <div class="themes">${[['system', 'Auto'], ['light', 'Day'], ['dark', 'Night']].map(([t, l]) => `<button class="thm" data-theme="${t}" aria-pressed="${theme === t}">${thumbSVG(t)}<span>${l}</span></button>`).join('')}</div>
     <div class="srow"><div><b>The tour</b><small>A 30-second walk through this page.</small></div><button class="btn sm" data-tour>Take the tour</button></div>
   </section>`;
 }
+// ---------- the morning ping: the verdict in Discord or Telegram, set up step by step ----------
+// Each step has a short film of someone doing it: shapes in this page's own palette, a cursor that walks to each target
+// and clicks, and things that appear and leave at set moments of one loop, so everything stays in step. Reduced
+// motion shows the last frame, still.
+let FILMN = 0;
+function film(sc) {
+  const id = 'fm' + (++FILMN), D = sc.dur ?? 6.4, css = [], top = [], pc = n => `${Math.max(0, Math.min(100, n)).toFixed(2)}%`;
+  let k = 0;
+  const anim = (frames, more = '') => { const n = `${id}a${k++}`; css.push(`@keyframes ${n}{${frames}}`); return `style="animation:${n} ${D}s infinite;${more}"`; };
+  const inner = e => {
+    const paint = `fill="${e.fill ?? 'none'}"${e.op != null ? ` fill-opacity="${e.op}"` : ''}${e.stroke ? ` stroke="${e.stroke}" stroke-width="${e.sw ?? 1}"` : ''}`;
+    if (e.t === 'rect') return `<rect x="${e.x}" y="${e.y}" width="${e.w}" height="${e.h}" rx="${e.r ?? 6}" ${paint}/>`;
+    if (e.t === 'circle') return `<circle cx="${e.x}" cy="${e.y}" r="${e.r}" ${paint}/>`;
+    if (e.t === 'path') return `<path d="${e.d}" ${paint} stroke-linecap="round" stroke-linejoin="round"/>`;
+    if (e.t === 'g') return e.els.map(shape).join('');
+    const size = e.size ?? 9, t = `<text x="${e.x}" y="${e.y}" font-size="${size}" font-weight="${e.weight ?? 500}" fill="${e.fill ?? 'var(--ink)'}"${e.anchor ? ` text-anchor="${e.anchor}"` : ''} font-family="${e.mono ? 'var(--mono)' : 'var(--sans)'}"${e.italic ? ' font-style="italic"' : ''}>${esc(e.s)}</text>`;
+    if (!e.type) return t;
+    // typed: a clip that opens a letter at a time
+    const [a, b] = e.type, w = e.s.length * size * (e.mono ? .62 : .56), x0 = e.anchor === 'middle' ? e.x - w / 2 : e.x, cid = `${id}k${k}`;
+    return `<clipPath id="${cid}"><rect x="${x0}" y="${e.y - size}" width="${w + 2}" height="${size * 1.6}" ${anim(`0%,${pc(a)}{transform:scaleX(0)}${pc(b)},100%{transform:scaleX(1)}`, `transform-box:fill-box;transform-origin:left;animation-timing-function:steps(${e.s.length})`)}/></clipPath><g clip-path="url(#${cid})">${t}</g>`;
+  };
+  const shape = e => {
+    if (!e.show) return inner(e);
+    const [a, b = 100] = e.show, from = `opacity:0;transform:translateY(${e.rise ?? 5}px) scale(${e.pop ? .86 : 1})`;
+    return `<g ${anim(`0%,${pc(a)}{${from}}${pc(a + (e.pop ? 6 : 4))}{opacity:1;transform:none}${b < 100 ? `${pc(b)}{opacity:1;transform:none}${pc(b + 3)},100%{opacity:0;transform:none}` : '100%{opacity:1;transform:none}'}`,
+      `transform-box:fill-box;transform-origin:center;animation-timing-function:${e.pop ? 'cubic-bezier(.3,1.5,.5,1)' : 'cubic-bezier(.16,1,.3,1)'}`)}>${inner(e)}</g>`;
+  };
+  const P = sc.path ?? [];
+  if (P.length) {  // the cursor holds, then travels (easing in and out), arriving at each point on its moment
+    let f = `0%{transform:translate(${P[0][0]}px,${P[0][1]}px)}`;
+    for (let i = 1; i < P.length; i++) {
+      const [x, y, t] = P[i], [px, py, pt = 0] = P[i - 1];
+      f += `${pc(Math.max(pt + 1, t - 12))}{transform:translate(${px}px,${py}px);animation-timing-function:cubic-bezier(.55,0,.25,1)}${pc(t)}{transform:translate(${x}px,${y}px)}`;
+    }
+    for (const [x, y, t, click] of P) if (click)
+      top.push(`<circle cx="${x}" cy="${y}" r="13" fill="none" stroke="var(--ink)" stroke-width="1.6" ${anim(`0%,${pc(t)}{opacity:0;transform:scale(.25)}${pc(t + 1)}{opacity:.65;transform:scale(.35)}${pc(t + 10)},100%{opacity:0;transform:scale(1.5)}`, 'transform-box:fill-box;transform-origin:center')}/>`);
+    top.push(`<g ${anim(f + `100%{transform:translate(${P.at(-1)[0]}px,${P.at(-1)[1]}px)}`)}><path d="M0 0v15.5l4.3-3.7 3 6.8 2.6-1.1-3-6.6H12.4z" fill="var(--ink)" stroke="var(--paper)" stroke-width="1.4" stroke-linejoin="round"/></g>`);
+  }
+  const body = sc.els.map(shape).join('');
+  return `<svg class="film" viewBox="0 0 360 220" role="img" aria-label="${esc(sc.label)}"><style>${css.join('')}</style>${body}${top.join('')}</svg>`;
+}
+
+// the scenes: a stand-in for each app, drawn plainly, never its real look or logo
+const DIS = '#5865F2', TGB = '#2AABEE';
+const FRAME = { t: 'rect', x: 8, y: 8, w: 344, h: 204, r: 14, fill: 'var(--paper)', stroke: 'var(--rule2)' };
+const tx = (x, y, s, o = {}) => ({ t: 'text', x, y, s, ...o }), bx = (x, y, w, h, o = {}) => ({ t: 'rect', x, y, w, h, ...o }), ci = (x, y, r, o = {}) => ({ t: 'circle', x, y, r, ...o });
+const bars = (x, y, n, show) => Array.from({ length: n }, (_, i) => bx(x, y + i * 13, [140, 176, 96, 150][i % 4], 6, { r: 3, fill: 'var(--shoal)', show }));
+const blob = (x, y) => ({ t: 'g', els: [ci(x, y, 11, { fill: '#7FB3C8' }), bx(x - 4.6, y - 4, 2.4, 5.6, { r: 1.2, fill: '#0B1820' }), bx(x + 2.2, y - 4, 2.4, 5.6, { r: 1.2, fill: '#0B1820' }), ci(x - 6.5, y + 3, 1.6, { fill: '#ED76B3' }), ci(x + 6.5, y + 3, 1.6, { fill: '#ED76B3' })] });
+const pasteScene = (what, text, ok) => ({ label: `Paste the ${what} into slowship`, els: [FRAME,
+  tx(26, 34, 'slowship', { weight: 800, size: 11 }), tx(80, 34, '· Settings · Morning ping', { fill: 'var(--ink3)', size: 9 }),
+  tx(26, 62, `Paste the ${what}`, { weight: 700, size: 9.5 }),
+  bx(26, 72, 308, 32, { r: 9, fill: 'var(--sheet)', stroke: 'var(--rule2)' }), bx(26, 72, 308, 32, { r: 9, stroke: 'var(--ink)', sw: 1.6, show: [22, 100] }),
+  bx(140, 46, 40, 16, { r: 5, fill: 'var(--ink)', show: [28, 42], pop: true }), tx(160, 57, 'Ctrl V', { anchor: 'middle', fill: 'var(--paper)', size: 7.5, weight: 800, show: [28, 42] }),
+  tx(38, 92, text, { mono: true, size: 8.5, type: [33, 45], show: [32, 100] }),
+  ci(316, 88, 9, { fill: 'var(--clear)', show: [54, 100], pop: true }), { t: 'path', d: 'M311.5 88.5l3.2 3.2 5.6-6.4', stroke: '#fff', sw: 2, show: [56, 100] },
+  tx(26, 126, ok, { fill: 'var(--clear-ink)', size: 9, weight: 700, show: [58, 100] }),
+  bx(26, 150, 96, 28, { r: 8, fill: 'var(--ink)' }), tx(74, 168, 'Connect', { anchor: 'middle', fill: 'var(--paper)', size: 9.5, weight: 800 })],
+  path: [[230, 200, 0], [150, 88, 20, true], [74, 164, 72, true], [74, 164, 100]] });
+
+const DSCENES = [
+  { label: 'Hover the channel, press its gear', els: [FRAME,
+    bx(8, 8, 38, 204, { r: 14, fill: 'var(--shoal)' }), ci(27, 34, 11, { fill: DIS }), ci(27, 62, 11, { fill: 'var(--rule2)' }), ci(27, 90, 11, { fill: 'var(--rule2)' }),
+    bx(46, 8, 98, 204, { r: 0, fill: 'var(--sheet)' }), tx(56, 30, 'your server', { weight: 800, size: 9.5 }),
+    bx(51, 67, 88, 18, { r: 6, fill: 'var(--shoal)', show: [24, 100] }),
+    tx(58, 56, '# general', { fill: 'var(--ink2)' }), tx(58, 79, '# ship-log', { fill: 'var(--ink2)' }), tx(58, 102, '# random', { fill: 'var(--ink2)' }), tx(58, 125, '# releases', { fill: 'var(--ink2)' }),
+    ci(129, 76, 3.8, { stroke: 'var(--ink2)', sw: 1.8, show: [28, 100], pop: true }), ci(129, 76, 6.2, { stroke: 'var(--ink2)', sw: 1, show: [28, 100], pop: true }),
+    ...bars(158, 40, 5, [0, 52]),
+    bx(144, 8, 208, 204, { r: 0, fill: 'var(--sheet)', show: [52, 100], rise: 0 }),
+    tx(160, 34, '# ship-log', { weight: 800, size: 11, show: [54, 100] }), tx(160, 48, 'Channel settings', { fill: 'var(--ink3)', size: 8.5, show: [54, 100] }),
+    ...['Overview', 'Permissions', 'Invites', 'Integrations'].map((s, i) => tx(160, 78 + i * 20, s, { fill: 'var(--ink2)', size: 9, show: [56 + i * 2, 100] }))],
+    path: [[300, 196, 0], [98, 78, 24], [129, 77, 42, true], [129, 77, 100]] },
+  { label: 'Integrations, then New Webhook', els: [FRAME,
+    bx(8, 8, 112, 204, { r: 14, fill: 'var(--shoal)' }), tx(22, 32, '# ship-log', { weight: 800, size: 10 }),
+    bx(14, 106, 100, 18, { r: 6, fill: 'var(--sheet)', show: [18, 100] }),
+    ...['Overview', 'Permissions', 'Invites', 'Integrations'].map((s, i) => tx(22, 58 + i * 20, s, { fill: 'var(--ink2)', size: 9 })),
+    tx(134, 34, 'Integrations', { weight: 800, size: 12, show: [20, 100] }),
+    bx(134, 46, 204, 34, { r: 9, fill: 'var(--sheet)', stroke: 'var(--rule2)', show: [22, 100] }), tx(146, 67, 'Webhooks', { weight: 700, size: 9.5, show: [22, 100] }),
+    bx(258, 54, 72, 18, { r: 6, fill: DIS, show: [22, 100] }), tx(294, 66, 'New Webhook', { anchor: 'middle', fill: '#fff', size: 7.8, weight: 800, show: [22, 100] }),
+    { t: 'g', show: [48, 100], pop: true, els: [bx(134, 90, 204, 78, { r: 11, fill: 'var(--sheet)', stroke: 'var(--rule2)' }), ci(156, 116, 12, { fill: DIS }),
+      bx(176, 105, 128, 22, { r: 6, fill: 'var(--paper)', stroke: 'var(--rule2)' }), tx(176, 146, 'Channel  # ship-log', { fill: 'var(--ink3)', size: 8 })] },
+    tx(183, 120, 'Captain Hook', { fill: 'var(--ink2)', size: 9, show: [50, 60] }), tx(183, 120, 'slowship', { size: 9, weight: 700, show: [62, 100], type: [63, 74] })],
+    path: [[230, 200, 0], [64, 116, 16, true], [294, 63, 40, true], [240, 116, 58, true], [240, 116, 100]] },
+  { label: 'Copy Webhook URL', els: [FRAME,
+    bx(24, 26, 312, 166, { r: 13, fill: 'var(--sheet)', stroke: 'var(--rule2)' }), ci(54, 58, 14, { fill: DIS }),
+    tx(78, 56, 'slowship', { weight: 800, size: 11 }), tx(78, 70, '# ship-log', { fill: 'var(--ink3)', size: 8.5 }),
+    bx(40, 88, 280, 28, { r: 7, fill: 'var(--paper)', stroke: 'var(--rule2)' }), bx(40, 88, 280, 28, { r: 7, fill: DIS, op: .16, show: [40, 100] }),
+    tx(50, 106, 'https://discord.com/api/webhooks/1301…/••••••••', { mono: true, size: 8, fill: 'var(--ink3)' }),
+    bx(40, 134, 118, 26, { r: 7, fill: 'var(--paper)', stroke: 'var(--rule2)' }), tx(99, 151, 'Copy Webhook URL', { anchor: 'middle', size: 8.5, weight: 800 }),
+    tx(176, 151, 'Delete Webhook', { fill: 'var(--hold)', size: 8.5, weight: 700 }),
+    bx(70, 166, 58, 18, { r: 9, fill: 'var(--ink)', show: [42, 74], pop: true }), tx(99, 178, 'Copied', { anchor: 'middle', fill: 'var(--paper)', size: 8.5, weight: 800, show: [42, 74] })],
+    path: [[260, 205, 0], [99, 147, 34, true], [99, 147, 100]] },
+  pasteScene('webhook link', 'https://discord.com/api/webhooks/1301…/••••••••', '✓ A Discord webhook. Kept where only you can read it.'),
+  { label: 'The verdict lands in your channel', dur: 5.6, els: [FRAME,
+    tx(24, 32, '# ship-log', { weight: 800, size: 11 }), bx(8, 44, 344, 1, { r: 0, fill: 'var(--rule)' }),
+    ...bars(24, 58, 2),
+    { t: 'g', show: [14, 100], rise: 18, els: [blob(36, 100),
+      tx(54, 98, 'slowship', { weight: 800, size: 9.5 }), bx(98, 90, 22, 11, { r: 3, fill: DIS }), tx(109, 98.5, 'BOT', { anchor: 'middle', fill: '#fff', size: 6.5, weight: 900 }), tx(126, 98, '06:30', { fill: 'var(--ink3)', size: 7.5 }),
+      bx(54, 106, 278, 92, { r: 7, fill: 'var(--shoal)' }), bx(54, 106, 4, 92, { r: 2, fill: 'var(--hold)' }),
+      tx(68, 125, '◆ Held in port.', { weight: 800, size: 11 }), tx(68, 142, '1 held · 10 to glance · 252 aboard', { fill: 'var(--ink2)', size: 8.5 }),
+      tx(68, 162, '◆ evil-pkg · reads credential files and sends…', { size: 8.5 }), tx(68, 186, 'my-app · read, never run · slowship review', { fill: 'var(--ink3)', size: 7.5 })] },
+    ci(36, 100, 13, { stroke: 'var(--clear)', sw: 2, show: [16, 36], pop: true })] },
+];
+const TSCENES = [
+  { label: 'Search for BotFather and open it', els: [FRAME,
+    bx(8, 8, 130, 204, { r: 14, fill: 'var(--sheet)' }), bx(16, 18, 114, 22, { r: 11, fill: 'var(--shoal)' }),
+    tx(28, 32.5, 'Search', { fill: 'var(--ink3)', size: 8.5, show: [0, 22] }), tx(28, 32.5, 'BotFather', { size: 8.5, weight: 700, type: [24, 40], show: [23, 100] }),
+    ...[58, 88, 118].flatMap(y => [ci(30, y, 10, { fill: 'var(--rule2)', show: [0, 42] }), bx(46, y - 7, 72, 6, { r: 3, fill: 'var(--shoal)', show: [0, 42] }), bx(46, y + 3, 48, 5, { r: 2.5, fill: 'var(--shoal)', show: [0, 42] })]),
+    bx(12, 46, 122, 30, { r: 9, fill: 'var(--shoal)', show: [58, 100] }),
+    { t: 'g', show: [43, 100], els: [ci(30, 61, 11, { fill: TGB }), tx(47, 59, 'BotFather', { weight: 800, size: 9 }), ci(99, 56, 4.5, { fill: TGB }), { t: 'path', d: 'M97 56l1.6 1.6 2.8-3', stroke: '#fff', sw: 1.4 }, tx(47, 70, 'bot', { fill: 'var(--ink3)', size: 7.5 })] },
+    { t: 'g', show: [64, 100], els: [tx(154, 32, 'BotFather', { weight: 800, size: 11 }), tx(154, 44, 'bot', { fill: 'var(--ink3)', size: 7.5 }), bx(138, 52, 214, 1, { r: 0, fill: 'var(--rule)' })] },
+    { t: 'g', show: [70, 100], rise: 10, els: [bx(154, 66, 180, 36, { r: 11, fill: 'var(--shoal)' }), tx(166, 82, 'I can help you create and', { size: 8.5 }), tx(166, 94, 'manage Telegram bots.', { size: 8.5 })] }],
+    path: [[260, 196, 0], [72, 29, 18, true], [72, 61, 56, true], [72, 61, 100]] },
+  { label: 'Send /newbot, a name, a username', dur: 7.2, els: [FRAME,
+    tx(24, 30, 'BotFather', { weight: 800, size: 11 }), bx(8, 40, 344, 1, { r: 0, fill: 'var(--rule)' }),
+    ...[[6, '/newbot', 86, 48, true], [20, 'Alright, a new bot. How shall we call it?', 210, 70], [34, 'slowship', 74, 92, true], [48, 'Good. Now a username. It must end in bot.', 222, 114], [62, 'my_slowship_bot', 112, 136, true]]
+      .flatMap(([t, s, w, y, me]) => [bx(me ? 334 - w : 24, y, w, 18, { r: 9, fill: me ? TGB : 'var(--shoal)', show: [t, 100], rise: 8 }),
+        tx(me ? 334 - w / 2 : 34, y + 12.5, s, { anchor: me ? 'middle' : undefined, fill: me ? '#fff' : 'var(--ink)', size: 8.2, weight: me ? 700 : 500, show: [t, 100], ...(me ? { type: [t, t + 7] } : {}) })]),
+    { t: 'g', show: [76, 100], rise: 10, els: [bx(24, 158, 250, 44, { r: 11, fill: 'var(--shoal)' }), tx(34, 173, 'Done! Use this token to access the HTTP API:', { size: 8 }),
+      bx(34, 180, 150, 15, { r: 4, fill: 'var(--deep)' }), tx(39, 191, '7012345678:AAH••••••••', { mono: true, size: 7.6 })] }] },
+  { label: 'Copy the token', els: [FRAME,
+    tx(24, 30, 'BotFather', { weight: 800, size: 11 }), bx(8, 40, 344, 1, { r: 0, fill: 'var(--rule)' }),
+    bx(24, 54, 300, 100, { r: 13, fill: 'var(--shoal)' }), tx(38, 76, 'Done! Congratulations on your new bot.', { size: 8.8 }),
+    tx(38, 92, 'Use this token to access the HTTP API:', { size: 8.8 }),
+    bx(38, 102, 200, 22, { r: 6, fill: 'var(--deep)' }), bx(38, 102, 200, 22, { r: 6, fill: TGB, op: .24, show: [32, 100] }),
+    tx(46, 117, '7012345678:AAH•••••••••••••', { mono: true, size: 8.6 }), tx(38, 142, 'Keep your token secure.', { fill: 'var(--ink3)', size: 7.8 }),
+    bx(146, 160, 60, 18, { r: 9, fill: 'var(--ink)', show: [38, 72], pop: true }), tx(176, 172, 'Copied', { anchor: 'middle', fill: 'var(--paper)', size: 8.5, weight: 800, show: [38, 72] })],
+    path: [[290, 205, 0], [138, 113, 30, true], [138, 113, 100]] },
+  pasteScene('token', '7012345678:AAH•••••••••••••••••', '✓ Your bot is @my_slowship_bot.'),
+  { label: 'Open your bot and press Start', els: [FRAME,
+    tx(24, 30, 'slowship bot', { weight: 800, size: 11 }), tx(24, 42, 'bot', { fill: 'var(--ink3)', size: 7.5 }), bx(8, 50, 344, 1, { r: 0, fill: 'var(--rule)' }),
+    { t: 'g', show: [0, 46], els: [bx(70, 66, 220, 56, { r: 12, fill: 'var(--shoal)' }), tx(180, 88, 'What can this bot do?', { anchor: 'middle', weight: 800, size: 9 }), tx(180, 104, 'Sends you slowship’s morning verdict.', { anchor: 'middle', fill: 'var(--ink2)', size: 8 })] },
+    { t: 'g', show: [0, 48], els: [bx(24, 176, 312, 26, { r: 9, fill: TGB }), tx(180, 193, 'START', { anchor: 'middle', fill: '#fff', weight: 900, size: 10 })] },
+    bx(272, 132, 62, 18, { r: 9, fill: TGB, show: [46, 100], rise: 8 }), tx(303, 144.5, '/start', { anchor: 'middle', fill: '#fff', size: 8.5, weight: 700, show: [46, 100] }),
+    ci(44, 176, 5, { fill: 'var(--ink)', show: [58, 100], pop: true }), ci(44, 176, 11, { stroke: 'var(--ink)', sw: 1.5, show: [60, 100], pop: true }),
+    tx(62, 179.5, 'slowship heard you', { weight: 800, size: 9.5, show: [62, 100] })],
+    path: [[250, 100, 0], [180, 189, 34, true], [180, 189, 100]] },
+  { label: 'The verdict lands in your chat', dur: 5.6, els: [FRAME,
+    tx(24, 30, 'slowship bot', { weight: 800, size: 11 }), bx(8, 40, 344, 1, { r: 0, fill: 'var(--rule)' }),
+    bx(272, 52, 62, 18, { r: 9, fill: TGB }), tx(303, 64.5, '/start', { anchor: 'middle', fill: '#fff', size: 8.5, weight: 700 }),
+    { t: 'g', show: [14, 100], rise: 18, els: [bx(24, 80, 268, 118, { r: 13, fill: 'var(--shoal)' }),
+      tx(38, 102, '◆ Held in port.', { weight: 800, size: 11 }), tx(38, 120, '1 held · 10 to glance · 252 aboard in my-app', { fill: 'var(--ink2)', size: 8.4 }),
+      tx(38, 144, '◆ evil-pkg · reads credential files and sends…', { size: 8.4 }), tx(38, 168, 'Read, never run. Open it with:', { fill: 'var(--ink3)', size: 8, italic: true }),
+      tx(38, 182, 'slowship review', { fill: 'var(--ink3)', size: 8, italic: true }), tx(282, 192, '06:30', { anchor: 'end', fill: 'var(--ink3)', size: 7 })] }] },
+];
+const PINGS = {
+  discord: { name: 'Discord', ic: () => IC.speech, lede: 'A message in a channel you pick, after each nightly watch. Through a webhook: no bot to run.', steps: [
+    { t: 'Open your channel’s settings', p: 'In Discord, hover the channel the verdict should land in and press its gear. You need the <b>Manage Webhooks</b> permission there.' },
+    { t: 'Integrations, then New Webhook', p: 'Open <b>Integrations</b>, then <b>Webhooks</b>, and press <b>New Webhook</b>. Name it slowship if you like.' },
+    { t: 'Copy the webhook link', p: 'Press <b>Copy Webhook URL</b>. Anyone with this link can post in that channel, so it stays on this computer and isn’t shown again.' },
+    { t: 'Paste it here', p: 'slowship checks it’s a Discord webhook and keeps it in a file only you can read.', input: 'https://discord.com/api/webhooks/…' },
+    { t: 'Send a test', p: 'This lands after each nightly watch: the verdict, the counts and the names of what needs you. Never code, paths or keys.', test: true },
+  ].map((s, i) => ({ ...s, film: DSCENES[i] })) },
+  telegram: { name: 'Telegram', ic: () => IC.plane, lede: 'A message from a bot you make, after each nightly watch. It writes to you and nobody else.', steps: [
+    { t: 'Find @BotFather', p: 'BotFather is Telegram’s own bot for making bots. Search for it, or open <a href="https://t.me/BotFather" target="_blank" rel="noopener">t.me/BotFather</a>.' },
+    { t: 'Make a bot with /newbot', p: 'Send <b>/newbot</b>, give it a name, then a username that ends in <b>bot</b>.' },
+    { t: 'Copy the token', p: 'BotFather replies with a token. Copy it. It lets anyone write as your bot, so it stays on this computer and isn’t shown again.' },
+    { t: 'Paste it here', p: 'slowship asks Telegram whose bot it is, then keeps the token in a file only you can read.', input: '123456789:AAH…' },
+    { t: 'Say hello to your bot', p: 'Open your bot and press <b>Start</b>, so it knows where to write. slowship is listening.', listen: true },
+    { t: 'Send a test', p: 'This lands after each nightly watch: the verdict, the counts and the names of what needs you. Never code, paths or keys.', test: true },
+  ].map((s, i) => ({ ...s, film: TSCENES[i] })) },
+};
+
+// the Settings section: what's connected, and how often it speaks
+function pingHTML(g) {
+  const s = S.ping ?? { discord: {}, telegram: {} };
+  const tile = (pf, on, sub, acts) => `<div class="ptile${on ? ' on' : ''}" data-pf="${pf}"><span class="led2"></span><span class="pico">${PINGS[pf].ic()}</span><b>${PINGS[pf].name}</b><small>${sub}</small><div class="pact">${acts}</div></div>`;
+  const tg = s.telegram ?? {}, dc = s.discord ?? {};
+  return `<section class="sgrp wide" id="sg-ping" style="--i:${g}"><h3>Morning ping</h3>
+    <p class="shelp">Optional. After each nightly watch the verdict lands in Discord or Telegram. Only the verdict, the counts and the names of what needs you leave this computer. Never code, paths or keys.</p>
+    <div class="pings">
+      ${tile('discord', dc.on, dc.on ? `Connected · ${esc(dc.hint)}` : 'Not connected', dc.on ? '<button class="btn sm" data-ptest-now="discord">Send a test</button><button class="btn sm" data-poff="discord">Disconnect</button>' : '<button class="btn sm primary" data-pconnect="discord">Connect…</button>')}
+      ${tile('telegram', tg.on, tg.on ? `Connected · @${esc(tg.bot)} → ${esc(tg.chat)}` : tg.bot ? `@${esc(tg.bot)} is waiting for your Start` : 'Not connected',
+        tg.on ? '<button class="btn sm" data-ptest-now="telegram">Send a test</button><button class="btn sm" data-poff="telegram">Disconnect</button>' : `<button class="btn sm primary" data-pconnect="telegram"${tg.bot ? ' data-pstep="4"' : ''}>${tg.bot ? 'Finish setting up…' : 'Connect…'}</button>${tg.bot ? '<button class="btn sm" data-poff="telegram">Start over</button>' : ''}`)}
+    </div>
+    <div class="srow${dc.on || tg.on ? '' : ' dim'}"><div><b>Only when something needs you</b><small>Off: a ping after every nightly watch, quiet ones too.</small></div><button class="sw2" role="switch" aria-checked="${s.when === 'needs'}" data-pwhen aria-label="Only when something needs you"><i></i></button></div>
+    <div class="srow${dc.on || tg.on ? '' : ' dim'}"><div><b>Also after watches I start</b><small>Off: only the nightly watch sends one.</small></div><button class="sw2" role="switch" aria-checked="${!!s.manual}" data-pmanual aria-label="Also after watches I start"><i></i></button></div>
+  </section>`;
+}
+async function loadPing() { try { S.ping = await api('/api/notify'); } catch { S.ping = null; } }
+
+// the setup: a rail of steps, and a stage with the step's film, what to do, and the one thing to fill in
+const PD = $('#pingdlg'), PG = { pf: 'discord', i: 0, open: false };
+function openPing(pf, at = 0) {
+  Object.assign(PG, { pf, i: at, open: true, msg: null, listening: false });
+  renderPing(1, true);
+  PD.showModal();
+}
+PD.addEventListener('close', () => { PG.open = false; renderSettings(); });
+function railHTML() {
+  const p = PINGS[PG.pf];
+  return `<div class="pbrand"><span class="pico">${p.ic()}</span><div><small>Morning ping</small><h3 id="pgh">${p.name}</h3></div></div><p>${p.lede}</p>
+    <ol class="steps">${'<span class="fillv"></span>'}${p.steps.map((s, i) => `<li class="${i < PG.i ? 'done' : i === PG.i ? 'cur' : ''}" data-pgo="${i}"><span class="nd">${i < PG.i ? '✓' : i + 1}</span><span>${s.t}</span></li>`).join('')}</ol>
+    <p class="pfine">${IC.lock}<span>Kept on this computer, in a file only you can read. Off again any time: <code>slowship notify off</code>.</span></p>`;
+}
+function stageHTML() {
+  const p = PINGS[PG.pf], s = p.steps[PG.i], last = PG.i === p.steps.length - 1, st = S.ping?.[PG.pf] ?? {};
+  let ctl = '';
+  if (s.input) ctl = `<form class="pfield" data-pform><label class="pathin">${IC.lock}<input id="psecret" type="password" autocomplete="off" spellcheck="false" placeholder="${s.input}" aria-label="${s.t}"></label><button class="btn primary" type="submit">Connect</button></form>`;
+  if (s.listen) ctl = !st.bot ? `<div class="pmsg err">${IC.warn}<span>Paste your bot’s token in step 4 first.</span></div>` : st.on ? `<div class="pmsg ok">${IC.check}<span>Found you: ${esc(st.chat)}. The morning ping goes to this chat.</span></div>`
+    : `<div class="listen"><i></i><span>Listening for your message to <b>@${esc(st.bot ?? 'your bot')}</b>…</span></div>${st.bot ? `<a class="btn sm" href="https://t.me/${encodeURIComponent(st.bot)}" target="_blank" rel="noopener">Open @${esc(st.bot)}</a>` : ''}`;
+  if (s.test) ctl = `<div class="pfield"><button class="btn primary" data-ptest>${IC.play}Send a test</button></div>`;
+  const msg = PG.msg ? `<div class="pmsg ${PG.msg.ok ? 'ok' : 'err'}">${PG.msg.ok ? IC.check : IC.warn}<span>${esc(PG.msg.t)}</span></div>` : '';
+  const ready = (!s.input || st.on || (PG.pf === 'telegram' && st.bot)) && (!s.listen || st.on);
+  return `<div class="ptop"><span class="cnt">Step ${PG.i + 1} of ${p.steps.length}</span><button class="btn sm x" data-pclose aria-label="Close">${IC.x}</button></div>
+    <div class="pbody"><div class="slab"><span class="ghost">${String(PG.i + 1).padStart(2, '0')}</span>${film(s.film)}</div>
+      <div class="ptext"><h4>${s.t}</h4><p>${s.p}</p>${ctl}${msg}</div></div>
+    <div class="pnav"><button class="btn" data-pback${PG.i ? '' : ' disabled'}>Back</button><button class="btn primary" data-pnext${ready ? '' : ' disabled'}>${last ? 'Done' : 'Next'}${last ? '' : ARR}</button></div>`;
+}
+function renderPing(dir = 1, first = false) {
+  const rail = $('#prail'), stage = $('#pstage');
+  rail.innerHTML = railHTML(); stage.innerHTML = stageHTML();
+  // the rail's line fills to the step you're on
+  requestAnimationFrame(() => {
+    const li = rail.querySelectorAll('.steps li')[PG.i], ol = rail.querySelector('.steps');
+    if (li && ol) { ol.style.setProperty('--fill', `${li.offsetTop + li.offsetHeight / 2 - 16}px`); ol.style.setProperty('--fillh', `${li.offsetLeft + li.offsetWidth / 2 - 16}px`); }
+  });
+  if (!REDUCED) {  // the new step arrives from the side it lies on, out of a little depth; its parts follow one another in
+    const b = stage.querySelector('.pbody'), parts = [b.querySelector('.slab'), ...b.querySelectorAll('.ptext > *')];
+    parts.forEach((el, k) => el.animate([{ opacity: 0, transform: `translateX(${(first ? 0 : 56) * dir}px) translateY(${first ? 14 : 0}px) scale(${k ? 1 : .94})`, filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
+      { duration: 640, delay: k * 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+  }
+  const s = PINGS[PG.pf].steps[PG.i];
+  if (s.input) setTimeout(() => $('#psecret')?.focus(), 80);
+  if (s.listen && S.ping?.telegram?.bot && !S.ping.telegram.on) listen();  // nothing to listen to until there's a bot
+}
+async function pingGo(i) {
+  const n = PINGS[PG.pf].steps.length;
+  if (i < 0 || i >= n || i === PG.i) return;
+  const dir = i > PG.i ? 1 : -1, b = $('#pstage .pbody');
+  if (b && !REDUCED) await b.animate([{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: `translateX(${-40 * dir}px) scale(.97)`, filter: 'blur(5px)' }], { duration: 200, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' }).finished;
+  PG.i = i; PG.msg = null; renderPing(dir);
+}
+async function listen() {  // Telegram: wait for the Start, a long poll at a time, while this step is open
+  if (PG.listening) return;
+  PG.listening = true;
+  try {
+    while (PG.open && PG.pf === 'telegram' && PINGS.telegram.steps[PG.i].listen && !S.ping?.telegram?.on) {
+      const r = await api('/api/notify/telegram/chat', {});
+      S.ping = r;
+      if (r.found && PG.open) { PG.msg = null; renderPing(1); break; }
+    }
+  } catch (e) { PG.msg = { ok: false, t: e.message }; if (PG.open) renderPing(1); }
+  PG.listening = false;
+}
+PD.addEventListener('submit', async e => {
+  if (!e.target.matches('[data-pform]')) return;
+  e.preventDefault();
+  const v = $('#psecret').value.trim(), btn = e.target.querySelector('button');
+  if (!v) return;
+  btn.disabled = true;
+  try {
+    S.ping = await api(`/api/notify/${PG.pf}`, PG.pf === 'discord' ? { webhook: v } : { token: v });
+    PG.msg = { ok: true, t: PG.pf === 'discord' ? `A Discord ${S.ping.discord.hint}. Kept where only you can read it.` : `Your bot is @${S.ping.telegram.bot}. Kept where only you can read it.` };
+    renderPing(1);
+    setTimeout(() => PG.open && pingGo(PG.i + 1), 1100);  // a beat to read the tick, then on
+  } catch (err) { PG.msg = { ok: false, t: err.message }; btn.disabled = false; renderPing(1); }
+});
+PD.addEventListener('click', async e => {
+  if (e.target === PD || e.target.closest('[data-pclose]')) return PD.close();
+  const go = e.target.closest('[data-pgo]');
+  if (go) { const i = +go.dataset.pgo; if (i <= PG.i || $('#pstage [data-pnext]:not([disabled])')) pingGo(i); return; }
+  if (e.target.closest('[data-pback]')) return pingGo(PG.i - 1);
+  if (e.target.closest('[data-pnext]')) return PG.i === PINGS[PG.pf].steps.length - 1 ? PD.close() : pingGo(PG.i + 1);
+  const t = e.target.closest('[data-ptest]');
+  if (t) {
+    t.disabled = true;
+    try { const r = await api('/api/notify/test', { platform: PG.pf }); PG.msg = r.ok ? { ok: true, t: `Sent. Look in your ${PG.pf === 'discord' ? 'channel' : 'chat'}.` } : { ok: false, t: r.error || 'Not sent' }; }
+    catch (err) { PG.msg = { ok: false, t: err.message }; }
+    renderPing(1);
+    if (PG.msg.ok) { const b = $('#pstage [data-ptest]'); if (b) b.insertAdjacentHTML('beforeend', '<span class="ring2"></span>'); }
+  }
+});
+
 function renderSettings() {
   const body = $('#setbody'), y = body.parentElement.scrollTop;
   body.innerHTML = settingsHTML();
@@ -2935,6 +3293,7 @@ function themeThumb() { const on = $(`#themeseg button[aria-pressed="true"]`), t
 function openSettings(focus) {
   closeMenu(); hidePop(); closePanel();
   renderSettings();
+  loadPing().then(() => SET.classList.contains('on') && renderSettings());
   // the window opens out of the gear: the reveal is centred on it
   const p = $('.dpanel'), g = $('#gear').getBoundingClientRect();
   const cx = g.left + g.width / 2 - (innerWidth - p.offsetWidth) / 2, cy = g.top + g.height / 2 - (innerHeight - p.offsetHeight) / 2;
@@ -2965,6 +3324,23 @@ async function setNightly(body) {
 }
 SET.addEventListener('click', e => {
   if (e.target.closest('[data-sclose]')) return closeSettings();
+  // the morning ping: connect (the setup), a test, disconnect, how often
+  const pc = e.target.closest('[data-pconnect]');
+  if (pc) return openPing(pc.dataset.pconnect, +(pc.dataset.pstep || 0));
+  const pt = e.target.closest('[data-ptest-now]');
+  if (pt) {
+    const pf = pt.dataset.ptestNow; pt.disabled = true;
+    api('/api/notify/test', { platform: pf }).then(r => toast(r.ok ? `Sent a test to ${PINGS[pf].name}.` : `Not sent: ${esc(r.error)}`), err => toast(`Not sent: ${esc(err.message)}`)).finally(() => { pt.disabled = false; });
+    return;
+  }
+  const po = e.target.closest('[data-poff]');
+  if (po) { const pf = po.dataset.poff; api('/api/notify/off', { platform: pf }).then(st => { S.ping = st; renderSettings(); toast(`${PINGS[pf].name} is disconnected. Nothing more goes there.`); }, err => toast(esc(err.message))); return; }
+  const pw = e.target.closest('[data-pwhen],[data-pmanual]');
+  if (pw) {
+    const on = pw.getAttribute('aria-checked') !== 'true'; pw.setAttribute('aria-checked', on);
+    api('/api/notify/prefs', pw.hasAttribute('data-pwhen') ? { when: on ? 'needs' : 'always' } : { manual: on }).then(st => { S.ping = st; saved(); }, err => toast(esc(err.message)));
+    return;
+  }
   const o = e.target.closest('[data-opt]');
   if (o) { const a = o.hasAttribute('aria-pressed') ? 'aria-pressed' : 'aria-checked', on = o.getAttribute(a) !== 'true'; o.setAttribute(a, on); return saveSetting({ [o.dataset.opt]: on }, o); }  // it moves at once; the server confirms
   const n = e.target.closest('[data-night]');
