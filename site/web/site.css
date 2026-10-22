@@ -1,0 +1,126 @@
+/* slowship.site: the shared look. Harbour pop: sailcloth paper, navy ink, signal-flag colours, everything you can
+   press outlined in ink on a hard shadow like a hull on its waterline. The landing page and the docs both use it. */
+@font-face{font-family:"Eczar";src:url(fonts/Eczar.ttf) format("truetype");font-weight:400 800;font-display:swap}
+@font-face{font-family:"Fraunces";src:url(fonts/Fraunces.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Martian Mono";src:url(fonts/MartianMono.woff2) format("woff2");font-weight:100 800;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible Next";src:url(fonts/AtkinsonHyperlegibleNext.ttf) format("truetype");font-weight:200 800;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible Mono";src:url(fonts/AtkinsonHyperlegibleMono.ttf) format("truetype");font-weight:200 800;font-display:swap}
+
+:root{
+  --paper:#F4F2EE; --sheet:#FFFFFF; --shoal:#ECE9E2; --deep:#DFDBD2;
+  --ink:#0A1633; --ink2:#3F4B68; --ink3:#6A7491;
+  --rule:rgb(10 22 51 / .12); --rule2:rgb(10 22 51 / .22);
+  --navy:#0B1F4D; --abyss:#061335; --cobalt:#2B50FF; --cobalt2:#5574FF; --foam:#9CB0FF; --sky:#DCE6FF;
+  --hold:#FF2E88; --glance:#FFC21A; --clear:#14D18F;
+  --hold-ink:#B0115C; --glance-ink:#8A5A00; --clear-ink:#0A7A52;
+  --line:#0A1633; --lift:0 4px 0 var(--line); --lift-lg:0 6px 0 var(--line);
+  --poster:"Eczar",Georgia,serif; --display:"Fraunces",Georgia,serif;
+  --sans:"Atkinson Hyperlegible Next","Segoe UI",system-ui,sans-serif; --mono:"Atkinson Hyperlegible Mono",ui-monospace,Consolas,monospace; --data:"Martian Mono",ui-monospace,Consolas,monospace;
+  --out:cubic-bezier(.16,1,.3,1); --io:cubic-bezier(.65,0,.35,1);
+  --spring:linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938 16.7%,1.017 20.6%,1.035 23.5%,1.032 27.4%,.999 39.9%,.995 47.2%,1);
+  --gut:24px; --max:1200px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#070E22; --sheet:#0F1A36; --shoal:#172444; --deep:#213055;
+  --ink:#F3F5FB; --ink2:#AEB7CF; --ink3:#7C87A6; --rule:rgb(243 245 251 / .1); --rule2:rgb(243 245 251 / .2);
+  --line:#33467E; --lift:0 4px 0 #01040D; --lift-lg:0 6px 0 #01040D; --cobalt:#6683FF; --navy:#0B1A42; --sky:#172444;
+  --hold-ink:#FF6FB0; --glance-ink:#FFD45C; --clear-ink:#4BE3AC;
+  color-scheme:dark;
+}}
+@media (max-width:640px){:root{--gut:16px}}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:88px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip}
+img,svg,video{display:block;max-width:100%}
+a{color:inherit}
+::selection{background:var(--glance);color:#0A1633}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;border-radius:6px}
+.wrap{width:min(var(--max),100% - var(--gut) * 2);margin-inline:auto}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+code,kbd{font-family:var(--mono);font-size:.92em}
+
+/* ---------- the header: a pill of navy glass that floats over the page ---------- */
+.nav{position:fixed;z-index:50;top:12px;left:0;right:0;pointer-events:none}
+.nav .in{pointer-events:auto;display:flex;align-items:center;gap:6px;width:min(1120px,100% - var(--gut) * 2);margin:0 auto;padding:7px 7px 7px 16px;border-radius:18px;
+  color:#F6F4EF;border:1.5px solid transparent;transition:background-color .4s,border-color .4s,box-shadow .4s,backdrop-filter .4s}
+.nav.solid .in,.nav.light .in{background:color-mix(in oklab,var(--abyss) 82%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.5);backdrop-filter:blur(16px) saturate(1.5);border-color:rgb(246 244 239 / .12);box-shadow:0 10px 30px -12px rgb(1 4 13 / .5)}
+.brand{display:inline-flex;align-items:center;gap:9px;margin-right:auto;text-decoration:none;font:700 19px/1 var(--display);letter-spacing:-.01em}
+.brand svg{width:30px;height:30px;transition:transform .6s var(--spring)}
+.brand:hover svg{transform:rotate(-8deg) translateY(-1px)}
+.nav .links{display:flex;align-items:center;gap:2px}
+.nav .links a{padding:9px 13px;border-radius:11px;font-size:15px;text-decoration:none;color:#C9D2EC;transition:color .2s,background-color .2s}
+.nav .links a:hover,.nav .links a[aria-current]{color:#fff;background:rgb(255 255 255 / .08)}
+.nav .btn{margin-left:6px}
+.menu-b{display:none;width:42px;height:42px;border-radius:12px;border:1.5px solid rgb(246 244 239 / .25);background:transparent;color:inherit;cursor:pointer}
+.menu-b i{display:block;width:16px;height:2px;margin:3px auto;border-radius:2px;background:currentColor;transition:transform .4s var(--spring),opacity .2s}
+.nav.open .menu-b i:nth-child(1){transform:translateY(5px) rotate(45deg)}.nav.open .menu-b i:nth-child(2){opacity:0}.nav.open .menu-b i:nth-child(3){transform:translateY(-5px) rotate(-45deg)}
+@media (max-width:860px){
+  .nav .links,.nav .in>.btn{display:none}
+  .menu-b{display:block}
+  .nav.open .in{background:var(--abyss);border-color:rgb(246 244 239 / .12);flex-wrap:wrap;border-radius:20px}
+  .nav.open .links{display:grid;width:100%;padding:10px 4px 6px;gap:2px;order:3}
+  .nav.open .links a{font-size:18px;padding:12px}
+  .nav.open .in>.btn{display:inline-flex;order:4;margin:4px 4px 6px;width:calc(100% - 8px);justify-content:center}
+}
+
+/* ---------- buttons: ink outline, hard shadow; they sink into it when pressed ---------- */
+.btn{--bg:var(--sheet);--fg:var(--ink);--sh:var(--line);position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 20px;border-radius:14px;
+  border:2px solid var(--sh);background:var(--bg);color:var(--fg);box-shadow:0 4px 0 var(--sh);font:700 16px/1 var(--sans);text-decoration:none;cursor:pointer;white-space:nowrap;
+  transition:transform .35s var(--spring),box-shadow .35s var(--spring),background-color .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--sh)}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--sh);transition-duration:.08s}
+.btn.primary{--bg:var(--glance);--fg:#0A1633;--sh:#0A1633}
+.btn.cobalt{--bg:var(--cobalt);--fg:#fff;--sh:#0A1633}
+.btn.paper{--bg:#F6F4EF;--fg:#0A1633;--sh:#01040D}
+.btn.ghost{--bg:transparent;--fg:currentColor;--sh:currentColor;box-shadow:none}
+.btn.ghost:hover{box-shadow:none;background:rgb(127 127 127 / .1)}
+.btn.sm{min-height:38px;padding:0 14px;font-size:14.5px;border-radius:11px}
+.btn.lg{min-height:56px;padding:0 26px;font-size:17.5px;border-radius:16px}
+.btn .play{width:20px;height:20px;border-radius:50%;background:#0A1633;display:grid;place-items:center}
+.btn .play svg{width:9px;height:9px;fill:var(--glance);margin-left:1px}
+.on-dark .btn.ghost,.nav .btn.ghost{--fg:#F6F4EF;--sh:rgb(246 244 239 / .35)}
+
+/* a command you can copy, as one line */
+.cmd{display:flex;align-items:center;gap:12px;min-width:0;padding:12px 12px 12px 16px;border-radius:14px;background:#061335;color:#E8ECF8;border:1.5px solid rgb(246 244 239 / .1);font:500 14.5px/1.5 var(--mono)}
+.cmd code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.cmd code::before{content:"$ ";color:#7C87A6}
+.cmd .c{color:#7C87A6}
+.copy{flex:none;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:9px;border:1.5px solid rgb(246 244 239 / .2);background:rgb(255 255 255 / .06);color:#C9D2EC;font:600 12.5px var(--sans);cursor:pointer;transition:background-color .2s,color .2s,border-color .2s}
+.copy:hover{background:rgb(255 255 255 / .12);color:#fff}
+.copy svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.copy.done{color:var(--clear);border-color:color-mix(in oklab,var(--clear) 50%,transparent)}
+
+/* ---------- reveal on scroll: things rise into place once, never again ---------- */
+[data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .9s var(--out),transform 1.1s var(--out);transition-delay:calc(var(--d,0) * 90ms)}
+[data-reveal].in{opacity:1;transform:none}
+.no-js [data-reveal]{opacity:1;transform:none}
+
+/* ---------- a terminal, drawn from slowship's own output ---------- */
+.term{border-radius:16px;background:#070D1F;border:2px solid #01040D;box-shadow:0 6px 0 #01040D;overflow:hidden;color:#E8ECF8}
+.term .tbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgb(246 244 239 / .08);font:500 12.5px var(--mono);color:#7C87A6}
+.term .tbar b{color:#C9D2EC;font-weight:600}
+.term .tbar b::before{content:"$ ";color:#7C87A6}
+.term pre{margin:0;padding:14px 16px 16px;overflow-x:auto;font:400 12.5px/1.32 var(--mono);letter-spacing:0;scrollbar-width:thin}
+.term pre span{white-space:pre}
+/* each cell exactly one column, so half blocks and box lines join up whatever the font */
+.term{container-type:inline-size}
+.term pre.tpic{--lh:1.3em;line-height:var(--lh);font-size:min(12.5px,calc((100cqw - 34px) / (var(--cols,96) * .635)));overflow-x:hidden}
+.tpic .tl>*{display:inline-block;height:var(--lh);vertical-align:top}
+.tpic i{width:1ch;font-style:normal;text-align:center;overflow:visible}
+
+/* ---------- the footer ---------- */
+.foot{background:var(--abyss);color:#BAC4E3;padding:72px 0 40px;margin-top:0}
+.foot .cols{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:40px}
+.foot h4{margin:0 0 14px;font:700 14px var(--sans);color:#F6F4EF}
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:9px;font-size:15px}
+.foot a{text-decoration:none;color:#BAC4E3;transition:color .2s}
+.foot a:hover{color:#fff}
+.foot .tag{max-width:30ch;margin:14px 0 0;font-size:15px;line-height:1.5}
+.foot .brand{color:#F6F4EF}
+.foot .base{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:56px;padding-top:22px;border-top:1px solid rgb(246 244 239 / .1);font-size:13.5px;color:#7C87A6}
+@media (max-width:760px){.foot .cols{grid-template-columns:1fr 1fr}.foot .cols>div:first-child{grid-column:1 / -1}}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  [data-reveal]{opacity:1;transform:none}}

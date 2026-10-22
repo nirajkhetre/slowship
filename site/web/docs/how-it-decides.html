@@ -1,0 +1,55 @@
+<h1>How it decides</h1>
+<p class="lead">A funnel that goes from cheap to careful. Most things are settled by plain rules in a blink. Only what’s worth a second opinion goes to the model, and the final word always stays in code.</p>
+
+<h2>The funnel</h2>
+<ol class="steps">
+  <li><b>Inventory</b><p>Find everything aboard, in one pass, with no setup.</p></li>
+  <li><b>Memory by content</b><p>Every item is fingerprinted. Anything whose bytes haven’t changed since last time is skipped, and anything you’ve cleared stays cleared until its code changes.</p></li>
+  <li><b>Facts from the syntax tree</b><p>A pass over the code’s syntax tree finds what it can actually do. Each fact keeps its file and line.</p></li>
+  <li><b>Combinations, in code</b><p>Some pairs of facts mean more than their parts. Only these can hold the ship.</p></li>
+  <li><b>Claim against behaviour, on your laptop</b><p>For anything worth a second opinion, the local model compares the item’s own description with its short list of facts.</p></li>
+  <li><b>Severity stays in code</b><p>The model can nudge a single fact, never a combination.</p></li>
+  <li><b>The morning report</b><p>One verdict, a short queue, the real code, and an honest map of what couldn’t be read.</p></li>
+</ol>
+
+<h2>The facts it looks for</h2>
+<p>Facts are things the code can do, read from its structure, not guessed from its words:</p>
+<ul>
+  <li>making network calls</li>
+  <li>running other programs</li>
+  <li>writing files, especially in places that survive a restart</li>
+  <li>reading secrets: credential files, keys in the environment</li>
+  <li>building code at runtime, like <code>eval</code> or a <code>Function</code> made from a string</li>
+  <li>install scripts</li>
+  <li>hidden characters, like text that reads differently to you and to the computer</li>
+</ul>
+<p>None of these is bad on its own. A downloader makes network calls. That’s why most facts are only <b>noted</b>.</p>
+
+<h2>What can hold the ship</h2>
+<p>Only combinations found in code:</p>
+<ul>
+  <li>a credential file read next to a network call,</li>
+  <li>decoding something, then running it as code, in the same function,</li>
+  <li>writing to a place that starts programs at login,</li>
+  <li>hidden direction-changing characters in code,</li>
+  <li>a skill that tells your agent to keep something from you,</li>
+  <li>an IPC handler a page can reach that never checks the sender and starts programs or opens a computed address.</li>
+</ul>
+
+<h2>The four levels</h2>
+<div class="tablewrap"><table>
+  <tr><th>Level</th><th>Means</th><th>Who can set it</th></tr>
+  <tr><td><b>Held</b></td><td>Does more than it says. Look before you ship.</td><td>Only a combination found in code.</td></tr>
+  <tr><td><b>Worth a glance</b></td><td>A fact the description doesn’t call for.</td><td>The rules, or the model raising a single fact.</td></tr>
+  <tr><td><b>Noted</b></td><td>A power you’d expect from it.</td><td>The rules, or the model lowering a single fact.</td></tr>
+  <tr><td><b>Fine</b></td><td>Nothing found.</td><td>The rules.</td></tr>
+</table></div>
+
+<h2>What the model does, and doesn’t</h2>
+<p>The model sees the item’s own description, marked clearly as untrusted data, and the short list of facts. It says, fact by fact, whether the description calls for it, and it must cite fact ids that exist. It never sees your other code, and it never decides alone.</p>
+<ul>
+  <li>It can move a <b>single fact</b> one step up or down, never past “worth a glance”.</li>
+  <li>It can <b>never lower a hold</b>. A combination found in code stays held.</li>
+</ul>
+<div class="note hold"><div><p>This is what makes prompt injection pointless here. A README that tells AI scanners to approve everything can sway the model, and in testing it sometimes did. But the hold comes from code, and the model can’t touch it.</p></div></div>
+<p>The model isn’t repeatable bit for bit: between two runs on the same project it moved 4 package verdicts by one step. Rules-only verdicts didn’t change at all.</p>

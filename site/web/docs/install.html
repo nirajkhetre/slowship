@@ -1,0 +1,48 @@
+<h1>Install</h1>
+<p class="lead">You need Node.js and five minutes. A local model makes slowship sharper, but it works without one.</p>
+
+<h2>What you need</h2>
+<div class="tablewrap"><table>
+  <tr><th>What</th><th>Needed?</th><th>Why</th></tr>
+  <tr><td><b>Node.js 22.19 or newer</b></td><td>Yes</td><td>slowship is a Node program with three small dependencies, all parsers.</td></tr>
+  <tr><td><b>Ollama</b> with <code>gemma4:e2b</code></td><td>Recommended</td><td>The local model that compares each description with what the code does. Without it, slowship runs on its rules alone and says so.</td></tr>
+  <tr><td><b>REA</b></td><td>Optional</td><td>Lets slowship read compiled Go, Rust and .NET files, map your Electron app’s IPC, and read Electron fuses. All without running them.</td></tr>
+</table></div>
+<p>It works on Windows, macOS and Linux. The nightly watch uses Task Scheduler on Windows and one crontab line elsewhere.</p>
+
+<h2>Install slowship</h2>
+<ol class="steps">
+  <li><b>Get the code</b>
+<pre><code>git clone https://github.com/nirajkhetre/slowship
+cd slowship</code></pre></li>
+  <li><b>Install its dependencies and link the command</b>
+<pre><code>npm install
+npm link</code></pre>
+  <p><code>npm link</code> puts a <code>slowship</code> command on your computer that points at this folder.</p></li>
+  <li><b>Check it works</b>
+<pre><code>slowship help</code></pre>
+  <p>You should see the mark and the list of commands:</p></li>
+</ol>
+<!--term:help|slowship help-->
+<div class="note warn"><div><p><b>“slowship is not recognized”?</b> Open a new terminal after <code>npm link</code>, so it picks up the new command. If it still isn’t found, run <code>npm prefix -g</code> and make sure that folder is on your <code>PATH</code>. You can always run it directly with <code>node bin/slowship.js</code> from the slowship folder.</p></div></div>
+
+<h2>Add the local model</h2>
+<p>Install <a href="https://ollama.com">Ollama</a>, then pull the model slowship uses by default:</p>
+<pre><code>ollama pull gemma4:e2b</code></pre>
+<p>It’s small enough for a laptop. Ollama runs it on your own machine, so nothing you scan is uploaded. To use a different model, set <code>SLOWSHIP_MODEL</code>:</p>
+<pre><code>SLOWSHIP_MODEL=the-model-you-pulled slowship</code></pre>
+<p>On Windows PowerShell, that’s <code>$env:SLOWSHIP_MODEL = "the-model-you-pulled"</code> before running <code>slowship</code>.</p>
+
+<h2>Add REA (optional)</h2>
+<p><a href="https://github.com/morluto/rea">REA</a> reads compiled files statically. With it, a compiled MCP server or a native <code>.node</code>, <code>.exe</code> or <code>.dll</code> stops being a blind spot: slowship can say what it was built from and, for .NET, which native functions it declares.</p>
+<pre><code>npm install -g rea-agents</code></pre>
+<p>slowship finds a global install by itself. If you keep REA somewhere else, point <code>SLOWSHIP_REA</code> at its <code>scripts/rea.mjs</code>. slowship only ever runs REA’s static readers, with fixed arguments and a timeout.</p>
+
+<h2>Update or remove it</h2>
+<p>To update, pull the latest code in the slowship folder and install again:</p>
+<pre><code>git pull
+npm install</code></pre>
+<p>To remove it, turn off the nightly watch first, then unlink it and delete its folder of memory:</p>
+<pre><code>slowship schedule --off
+npm unlink -g slowship</code></pre>
+<p>slowship keeps what it remembers in <code>~/.slowship</code> (or wherever <code>SLOWSHIP_HOME</code> points). Delete that folder to forget everything, including what you’ve cleared and any morning ping you connected.</p>

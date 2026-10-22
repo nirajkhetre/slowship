@@ -1,0 +1,29 @@
+<h1>The nightly watch</h1>
+<p class="lead">slowship is meant to be slow. Let it read while you sleep, and the verdict is waiting when you open your laptop.</p>
+
+<h2>Turn it on</h2>
+<p>In your project:</p>
+<pre><code>slowship schedule</code></pre>
+<p>That’s it. Every night at 03:00, slowship reads this project, and the report waits in <code>slowship ui</code>. To pick another time, or another folder:</p>
+<pre><code>slowship schedule ~/code/your-app --at 01:30</code></pre>
+<p>Any watch flag you add is kept for the nightly run, so <code>slowship schedule --app dist/</code> checks your build every night too.</p>
+<p>You can also turn it on in the report: <b>Settings</b>, <b>Nightly watch</b>.</p>
+
+<h2>Check it or turn it off</h2>
+<pre><code><span class="c"># what's scheduled, and where its log is</span>
+slowship schedule --status
+
+<span class="c"># stop the nightly watch</span>
+slowship schedule --off</code></pre>
+
+<h2>How it runs</h2>
+<p>You don’t need to keep anything open. The report server doesn’t need to be running, and neither does a terminal. The system starts slowship by itself:</p>
+<ul>
+  <li><b>On Windows</b>, it’s a task in Task Scheduler that runs hidden, with no window popping up. If the computer was asleep at that time, it runs when it next wakes.</li>
+  <li><b>On macOS and Linux</b>, it’s one line in your crontab, marked so slowship can find and replace it. Every other line is left alone.</li>
+</ul>
+<p>Your computer has to be on (or wake up) for the watch to run. It doesn’t need to be connected to anything: the model runs locally, and anything unchanged since last night is read from memory in seconds.</p>
+<div class="note"><div><p>The nightly run always exits cleanly, even when something is held. The verdict waits in the report instead of failing a task you’ll never see. If you’ve connected a <a href="{{base}}docs/morning-ping/">morning ping</a>, it arrives with the verdict.</p></div></div>
+
+<h2>The log</h2>
+<p>Each nightly run writes a log. <code>slowship schedule --status</code> prints where it is. The results themselves land in the same memory as any other watch, so <code>slowship review</code> and <code>slowship ui</code> both show them.</p>

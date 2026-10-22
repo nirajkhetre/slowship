@@ -1,0 +1,61 @@
+<h1>Commands and options</h1>
+<p class="lead">Everything slowship understands, on one page.</p>
+
+<h2>Commands</h2>
+<div class="tablewrap"><table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td><code>slowship [dir]</code></td><td>Read <code>dir</code> (here by default), show the verdict, then offer the review.</td></tr>
+  <tr><td><code>slowship review</code></td><td>Review the last watch again, full screen in the terminal.</td></tr>
+  <tr><td><code>slowship ui</code></td><td>Open the morning report in your browser.</td></tr>
+  <tr><td><code>slowship schedule [dir]</code></td><td>Keep watch every night. See <a href="{{base}}docs/nightly/">The nightly watch</a>.</td></tr>
+  <tr><td><code>slowship discord</code></td><td>Connect a Discord channel for the morning ping.</td></tr>
+  <tr><td><code>slowship telegram</code></td><td>Connect a Telegram chat for the morning ping.</td></tr>
+  <tr><td><code>slowship notify</code></td><td>Show, test or stop the morning ping.</td></tr>
+  <tr><td><code>slowship connect</code></td><td>Print how to connect your coding agent, and install its skill.</td></tr>
+  <tr><td><code>slowship mcp</code></td><td>The MCP server your agent talks to. Your agent starts it; you don’t need to.</td></tr>
+  <tr><td><code>slowship help</code></td><td>The mark and the list of commands.</td></tr>
+</table></div>
+
+<h2>Watch options</h2>
+<div class="tablewrap"><table>
+  <tr><th>Option</th><th>What it does</th></tr>
+  <tr><td><code>--app &lt;folder&gt;</code></td><td>Also check your own build before it ships.</td></tr>
+  <tr><td><code>--no-model</code></td><td>Rules only, no local model.</td></tr>
+  <tr><td><code>--packages-only</code></td><td>Read only the project’s packages.</td></tr>
+  <tr><td><code>--agents-only</code></td><td>Read only agent skills and MCP servers.</td></tr>
+  <tr><td><code>--offline</code></td><td>Don’t download <code>npx</code> MCP servers to read them.</td></tr>
+  <tr><td><code>--json &lt;file&gt;</code></td><td>Write everything found as JSON.</td></tr>
+  <tr><td><code>--approve &lt;name|notable|review&gt;</code></td><td>Clear one item, or everything at that level and below. See <a href="{{base}}docs/clearing/">Clearing things</a>.</td></tr>
+  <tr><td><code>--notify</code></td><td>Send the morning ping after this watch too.</td></tr>
+  <tr><td><code>--plain</code></td><td>Plain text: no colour, no screens. Automatic when piped.</td></tr>
+  <tr><td><code>--no-motion</code></td><td>Draw, but don’t animate.</td></tr>
+</table></div>
+
+<h2>Other options</h2>
+<div class="tablewrap"><table>
+  <tr><th>Command</th><th>Options</th></tr>
+  <tr><td><code>slowship ui</code></td><td><code>--port 7798</code> to choose the port, <code>--no-open</code> to start without opening the browser.</td></tr>
+  <tr><td><code>slowship schedule</code></td><td><code>--at 03:00</code> for the time, any watch option to keep for the nightly run, <code>--status</code> to see what’s set, <code>--off</code> to stop it.</td></tr>
+  <tr><td><code>slowship notify</code></td><td><code>test</code> sends one now. <code>off [discord|telegram|all]</code> disconnects. <code>when needs|always</code> chooses when it sends. <code>manual on|off</code> also sends after watches you start.</td></tr>
+</table></div>
+
+<h2>Environment variables</h2>
+<div class="tablewrap"><table>
+  <tr><th>Variable</th><th>What it does</th></tr>
+  <tr><td><code>SLOWSHIP_MODEL</code></td><td>The Ollama model to use. Default <code>gemma4:e2b</code>.</td></tr>
+  <tr><td><code>SLOWSHIP_HOME</code></td><td>Where slowship keeps its memory. Default <code>~/.slowship</code>.</td></tr>
+  <tr><td><code>SLOWSHIP_REA</code></td><td>Where REA’s <code>scripts/rea.mjs</code> is, if it isn’t installed globally.</td></tr>
+  <tr><td><code>SLOWSHIP_PORT</code></td><td>The report’s port, instead of <code>--port</code>.</td></tr>
+  <tr><td><code>SLOWSHIP_NO_MOTION</code></td><td>The same as <code>--no-motion</code>, everywhere.</td></tr>
+  <tr><td><code>NO_COLOR</code></td><td>Plain text, like <code>--plain</code>.</td></tr>
+</table></div>
+
+<h2>Exit codes</h2>
+<p><code>2</code> when the verdict is held, so it can gate CI; <code>0</code> otherwise. The nightly task always exits cleanly; the verdict waits in the report.</p>
+
+<h2>Files</h2>
+<div class="tablewrap"><table>
+  <tr><th>File</th><th>Holds</th></tr>
+  <tr><td><code>~/.slowship/state.json</code></td><td>The memory of what was read, by fingerprint, and your clears.</td></tr>
+  <tr><td><code>~/.slowship/notify.json</code></td><td>The morning ping’s webhook or token, readable only by you.</td></tr>
+</table></div>

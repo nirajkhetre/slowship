@@ -1,0 +1,56 @@
+<h1>Morning ping</h1>
+<p class="lead">The verdict, sent to where you’ll see it when you wake: a Discord channel or a Telegram chat. It’s optional and off until you connect one.</p>
+
+<h2>What gets sent</h2>
+<p>Only a short summary, in slowship’s own words:</p>
+<ul>
+  <li>the verdict and the counts,</li>
+  <li>the names of what needs you,</li>
+  <li>and slowship’s own words for why.</li>
+</ul>
+<p>Never code, file paths, key names, or any text a scanned package wrote. Discord mentions are switched off, so a package called <code>@everyone</code> pings nobody.</p>
+<p>It talks only to <code>discord.com</code> and <code>api.telegram.org</code>. This is the only thing slowship ever sends anywhere on its own.</p>
+
+<h2>Connect Discord</h2>
+<p>Discord uses a webhook: a private address that can post into one channel. There’s no bot to run.</p>
+<ol class="steps">
+  <li><b>Open the channel’s settings</b><p>In Discord, hover the channel, press the gear, and go to <b>Integrations</b>.</p></li>
+  <li><b>Make a webhook</b><p>Press <b>Webhooks</b>, then <b>New Webhook</b>, then <b>Copy Webhook URL</b>.</p></li>
+  <li><b>Give it to slowship</b>
+<pre><code>slowship discord</code></pre>
+  <p>Paste the address when it asks. slowship checks it and offers to send a test.</p></li>
+</ol>
+
+<h2>Connect Telegram</h2>
+<p>Telegram uses a bot that you make yourself. It takes a minute.</p>
+<ol class="steps">
+  <li><b>Make a bot</b><p>In Telegram, open a chat with <b>@BotFather</b>, send <code>/newbot</code>, and follow its questions. It gives you a token.</p></li>
+  <li><b>Give the token to slowship</b>
+<pre><code>slowship telegram</code></pre>
+  <p>Paste the token when it asks.</p></li>
+  <li><b>Say hello to your bot</b><p>Open the chat with your new bot and press <b>Start</b>. slowship finds that chat by itself and writes there from now on.</p></li>
+</ol>
+
+<h2>Or set it up in the report</h2>
+<figure><img src="{{base}}img/report-ping.webp" alt="The morning ping dialog in the report: numbered steps, each with a short animated film of what to click" width="1440" height="900" loading="lazy"><figcaption>In the report, each step has a short animated film of exactly what to click.</figcaption></figure>
+<p>Open <b>Settings</b>, then <b>Morning ping</b>. Each step shows a short film of what to click, the one thing to paste, and a button to send a test. Inside <code>slowship review</code>, <code>/discord</code> and <code>/telegram</code> do the same.</p>
+
+<h2>Choose when it sends</h2>
+<p>By default it sends after every nightly watch.</p>
+<pre><code><span class="c"># only when something needs you</span>
+slowship notify when needs
+
+<span class="c"># after every nightly watch (the default)</span>
+slowship notify when always
+
+<span class="c"># also after watches you start yourself</span>
+slowship notify manual on</code></pre>
+
+<h2>Test it, check it, stop it</h2>
+<pre><code>slowship notify          <span class="c"># what's connected</span>
+slowship notify test     <span class="c"># send one now</span>
+slowship notify off      <span class="c"># disconnect everything</span>
+slowship notify off discord</code></pre>
+
+<h2>Where the secret lives</h2>
+<p>The webhook address or bot token is kept in <code>notify.json</code> inside slowship’s folder (<code>~/.slowship</code>), readable only by you. The report and the terminal only ever see a hint of it, never the whole thing.</p>

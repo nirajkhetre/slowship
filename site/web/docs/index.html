@@ -1,0 +1,42 @@
+<h1>What slowship is</h1>
+<p class="lead">slowship is a careful reader for everything your project brings aboard. It reads the code of your packages, your coding agent’s skills and MCP servers, and your own build, without running any of it, and tells you which ones do more than they say.</p>
+
+<figure><img src="{{base}}img/report-hero.webp" alt="The morning report: the verdict on the left, the project drawn as a ship in harbour on the right, and four counts of what it read below" width="1440" height="900" loading="lazy"><figcaption>The morning report after one watch. The verdict is on the left. Your project is the ship, with one container for each thing aboard.</figcaption></figure>
+
+<h2>The idea in one example</h2>
+<p>Say you install a package called <code>tidy-dates</code>. Its description says: <i>“Formats dates the way people say them.”</i> That’s its promise.</p>
+<p>slowship opens its code and lists what the code can actually do. Here it finds three things:</p>
+<ol class="steps">
+  <li><b>It formats dates.</b> The description says so. That’s fine.</li>
+  <li><b>It reads your npm login file.</b> The description never mentions it.</li>
+  <li><b>It sends data to a server.</b> The description doesn’t mention this either.</li>
+</ol>
+<p>Reading a login file right next to a network call is one of the few combinations slowship treats as serious. So the verdict is <b>held in port</b>, and the report shows you the exact lines that did it.</p>
+<div class="note"><div><p>That’s the whole job: <b>does this do what it says it does?</b> Most things do. slowship stays quiet about those and only speaks up, with evidence, when something doesn’t.</p></div></div>
+
+<h2>What you get in the morning</h2>
+<p>Every watch ends in one of three verdicts:</p>
+<div class="tablewrap"><table>
+  <tr><th>Verdict</th><th>What it means</th><th>What to do</th></tr>
+  <tr><td><b>Held in port</b></td><td>Something does more than it says, and the proof is a combination found in its code.</td><td>Look at it before you ship.</td></tr>
+  <tr><td><b>Ready after a glance</b></td><td>Nothing serious. A few single facts the descriptions don’t mention.</td><td>Spend a few seconds on each, then clear them.</td></tr>
+  <tr><td><b>Cleared to sail</b></td><td>Everything aboard does what it says, as far as its code shows.</td><td>Ship it.</td></tr>
+</table></div>
+
+<h2>What makes it different</h2>
+<ul>
+  <li><b>It runs on your laptop.</b> The code never leaves your computer. The model that compares descriptions with code is a small open one, running through Ollama on your own machine.</li>
+  <li><b>It reads, it never runs.</b> No install scripts, no starting MCP servers, no <code>require</code>. Checking something should never be the way it gets in.</li>
+  <li><b>It stays quiet.</b> Scanners that cry wolf get ignored. slowship holds the ship only for combinations found in code, and the model can never talk a hold away.</li>
+  <li><b>It shows its evidence.</b> Every finding comes with the file, the line, and the real code around it.</li>
+  <li><b>It’s honest about what it can’t see.</b> The report lists every blind spot. No findings is not proof of nothing.</li>
+</ul>
+
+<h2>Where to go next</h2>
+<div class="dcards">
+  <a class="dcard" href="{{base}}docs/install/" style="--c:var(--glance)"><i></i><b>Install</b><span>Node, one clone, one link. Five minutes.</span></a>
+  <a class="dcard" href="{{base}}docs/first-watch/" style="--c:var(--cobalt)"><i></i><b>Your first watch</b><span>Run it in a project and read the verdict.</span></a>
+  <a class="dcard" href="{{base}}docs/morning-report/" style="--c:var(--clear)"><i></i><b>The morning report</b><span>A tour of every part of the report.</span></a>
+  <a class="dcard" href="{{base}}docs/how-it-decides/" style="--c:var(--hold)"><i></i><b>How it decides</b><span>From the syntax tree to the verdict.</span></a>
+</div>
+<p>Or <a href="{{base}}demo/">try the live demo</a>: the real report page, replaying one recorded night.</p>

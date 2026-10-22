@@ -67,7 +67,7 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 
 Run `slowship` in a terminal and it draws instead of printing (no dependencies, true colour where the terminal has it):
 
-- **The mark.** A soft blob with pill eyes beside a wordmark drawn letter by letter in half blocks.
+- **The mark.** The mochi captain (pill eyes, a captain's cap, a hard sticker shadow) beside a wordmark drawn letter by letter in half blocks.
 - **The watch, live.** A ship crosses a row of containers, one per thing aboard, each turning the colour of what was found; its flag flies the worst colour so far. Under it the water moves. The step it's on (find, fingerprint, read, model, verdict) is lit, with counts of what's held, worth a glance and read from memory.
 - **The verdict.** A card with the headline, a wave under its accent, the whole manifest as coloured containers, and one key to press: review here, open the browser report, or done.
 - **The review, full screen.** Four tabs (Review, Aboard, Keys, Blind spots), a list of cards with a rail in each one's colour, and an inspector beside it: what it says, what its code does with the real lines around each finding (the flagged one lit), the model's note, the IPC map, what compiled files are built from, and the keys it holds. `c` clears an item (it slides away; `u` brings it back), `/` searches, `f` filters by kind, `o` opens the browser report, `r` watches again, `?` shows every key. The mouse works too: click to pick, wheel to scroll. When the last one is cleared, she sails.
@@ -200,8 +200,11 @@ The exit code is `2` when the verdict is "held", so it can gate CI. The nightly 
 ```bash
 npm test
 node site/record.mjs <project>   # record one real watch for the web demo (public packages + the inert fixtures only)
-node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
+node site/shots.mjs              # the site's pictures: terminal output as HTML, and screenshots of a running `slowship ui`
+node site/build.mjs              # build the site into site/dist: the landing page, the docs and the live demo
 ```
+
+The website lives in `site/web`: the landing page (`index.html`), one file per docs page (`docs/`), and the pictures `shots.mjs` makes. The live demo at `demo/` is the real report page answered from the recording, so nothing in it touches a visitor's computer.
 
 There are 27 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token, and the MCP server for your agent, which has no tool to clear anything, repeats only slowship's own words, and passes its own skill. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 

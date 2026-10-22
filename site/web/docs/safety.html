@@ -1,0 +1,36 @@
+<h1>Safety and privacy</h1>
+<p class="lead">A checker should never be the way something gets in. Everything slowship reads stays in quarantine, nothing it reads is started, and almost nothing ever leaves your computer.</p>
+
+<h2>It never runs what it reads</h2>
+<ul>
+  <li><b>No scanned code is executed.</b> No <code>require</code>, no install scripts, no starting MCP servers.</li>
+  <li><b>REA runs only its static readers</b>: <code>analyze-javascript-application</code>, <code>inspect-go-binary</code>, <code>inspect-rust-binary</code>, <code>inspect-managed-artifact</code>, <code>inspect-managed-native-boundaries</code>, <code>inspect-managed-members</code> and <code>inspect-electron-fuses</code>. Each gets fixed arguments, a timeout and a cap on output. None of them loads or starts the file it reads.</li>
+  <li><b>No shell anywhere.</b> Programs are started with fixed arguments, never through a shell. Package names are checked before <code>npm pack</code>, and downloaded packages are unpacked by slowship’s own reader, which refuses any path that tries to leave the quarantine folder.</li>
+</ul>
+
+<h2>Nothing is uploaded</h2>
+<p>slowship uses the network for exactly three things, and nothing else:</p>
+<div class="tablewrap"><table>
+  <tr><th>What</th><th>Where to</th><th>When</th></tr>
+  <tr><td>Downloading <code>npx</code> MCP servers so they can be read</td><td>npm</td><td>During a watch. <code>--offline</code> turns it off.</td></tr>
+  <tr><td>A package your agent asks it to check</td><td>npm</td><td>Only when your agent calls <code>check</code>.</td></tr>
+  <tr><td>The morning ping</td><td><code>discord.com</code> or <code>api.telegram.org</code></td><td>Only if you connect one. A summary in slowship’s own words, never code, paths or keys.</td></tr>
+</table></div>
+<p>The model runs on your machine through Ollama. Your code never goes to it in bulk: it gets a description and a short list of facts.</p>
+
+<h2>The report answers only you</h2>
+<ul>
+  <li>It listens on <code>127.0.0.1</code>, so other computers can’t reach it.</li>
+  <li>It checks the <code>Host</code> header, so a website can’t reach it by renaming itself (DNS rebinding), and it checks the <code>Origin</code>.</li>
+  <li>It takes JSON only, and caps the size of what it accepts.</li>
+  <li>The code shown around a finding is read only from inside that item’s own folder, and secrets are cut down before they reach the page.</li>
+</ul>
+
+<h2>Your agent can look, never clear</h2>
+<p>The coding agent connector has two tools, <code>check</code> and <code>watch</code>, and no tool to clear anything. Answers repeat only slowship’s own words, never the scanned text, and say that names and paths are data. Clearing happens only in <code>slowship review</code> and <code>slowship ui</code>, by you.</p>
+
+<h2>Key names, never values</h2>
+<p>“Who can spend your money” keeps only the <b>names</b> of keys that an MCP config hands a server, in its <code>env</code> and auth headers. Their values are never read into the report.</p>
+
+<h2>What’s kept on your computer</h2>
+<p>Everything lives in <code>~/.slowship</code> (or <code>SLOWSHIP_HOME</code>): the memory of what it read, your clears, the last watch, and, if you connected one, the morning ping’s webhook or token in <code>notify.json</code>, readable only by you. Delete the folder and it’s all gone.</p>

@@ -1,0 +1,45 @@
+<h1>Your first watch</h1>
+<p class="lead">Go to the project you’re about to ship and type one word. slowship reads everything aboard, then leaves you a verdict and a short list of what to look at.</p>
+
+<h2>Run it</h2>
+<ol class="steps">
+  <li><b>Open a terminal in your project</b>
+  <p>The folder with your <code>package-lock.json</code>. That’s where slowship finds your packages.</p>
+<pre><code>cd ~/code/your-app</code></pre></li>
+  <li><b>Start the watch</b>
+<pre><code>slowship</code></pre>
+  <p>A ship crosses a row of containers, one for each thing aboard. Each container turns the colour of what was found, and the step it’s on lights up: find, fingerprint, read, model, verdict.</p></li>
+  <li><b>Read the verdict card</b>
+  <p>When it’s done, you get one card with the verdict, the whole manifest as coloured containers, and what it read:</p></li>
+</ol>
+<!--term:card|slowship-->
+<p>Then press one key:</p>
+<div class="tablewrap"><table>
+  <tr><th>Key</th><th>What it does</th></tr>
+  <tr><td><kbd>↵</kbd></td><td>Review everything right there, full screen in the terminal. See <a href="{{base}}docs/terminal/">The terminal review</a>.</td></tr>
+  <tr><td><kbd>o</kbd></td><td>Open the morning report in your browser. See <a href="{{base}}docs/morning-report/">The morning report</a>.</td></tr>
+  <tr><td><kbd>q</kbd></td><td>Done. The results wait for you in <code>slowship review</code> and <code>slowship ui</code>.</td></tr>
+</table></div>
+
+<h2>What it read</h2>
+<p>The card says exactly where everything came from. This answers the most common first question: <i>did it scan my whole computer?</i> No. It reads:</p>
+<ul>
+  <li><b>Packages</b> from the project folder you ran it in, using its <code>package-lock.json</code>.</li>
+  <li><b>Agent skills</b> from the folders your coding agents load skills from. These belong to your computer, not to one project, so every project shows the same skills.</li>
+  <li><b>MCP servers</b> from your editors’ MCP settings.</li>
+  <li><b>Your build</b>, only if you point it at one with <code>--app</code>.</li>
+</ul>
+<p>Nothing else on your computer is touched. If you run it in a folder with no <code>package-lock.json</code>, the card says so plainly, and it still reads your skills and MCP servers.</p>
+
+<h2>How long it takes</h2>
+<p>The first watch is the slow one, because it reads everything and asks the model about anything worth a second opinion. On the project we measured (275 things, a laptop with a 6 GB GPU), 50 went to the model, for 4 minutes 23 seconds of model time.</p>
+<p>After that it remembers. Anything whose bytes haven’t changed is skipped, so a re-run with nothing changed took about 4 seconds.</p>
+<div class="note"><div><p>In a hurry? <code>slowship --no-model</code> runs on rules alone and finishes fast. The verdict says it was rules only.</p></div></div>
+
+<h2>Check your own build too</h2>
+<p>Point <code>--app</code> at the folder you’re about to ship:</p>
+<pre><code>slowship --app dist/</code></pre>
+<p>It looks for secrets that slipped in (redacted everywhere it shows them), shipped <code>.env</code> files and source maps, risky Electron settings like <code>nodeIntegration</code>, DevTools left on, and, with REA, a map of every IPC handler your pages can reach.</p>
+
+<h2>Next</h2>
+<p>Look through what it found in <a href="{{base}}docs/morning-report/">the morning report</a>, clear what you’ve checked (<a href="{{base}}docs/clearing/">Clearing things</a>), then let it <a href="{{base}}docs/nightly/">keep watch every night</a>.</p>

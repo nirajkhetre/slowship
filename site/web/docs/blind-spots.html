@@ -1,0 +1,26 @@
+<h1>What it can’t see</h1>
+<p class="lead">slowship reads code; it never runs it. That’s what makes it safe, and it’s also its limit. Here is everything it knows it can miss.</p>
+<div class="note warn"><div><p><b>No findings is not proof of nothing.</b> The report says so too, and lists these blind spots for every watch.</p></div></div>
+
+<h2>Code that only exists while running</h2>
+<p>Code fetched or built while a program runs is invisible to a reader. slowship reports the capability, like <i>downloads and runs code</i>, but it can’t see the payload.</p>
+
+<h2>Compiled code</h2>
+<p>Compiled code isn’t decompiled. With REA, Go and Rust files are read as far as their build record: what they were built from, not what they do. .NET is read further, method by method, unless an assembly is too big for REA’s member reader (PowerShell’s 13 MB engine is). C and C++ leave no record, so those are only named.</p>
+
+<h2>Big Electron apps</h2>
+<p>REA’s map of an Electron app is slow on very big builds: on VS Code’s 6,187 files it got through 156 in 13 minutes. slowship gives it 5 minutes and says so when it gives up. A packaged app gets its fuses read, but its <code>app.asar</code> isn’t mapped; point <code>--app</code> at the unpacked build for the IPC map.</p>
+<p>In your build, only IPC handlers written inline are searched for what they do. A handler that hands off to a function elsewhere isn’t followed.</p>
+
+<h2>Languages it reads lightly, or not yet</h2>
+<ul>
+  <li>Python and shell inside skills are read line by line, not with a full parser. Treat quiet there as “nothing obvious”.</li>
+  <li>TypeScript isn’t read yet.</li>
+  <li>Code inside markdown code blocks is read as instructions, not as code.</li>
+</ul>
+
+<h2>Prompt injection</h2>
+<p>Instructions in <code>SKILL.md</code> are checked for four narrow things: hiding something from you, ignoring other instructions, downloading and running a script, and sending your data somewhere. Other prompt injection passes unnoticed. On the malware benchmark, attacks written as plain English were the biggest single group of misses.</p>
+
+<h2>Big files</h2>
+<p>Files over 2 MB, usually generated bundles, are skipped and named in the report.</p>

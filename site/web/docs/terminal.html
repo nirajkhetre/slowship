@@ -1,0 +1,49 @@
+<h1>The terminal review</h1>
+<p class="lead">You don’t have to leave the terminal. After a watch, press <kbd>↵</kbd> on the verdict card, or run <code>slowship review</code> any time, and the whole review opens full screen.</p>
+
+<h2>Open it</h2>
+<pre><code>slowship review</code></pre>
+<p>It reviews the last watch again, from memory, without reading anything twice.</p>
+<!--term:review|slowship review-->
+
+<h2>What’s on the screen</h2>
+<p>Four tabs run along the top:</p>
+<ul>
+  <li><b>Review</b>: what needs you, held things first. Each card has a rail in its colour.</li>
+  <li><b>Aboard</b>: everything that was read.</li>
+  <li><b>Keys</b>: who can spend your money, by outside account.</li>
+  <li><b>Blind spots</b>: where it couldn’t look.</li>
+</ul>
+<p>Beside the list is the inspector: what the item says, what its code does with the real lines around each finding (the flagged one lit), the model’s note, the IPC map, what compiled files are built from, and the keys it holds.</p>
+
+<h2>Keys</h2>
+<div class="tablewrap"><table>
+  <tr><th>Key</th><th>What it does</th></tr>
+  <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Move through the list</td></tr>
+  <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Switch tabs</td></tr>
+  <tr><td><kbd>↵</kbd></td><td>Open the selected item in the inspector</td></tr>
+  <tr><td><kbd>c</kbd></td><td>Clear it. It slides away.</td></tr>
+  <tr><td><kbd>u</kbd></td><td>Undo the last clear</td></tr>
+  <tr><td><kbd>/</kbd></td><td>Search, or type a command like <code>/discord</code></td></tr>
+  <tr><td><kbd>f</kbd></td><td>Filter by kind</td></tr>
+  <tr><td><kbd>o</kbd></td><td>Open the morning report in the browser</td></tr>
+  <tr><td><kbd>r</kbd></td><td>Watch again</td></tr>
+  <tr><td><kbd>?</kbd></td><td>Show every key</td></tr>
+  <tr><td><kbd>Esc</kbd></td><td>Step back. It never quits.</td></tr>
+  <tr><td><kbd>q</kbd></td><td>Quit. The terminal is always put back as it was.</td></tr>
+</table></div>
+<p>The mouse works too: click to pick, use the wheel to scroll. When the last thing is cleared, the ship sails.</p>
+
+<h2>Commands inside the review</h2>
+<p>Press <kbd>/</kbd> and type a command:</p>
+<ul>
+  <li><code>/discord</code> and <code>/telegram</code> connect a <a href="{{base}}docs/morning-ping/">morning ping</a> without leaving the review.</li>
+  <li>Anything else you type searches what’s aboard.</li>
+</ul>
+
+<h2>Small and odd terminals</h2>
+<p>Below 110 columns, the inspector opens over the list instead of beside it. Below 60 by 16, it asks for more room rather than drawing something broken.</p>
+<p>It uses true colour where the terminal has it, and 256 or 16 colours where it doesn’t.</p>
+
+<h2>Plain text, no motion</h2>
+<p>When the output is piped, in CI, overnight, with <code>NO_COLOR</code> set, or with <code>--plain</code>, slowship prints plain text instead of drawing, and the exit code is the same. <code>--no-motion</code> (or <code>SLOWSHIP_NO_MOTION</code>) keeps the drawing but stops all animation.</p>

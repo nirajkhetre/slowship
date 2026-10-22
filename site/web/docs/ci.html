@@ -1,0 +1,33 @@
+<h1>In CI</h1>
+<p class="lead">slowship can gate a build: the exit code is <code>2</code> when the verdict is held, so a pipeline stops before a package that does more than it says reaches production.</p>
+
+<h2>Exit codes</h2>
+<div class="tablewrap"><table>
+  <tr><th>Code</th><th>Means</th></tr>
+  <tr><td><code>0</code></td><td>Cleared to sail, or ready after a glance. Nothing is held.</td></tr>
+  <tr><td><code>2</code></td><td>Held in port. Something does more than it says.</td></tr>
+</table></div>
+<p>The nightly watch is the exception: it always exits cleanly and leaves the verdict in the report.</p>
+
+<h2>Flags that suit CI</h2>
+<ul>
+  <li><code>--packages-only</code>: a CI machine has no coding agent, so skip skills and MCP servers.</li>
+  <li><code>--no-model</code>: most CI machines have no local model. Rules only, and the output says so.</li>
+  <li><code>--json slowship.json</code>: write everything found as JSON, to keep as a build artifact.</li>
+  <li><code>--app dist/</code>: also check the build you’re about to ship.</li>
+</ul>
+<p>When output is piped, as it is in CI, slowship prints plain text by itself. <code>--plain</code> forces it anywhere.</p>
+
+<h2>An example pipeline</h2>
+<p>A sketch for GitHub Actions. Install your dependencies with scripts off, so nothing runs before it’s been read, then let slowship read them:</p>
+<pre><code>- uses: actions/checkout@v4
+- uses: actions/setup-node@v4
+  with:
+    node-version: 22
+- run: npm ci --ignore-scripts
+- run: git clone --depth 1 https://github.com/nirajkhetre/slowship ../slowship && npm --prefix ../slowship install
+- run: node ../slowship/bin/slowship.js . --packages-only --no-model --json slowship.json</code></pre>
+<div class="note warn"><div><p>Adjust it to your own pipeline. slowship reads what’s installed in <code>node_modules</code>, so install first. Installing with <code>--ignore-scripts</code> means a package’s install script can’t run before slowship has read it.</p></div></div>
+
+<h2>Clearing in CI</h2>
+<p>Clears are kept in slowship’s memory folder, which a fresh CI machine doesn’t have. Point <code>SLOWSHIP_HOME</code> at a folder you cache between runs if you want clears and memory to carry over. Clears stay tied to exact bytes, so a cached clear never covers changed code.</p>

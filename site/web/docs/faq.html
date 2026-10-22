@@ -1,0 +1,38 @@
+<h1>Questions</h1>
+<p class="lead">The things people ask first, answered plainly.</p>
+
+<h2>Does it scan my whole computer?</h2>
+<p>No. It reads the packages of the project folder you run it in, plus the skill folders your coding agents use and your editors’ MCP settings. Those last two belong to your computer rather than one project, so every project shows the same skills. Nothing else is touched. The verdict card lists exactly what it read.</p>
+
+<h2>Do I need to keep the server running for the nightly watch?</h2>
+<p>No. The nightly watch is a scheduled task (Task Scheduler on Windows, crontab elsewhere) that runs slowship by itself, hidden. The report server is only for reading the results, and only when you open it with <code>slowship ui</code>. Your computer does need to be on, or wake up.</p>
+
+<h2>Is it a replacement for npm audit?</h2>
+<p>No, use both. <code>npm audit</code> tells you about known vulnerabilities in published versions. slowship asks a different question: does this code do what its description says? That catches a package that is doing something new and quiet, before anyone has reported it.</p>
+
+<h2>Does it need the internet?</h2>
+<p>Not for reading. The model runs locally, and your packages are already on disk. It downloads only <code>npx</code> MCP servers so it can read them (<code>--offline</code> turns that off), packages your agent asks it to check, and the morning ping if you connect one.</p>
+
+<h2>Does it work without Ollama?</h2>
+<p>Yes. It runs on its rules alone and says so in the verdict. You lose the model’s second opinion, which mostly cuts false alarms; holds come from rules either way.</p>
+
+<h2>Why a small local model and not a big cloud one?</h2>
+<p>Two reasons. Your code stays on your laptop. And the model’s job is deliberately small: compare one description with a short list of facts. It can’t decide a hold or lower one, so a bigger model wouldn’t change what matters most.</p>
+
+<h2>Could a package trick it?</h2>
+<p>It can try. A package’s README can say anything to an AI, and in testing an injected README did sway the model. But the model never sees the code in bulk, never decides alone, and can’t lower a hold, which comes from code. Your coding agent can’t clear anything either. See <a href="{{base}}docs/how-it-decides/">How it decides</a>.</p>
+
+<h2>What does “worth a glance” mean?</h2>
+<p>A single thing the code does that its description doesn’t call for. A date library that also makes a network call, say. Usually there’s a good reason. Look for ten seconds, then clear it.</p>
+
+<h2>Can it break my project?</h2>
+<p>It never writes into your project. It writes only to its own folder, <code>~/.slowship</code>, plus the scheduled task or crontab line if you turn on the nightly watch, and the agent skill if you run <code>slowship connect</code>.</p>
+
+<h2>Why does it say nothing about most of my packages?</h2>
+<p>Because most packages do what they say. Silence is the point: a scanner that warns about everything gets ignored. Everything it read is still listed under <b>Everything aboard</b>.</p>
+
+<h2>What if it finds nothing?</h2>
+<p>Then nothing it can see was wrong. That’s not proof of nothing; see <a href="{{base}}docs/blind-spots/">What it can’t see</a>.</p>
+
+<h2>Where can I try it without installing?</h2>
+<p><a href="{{base}}demo/">The live demo</a> is the real report page, replaying one recorded watch. Nothing in it touches your computer.</p>

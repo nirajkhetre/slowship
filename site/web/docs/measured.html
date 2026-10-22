@@ -1,0 +1,49 @@
+<h1>Measured results</h1>
+<p class="lead">Every number slowship quotes was measured, on real code, on one laptop. Here they all are, with what they don’t say.</p>
+
+<h2>One real project</h2>
+<p>One project folder: the 174 dependencies of REA’s own npm package, plus 77 installed skills, 1 MCP server and a deliberately risky test build. A laptop with a 6 GB GPU, using <code>gemma4:e2b</code>.</p>
+<div class="tablewrap"><table>
+  <tr><th>What</th><th>Measured</th></tr>
+  <tr><td>Things found</td><td>275 (252 distinct)</td></tr>
+  <tr><td>Settled by rules alone</td><td>202</td></tr>
+  <tr><td>Same bytes as another copy, read once</td><td>23</td></tr>
+  <tr><td>Sent to the local model</td><td>50, in 4 min 23 s of model time</td></tr>
+  <tr><td>Re-run with nothing changed</td><td>about 4 s</td></tr>
+  <tr><td>Code that runs, actually read</td><td>3,827 of 3,829 files (99.95%); 454 test and example files left out on purpose</td></tr>
+  <tr><td>Compiled files read by REA</td><td>4, about 2 to 4 s each: the MCP server (Rust, built without a crate list) and 3 native addons with no Go, Rust or .NET record</td></tr>
+  <tr><td>Who can spend your money</td><td>9 of the agent’s tools hold 18 keys to 13 outside accounts: 3 read 10 keys in their own code, the rest are named in their instructions</td></tr>
+  <tr><td>Verdict</td><td>Held: the test build (an inert fixture with a fake key, risky Electron settings and an IPC handler that opens any address). 10 more worth a glance, 0 holds among real packages and skills</td></tr>
+</table></div>
+<p>The model isn’t repeatable bit for bit: between this run and the one before it, it moved 4 package verdicts by one step. Rules-only verdicts didn’t change at all.</p>
+
+<h2>Compiled programs</h2>
+<p>Reading compiled programs installed on the same laptop, with REA 6.7.0. Nothing was started.</p>
+<div class="tablewrap"><table>
+  <tr><th>File</th><th>What its build record says</th><th>Time</th></tr>
+  <tr><td><code>ollama.exe</code></td><td>Go 1.26.0, 54 modules</td><td>1.2 s</td></tr>
+  <tr><td><code>uv.exe</code></td><td>Rust, 572 crates</td><td>2.6 s</td></tr>
+  <tr><td>PowerShell’s <code>System.Management.Automation.dll</code></td><td>.NET, 62 references, 192 native imports, two flagged: <code>CreateProcess</code> and <code>CryptUnprotectData</code></td><td>5.6 s</td></tr>
+  <tr><td>a C++ <code>.node</code> addon (node-pty)</td><td>No record: named, not read</td><td>3.8 s</td></tr>
+  <tr><td>VS Code’s <code>Code.exe</code></td><td>Fuses as shipped: run as Node, <code>NODE_OPTIONS</code> and <code>--inspect</code> on, asar integrity off</td><td>1.5 s</td></tr>
+  <tr><td>slowship’s inert .NET test loader, compiled</td><td>Held twice: decode-then-load in one method, a browser password file then a POST in another</td><td>6.1 s</td></tr>
+</table></div>
+
+<h2>Against known malware</h2>
+<p>Measured on 200 agent skills from <a href="https://github.com/lxyeternal/MalSkillBench">MalSkillBench</a>: 100 malicious and 100 benign, a fixed and reproducible subset. Each rate has a range it is 95% likely to sit in, because 100 samples can’t pin it to the decimal.</p>
+<div class="tablewrap"><table>
+  <tr><th></th><th>Rules only</th><th>Rules and gemma4:e2b</th></tr>
+  <tr><td><b>Held</b></td><td>12 of 100 malicious skills (7–20%), 2 of 100 benign</td><td>13 malicious (8–21%), 3 benign</td></tr>
+  <tr><td><b>Held or worth a glance</b></td><td>53 malicious (43–62%), 17 benign (11–26%)</td><td>33–36 malicious, 8–9 benign, over two runs</td></tr>
+  <tr><td>Benign npm packages flagged (REA’s 174 dependencies)</td><td>0 held, 18 worth a glance</td><td>0 held, 3 worth a glance</td></tr>
+</table></div>
+<h3>Put plainly</h3>
+<ul>
+  <li><b>A hold is usually right</b>: 12 of 14 (between 60 and 96%).</li>
+  <li><b>It catches about one malicious skill in eight</b> as a hold. Most misses are attacks written as plain English in <code>SKILL.md</code>, or code inside a markdown block, which slowship doesn’t read as code yet.</li>
+  <li><b>The model cuts false alarms by half or more</b>, and it also lets more attacks through, because those attacks come with a description written to make them look expected.</li>
+  <li>Malicious npm packages haven’t been measured yet.</li>
+</ul>
+
+<h2>Rerun it yourself</h2>
+<p>The full write-up, every miss explained, and how to rerun it are in <a href="https://github.com/nirajkhetre/slowship/blob/main/eval/EVAL.md">eval/EVAL.md</a>. <code>node eval/run.mjs compare</code> lines two runs up skill by skill.</p>

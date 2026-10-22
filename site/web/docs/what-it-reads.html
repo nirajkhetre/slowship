@@ -1,0 +1,46 @@
+<h1>What it reads</h1>
+<p class="lead">Four kinds of cargo, found in one pass with no setup. Everything is read where it already sits, except MCP servers that live on npm, which are downloaded into quarantine first.</p>
+
+<h2>Packages</h2>
+<p>slowship reads your <code>package-lock.json</code>, so it reads exactly what you’ll ship, at the versions you’ll ship, including every dependency of a dependency. The code itself is read from <code>node_modules</code>.</p>
+<p>No lockfile? It falls back to reading <code>node_modules</code> directly and says so, because then versions aren’t pinned.</p>
+
+<h2>Agent skills</h2>
+<p>Skills are folders of instructions and scripts that coding agents load. slowship reads the skill folders that coding agents use, in your home folder and in the project, plugin folders included. For example <code>~/.agents/skills</code> and <code>~/.codex/skills</code>.</p>
+<p>A skill has two parts, and both are read:</p>
+<ul>
+  <li><b>Its scripts</b>: JavaScript is parsed properly; Python and shell are read line by line.</li>
+  <li><b>Its instructions</b> in <code>SKILL.md</code>: checked for four narrow things. Telling the agent to hide something from you, to ignore its other instructions, to download and run a script, or to send your data somewhere.</li>
+</ul>
+
+<h2>MCP servers</h2>
+<p>MCP servers are the tools your agents connect to. slowship finds them in the MCP settings of popular coding agents and editors (Cursor, VS Code, Codex and others).</p>
+<ul>
+  <li>An <code>npx</code> server is downloaded into a quarantine folder with every script off, and read there. <code>--offline</code> turns that download off.</li>
+  <li>A compiled server is read as far as its build record, with REA.</li>
+  <li>A remote server or one in a container can’t be read, and the report says so.</li>
+</ul>
+<p><b>None are ever started.</b></p>
+
+<h2>Compiled files</h2>
+<p>With <a href="{{base}}docs/install/#add-rea-optional">REA installed</a>, compiled files stop being blind spots. That covers a compiled MCP server, or a <code>.node</code>, <code>.exe</code> or <code>.dll</code> inside a package.</p>
+<div class="tablewrap"><table>
+  <tr><th>Kind</th><th>What slowship learns</th></tr>
+  <tr><td>Go and Rust</td><td>What they were built from: modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes.</td></tr>
+  <tr><td>.NET</td><td>Its references and the native functions it declares, like starting programs, raw network, keystroke hooks, writing into other programs, or decrypting what Windows protects for you. Then, method by method, the framework calls each method makes and the strings it loads.</td></tr>
+  <tr><td>C and C++</td><td>They leave no build record, so they are named, not read.</td></tr>
+</table></div>
+<p>So a .NET method that decodes base64 and loads it as code, or names the browser’s password file and then posts, is held just like the same JavaScript function.</p>
+
+<h2>Your build</h2>
+<p>Only when you ask, with <code>--app</code> or in Settings. slowship looks for:</p>
+<ul>
+  <li><b>Secrets that slipped in</b>, redacted in every output.</li>
+  <li><b>Shipped <code>.env</code> files and source maps.</b></li>
+  <li><b>Electron settings</b> like <code>nodeIntegration</code> or <code>contextIsolation: false</code>, and DevTools left on.</li>
+  <li><b>The IPC map</b>, with REA: every handler a page can reach (<code>window.api.x</code>), whether it checks who sent the message, and what it does.</li>
+  <li><b>Electron fuses</b> on a packaged app: whether it still lets anyone run it as plain Node.js, inject code through <code>NODE_OPTIONS</code>, attach a debugger with <code>--inspect</code>, or change its code after signing.</li>
+</ul>
+
+<h2>What it leaves out</h2>
+<p>Test and example files inside packages are left out on purpose: they ship, but they don’t run when you use the package. Files over 2 MB, usually generated bundles, are skipped and named. Both appear in <a href="{{base}}docs/blind-spots/">Blind spots</a>.</p>
