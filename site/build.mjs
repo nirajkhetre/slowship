@@ -13,7 +13,7 @@ const GH = 'https://github.com/nirajkhetre/slowship';
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(join(dist, 'fonts'), { recursive: true });
 cpSync(join(ui, 'fonts'), join(dist, 'fonts'), { recursive: true });
-for (const f of ['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js']) cpSync(join(web, f), join(dist, f));
+for (const f of ['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js', 'yard.css', 'yard.js']) cpSync(join(web, f), join(dist, f));
 if (existsSync(join(web, 'img'))) cpSync(join(web, 'img'), join(dist, 'img'), { recursive: true });
 if (existsSync(join(web, 'term', 'frames'))) cpSync(join(web, 'term', 'frames'), join(dist, 'term', 'frames'), { recursive: true });
 
@@ -76,9 +76,9 @@ const term = (html, base) => html.replace(/<!--term:([\w-]+)(?:\|([^>]*?))?-->/g
   return cmd ? `<figure class="termfig"><div class="term"><div class="tbar"><b>${cmd}</b></div>${pre}</div></figure>` : pre;
 });
 // the shared files carry a stamp of their content, so a browser never keeps an old copy after the site changes
-const STAMP = createHash('sha1').update(['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js'].map(f => readFileSync(join(web, f))).join('') + readFileSync(join(dist, 'play.json'))).digest('hex').slice(0, 8);
+const STAMP = createHash('sha1').update(['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js', 'yard.css', 'yard.js'].map(f => readFileSync(join(web, f))).join('') + readFileSync(join(dist, 'play.json'))).digest('hex').slice(0, 8);
 const page = (html, base, at) => term(html, base).replace('<!--header-->', header(base, at)).replace('<!--footer-->', footer(base)).replaceAll('{{base}}', base)
-  .replace(/((?:site|docs|play)\.(?:css|js))"/g, `$1?v=${STAMP}"`).replaceAll('{{stamp}}', STAMP);
+  .replace(/((?:site|docs|play|yard)\.(?:css|js))"/g, `$1?v=${STAMP}"`).replaceAll('{{stamp}}', STAMP);
 
 // ---------- the landing page ----------
 writeFileSync(join(dist, 'index.html'), page(readFileSync(join(web, 'index.html'), 'utf8'), '', 'home'));
