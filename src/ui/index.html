@@ -642,6 +642,34 @@ html.vt-theme::view-transition-new(root){animation:reveal .75s var(--io)}
 .filecard span{font-size:13.5px;color:var(--ink2)}
 
 /* ---------- everything aboard ---------- */
+/* who can spend your money: a purser's ledger of outside accounts, and which of your agent's tools hold a key to each */
+.purse{display:grid;gap:12px;margin:4px 0 22px;padding:18px 20px;border-radius:14px;border:1px solid var(--rule2);background:var(--sheet)}
+.purse[hidden]{display:none}
+.purse .sdl{display:flex;gap:8px;align-items:center;font-size:15.5px;color:var(--ink)}
+.purse .sdl svg.i{width:17px;height:17px}
+.purse>p{font-size:13.5px;line-height:1.5;color:var(--ink2);max-width:72ch}
+.ledger{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ledger li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-width:0;animation:rise .5s var(--out) both;animation-delay:calc(.1s + var(--i) * 60ms)}
+.ledger .svc{font:700 17px/1.25 var(--display)}
+.ledger .kn{display:flex;gap:4px;flex-wrap:wrap;min-width:0}
+.ledger .kn code{font:600 12px/1.6 var(--mono);padding:1px 6px;border-radius:5px;background:var(--shoal);color:var(--ink2);overflow-wrap:anywhere}
+.ledger .dl{flex:1;min-width:24px;border-bottom:1.5px dotted var(--rule2);transform:translateY(-3px)}
+.ledger .who{display:flex;gap:6px;flex-wrap:wrap}
+.hp{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 7px;border-radius:8px;border:1px solid var(--rule2);background:var(--paper);font-size:13px;font-weight:700;color:var(--ink);
+  transition:border-color .2s,transform .3s var(--spring)}
+.hp svg.i{width:15px;height:15px}
+button.hp:hover{border-color:var(--ink);transform:translateY(-1px)}
+.hp.locked{color:var(--ink2);border-style:dashed}
+@media (max-width:640px){.ledger .dl{display:none}.ledger .who{flex-basis:100%}}
+.ikeys{display:grid;gap:10px;min-width:0}
+.ikeys>.sdl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ikeys>.sdl small{font-weight:500;color:var(--ink3)}
+.ikeys>.sdl svg.i{width:15px;height:15px;align-self:center}
+.ikeys ul{list-style:none;margin:0;padding:12px 14px;border-radius:12px;background:var(--shoal);display:grid;gap:6px}
+.ikeys li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:14px}
+.ikeys li b{font:700 15px var(--display)}
+.ikeys li code{font:600 12.5px var(--mono);overflow-wrap:anywhere}
+.ikeys li small{color:var(--ink3);font-size:12.5px}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .seg{position:relative;display:inline-flex;max-width:100%;overflow-x:auto;scrollbar-width:none;padding:3px;border-radius:10px;background:var(--sheet);border:1px solid var(--rule2)}
 .seg button{position:relative;z-index:1;border:0;background:none;padding:7px 13px;border-radius:7px;font-size:14.5px;font-weight:700;color:var(--ink2);white-space:nowrap;transition:color .25s}
@@ -1414,6 +1442,7 @@ body.empty .holds,body.empty .clearance{display:none}
   </section>
   <section class="panel" id="p-aboard" role="tabpanel" aria-labelledby="t-aboard" hidden>
     <div class="ph"><div><h2>Everything aboard</h2><p class="lede" id="manlede"></p></div></div>
+    <section class="purse" id="purse" aria-label="Who can spend your money"></section>
     <div class="pmap" id="pmap"></div>
     <div class="tools"><div class="seg" id="filters" role="group" aria-label="Show"><span class="thumb"></span></div>
       <div class="seg" id="viewseg" role="group" aria-label="View"><span class="thumb"></span><button data-view="yard" aria-pressed="true">Yard</button><button data-view="list" aria-pressed="false">List</button></div>
@@ -1496,6 +1525,7 @@ const IC = {
   model: svg('<circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/>'),  // a second opinion: two views of one thing
   play: svg('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>'),
   warn: svg('<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>'),
+  coin: svg('<circle cx="12" cy="12" r="8.5"/><path d="M14.6 9.4c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2s1.2 1.6 2.6 2 2.6.8 2.6 2-1.1 2-2.6 2c-1.2 0-2.2-.5-2.7-1.4M12 6.4V8M12 16v1.6"/>'),
   chip: svg('<rect x="6.5" y="6.5" width="11" height="11" rx="2"/><path d="M10 3.5v3M14 3.5v3M10 17.5v3M14 17.5v3M3.5 10h3M3.5 14h3M17.5 10h3M17.5 14h3"/>'),
 };
 // the four kinds of cargo, drawn: a crate, a scroll, a plug, a window
@@ -2034,7 +2064,7 @@ function detailHTML(i) {
     ${scannerHTML(i, rel)}
     <section class="says claimrow"><span class="sdl">What it says it does${rel !== 'unknown' ? `<span class="relw rel-${rel}" data-explain="relation-${rel}">${rel === 'no' ? '≠ not what its code does' : '= matches its code'}</span>` : ''}</span><blockquote${i.claim ? ' title="Tap to read more"' : ''}>${says}</blockquote></section>
     ${fs.length ? `<ol class="fl">${fs.map((f, k) => findingHTML(i, f, k)).join('')}</ol>` : `<div class="calm2">${IC.check}<span>${i.coverage?.compiled ? 'Nothing in its build record to look at.' : 'Read every file it ships: nothing to look at.'}</span></div>`}
-    ${ipcHTML(i)}${builtHTML(i)}
+    ${keysHTML(i)}${ipcHTML(i)}${builtHTML(i)}
     ${COVER(i)}
   </div>`;
 }
@@ -2737,6 +2767,34 @@ document.addEventListener('click', async e => {
 $('#nextw').onclick = () => openSettings('schedule');
 
 // ---------- everything aboard ----------
+// who can spend your money: every key to an outside account that an agent's skill or MCP server reads in its code or
+// is handed in an editor's MCP config, by account. Names only; the report never sees a key's value.
+const holdsKeys = i => [...(i.keys || []).map(k => ({ how: 'code', ...k })), ...(i.given || []).map(k => ({ ...k, how: 'config' }))];
+function purse() {
+  // a run from before keys were collected says nothing about them, so the ledger stays away rather than claim "none"
+  $('#purse').hidden = !G.some(i => 'keys' in i);
+  if ($('#purse').hidden) return;
+  const rows = new Map(), add = (service, key, who) => {
+    const r = rows.get(service) ?? rows.set(service, { keys: new Set(), who: new Map() }).get(service);
+    r.keys.add(key); if (!r.who.has(who.name)) r.who.set(who.name, who);
+  };
+  for (const i of G) for (const k of holdsKeys(i)) add(k.service, k.name, { name: label(i), i });
+  for (const u of S.run?.unread || []) for (const k of u.given || []) add(k.service, k.name, { name: u.key.replace(/^mcp:/, ''), locked: true });
+  const list = [...rows].sort((a, b) => b[1].who.size - a[1].who.size || a[0].localeCompare(b[0])), tools = new Set(list.flatMap(([, r]) => [...r.who.keys()]));
+  $('#purse').innerHTML = `<span class="sdl">${IC.coin}Who can spend your money</span>
+    <p>${list.length ? `<b>${pl(tools.size, 'tool')}</b> your agent runs ${tools.size === 1 ? 'holds' : 'hold'} a key to <b>${pl(list.length, 'outside account')}</b>, in ${pl(list.reduce((n, [, r]) => n + r.keys.size, 0), 'key')}. Each one can run up a bill or act as you, with nobody watching.`
+      : 'None of your agent’s skills or MCP servers read or are handed a key to an outside account.'} Names only: slowship never reads a key’s value. Packages aren’t listed, because a package uses a key only when your own code calls it.</p>
+    ${list.length ? `<ol class="ledger">${list.map(([svc, r], k) => `<li style="--i:${k}"><span class="svc">${esc(svc)}</span><span class="kn">${[...r.keys].map(x => `<code>${esc(x)}</code>`).join('')}</span><span class="dl"></span>
+      <span class="who">${[...r.who.values()].map(w => w.locked ? `<span class="hp locked" title="An MCP server whose code can’t be read">${IC.lock}${esc(w.name)}</span>`
+        : `<button class="hp" data-fp="${esc(w.i.fp)}">${KICON[w.i.kind]}${esc(w.name)}</button>`).join('')}</span></li>`).join('')}</ol>` : ''}`;
+}
+$('#purse').addEventListener('click', e => { const b = e.target.closest('button.hp'); const i = b && G.find(x => x.fp === b.dataset.fp); if (i) openItem(i); });
+function keysHTML(i) {
+  const ks = holdsKeys(i);
+  if (!ks.length) return '';
+  return `<section class="ikeys"><span class="sdl">${IC.coin}Can spend your money on<small>keys to outside accounts it holds; names only</small></span>
+    <ul>${ks.map(k => `<li><b>${esc(k.service)}</b><code>${esc(k.name)}</code><small>${k.how === 'config' ? 'handed to it in an MCP config' : `${k.how === 'docs' ? 'its instructions name it' : 'read in its code'}, ${esc(k.file)}${k.line ? ':' + k.line : ''}`}</small></li>`).join('')}</ul></section>`;
+}
 const FILTERS = [['all', 'All'], ['npm', 'Packages'], ['skill', 'Skills'], ['mcp', 'MCP'], ['app', 'Build']];
 function filters() {
   const n = k => k === 'all' ? G.length : G.filter(i => i.kind === k).length;
@@ -3018,7 +3076,7 @@ function render() {
   const r = S.run, empty = !r || !!r.empty;
   document.body.classList.toggle('empty', empty && !S.watch);
   hero(); bar(); how(); chartShoals();
-  if (!empty) { holds(); review(); filters(); powers(); table(); blind(); tabCounts(); if (S.tab === 'blind') blindOpen(); }
+  if (!empty) { holds(); review(); filters(); powers(); purse(); table(); blind(); tabCounts(); if (S.tab === 'blind') blindOpen(); }
   else { $('#queue').innerHTML = ''; $('#insp').innerHTML = `<div class="calm">${miniFace('sleepy')}<div><b>No watch yet.</b><p>Choose a project and run the first watch. The review list appears here.</p></div></div>`; $('#review').classList.add('done'); $('#qprog').innerHTML = ''; $('#needlede').textContent = ''; }
   $('#footmeta').textContent = projOf();
   S.drawn = true;

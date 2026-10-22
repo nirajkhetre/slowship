@@ -70,6 +70,7 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 - **What it read.** Where everything came from: the project's lockfile, plus the skill folders and editor settings your AI agents use on this computer, plus your build.
 - **A review list with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. For your build there is a map of how pages reach the main process, drawn as lock gates: a handler that checks its sender shuts its gate, one that doesn't lets the current run through. Compiled files get a manifest of what they were built from. Clear it and a ship takes it aboard, a painter rolls it green, and the next one comes up. Undo rewinds the scene and puts it back in the list.
 - **A project switcher and Settings.** Switch to a recent project, or browse to any folder on this computer. Settings hold the nightly watch, what to read, your build folder, the model and the theme, and save as you change them.
+- **Who can spend your money.** A ledger of every key to an outside account that your agent's skills and MCP servers read in their code, name in their instructions, or are handed in an editor's MCP config, by account (OpenAI, GitHub, ElevenLabs…), with the tools that hold each one. Agents with paid keys can run up a bill on their own. Only key names are read, never their values.
 - **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run: the ship docks, a gantry scans each thing aboard, and every step from fingerprint to verdict lights up as it happens.
 
 Colours come from nautical charts: magenta marks what's held (no red anywhere), amber what's worth a glance, green what's cleared. Behind the report is a live sea chart of the watch: every open finding is a shoal on it, and it sinks once you clear it. Come near one to read its name, click it to open it. A `?` next to any part explains it, and a short tour runs on your first visit.
@@ -87,6 +88,7 @@ These are measured on one real project folder: the 174 dependencies of REA's own
 | Re-run with nothing changed | about 4 s |
 | Code that runs, actually read | 3,827 of 3,829 files (99.95%); 454 test and example files left out on purpose |
 | Compiled files read by REA | 4, about 2 to 4 s each: the MCP server (Rust, built without a crate list) and 3 native addons with no Go, Rust or .NET record |
+| Who can spend your money | 9 of the agent's tools hold 18 keys to 13 outside accounts: 3 read 10 keys in their own code (one media skill alone reads keys for 6: Gemini, Google, Google Cloud, HeyGen, Hyperframes and ElevenLabs), the rest are named in their instructions |
 | Verdict | held: the test build (an inert fixture with a fake key, risky Electron settings and an IPC handler that opens any URL). 10 more worth a glance, 0 holds among real packages and skills |
 
 The model isn't repeatable bit for bit: between this run and the one before it, it moved 4 package verdicts by one step. Rules-only verdicts didn't change at all ([eval/EVAL.md](eval/EVAL.md) has more on this).
@@ -108,11 +110,13 @@ Measured on 200 agent skills from [MalSkillBench](https://github.com/lxyeternal/
 
 | | rules only | rules + gemma4:e2b |
 |---|---|---|
-| **Held** | 12 of 100 malicious skills, 2 of 100 benign | 13 malicious, 3 benign |
-| **Held or worth a glance** | 53 malicious, 17 benign | 33–36 malicious, 8–9 benign (two runs) |
-| Benign npm packages flagged (REA's 174 dependencies) | 0 held, 18 worth a glance | 0 held, 3 worth a glance |
+| **Held** | 12 of 100 malicious skills (95% range 7–20%), 2 of 100 benign | 13 malicious (8–21%), 3 benign |
+| **Held or worth a glance** | 53 malicious (43–62%), 17 benign (11–26%) | 33–36 malicious (25–43% to 27–46%), 8–9 benign (4–15% to 5–16%), two runs |
+| Benign npm packages flagged (REA's 174 dependencies) | 0 held, 18 worth a glance (7–16%) | 0 held, 3 worth a glance (1–5%) |
 
-Put plainly: a hold is usually right (12 of 14), but it catches about one malicious skill in eight. Most misses are attacks written as plain English in SKILL.md, or code inside a markdown code block, and slowship doesn't read those as code yet. The model cuts false alarms by half or more, and it also lets more attacks through, because those attacks come with a description written to make them look expected. Malicious npm packages haven't been measured yet.
+Each rate has a range it is 95% likely to sit in, because 100 samples can't pin it to the decimal. Both columns score the same 200 skills, so `node eval/run.mjs compare` also lines the runs up skill by skill: the model's changes go one way far too often to be luck (19–22 attacks let through against 2 newly caught; 9 false alarms removed against 0–1 added).
+
+Put plainly: a hold is usually right (12 of 14, so 60–96%), but it catches about one malicious skill in eight. Most misses are attacks written as plain English in SKILL.md, or code inside a markdown code block, and slowship doesn't read those as code yet. The model cuts false alarms by half or more, and it also lets more attacks through, because those attacks come with a description written to make them look expected. Malicious npm packages haven't been measured yet.
 
 ## What it can't see
 
@@ -137,6 +141,7 @@ slowship reads code; it never runs it. So:
 - **The report server answers only this machine.** It checks the `Host` header (no DNS rebinding) and the `Origin`, takes JSON only, and caps request bodies.
 - **Code context is safe to serve.** The code shown around a finding is read only from inside that item's own folder, and secrets are cut down before they reach the page.
 - **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read; `--offline` turns that off.
+- **Key names, never values.** The "who can spend your money" ledger keeps only the names of keys an MCP config hands a server (`env` and auth headers); their values are never read into the report.
 
 ## Command reference
 
@@ -156,7 +161,7 @@ node site/record.mjs <project>   # record one real watch for the web demo (publi
 node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
-There are 21 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, and Electron fuses (the last four from recorded REA answers). One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+There are 22 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), and the "who can spend your money" ledger, which must never keep a key's value. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 

@@ -6,7 +6,8 @@
 //   node eval/run.mjs fetch <set>            set: malskillbench | datadog-npm | datadog-skills
 //   node eval/run.mjs score <set> [--model]  needs Ollama + gemma4:e2b for --model
 //   node eval/run.mjs lazy                   wall time of a full and a cached run of $SLOWSHIP_EVAL_BENIGN
-//   node eval/run.mjs selftest               checks the unzipper (no network, no samples)
+//   node eval/run.mjs compare <a> <b>        the same samples scored twice (two results files): what changed, and is it chance?
+//   node eval/run.mjs selftest               checks the unzipper and the statistics (no network, no samples)
 //
 // SLOWSHIP_EVAL_ROOT (default D:/slowship-eval) holds samples and results. SLOWSHIP_EVAL_BENIGN (default
 // D:/sloth-test) is an npm project whose installed packages are the benign side of the package test.
@@ -173,6 +174,21 @@ async function fetchSet(name) {
 
 // ---------- score ----------
 const POS = { hold: ['hold'], 'hold or review': ['hold', 'review'] };
+
+// 100 samples can't pin a rate down to the decimal: the range a rate of k in n is 95% likely to sit in (Wilson score).
+export function wilson(k, n) {
+  if (!n) return [0, 1];
+  const z = 1.96, p = k / n, d = 1 + z * z / n, mid = (p + z * z / (2 * n)) / d, half = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
+  return [Math.max(0, mid - half), Math.min(1, mid + half)];
+}
+// Two runs over the same samples: of the b + c samples whose verdict changed, b went one way and c the other. If the
+// change were chance, each would go either way like a coin: the exact two-sided chance of a split this lopsided.
+export function mcnemar(b, c) {
+  const n = b + c, k = Math.min(b, c);
+  let p = 0, choose = 1;
+  for (let i = 0; i <= k; i++) { p += choose / 2 ** n; choose = choose * (n - i) / (i + 1); }
+  return Math.min(1, 2 * p);
+}
 function metrics(rows) {
   return Object.entries(POS).map(([t, levels]) => {
     const c = { tp: 0, fp: 0, fn: 0, tn: 0 };
@@ -243,9 +259,9 @@ async function score(name) {
   const out = join(ROOT, 'results', `${name}-${mode}.json`);
   writeFileSync(out, JSON.stringify(result, null, 1));
 
-  const pct = x => `${(100 * x).toFixed(1)}%`;
+  const pct = x => `${(100 * x).toFixed(1)}%`, range = ([a, b]) => ` (95%: ${Math.round(100 * a)}–${Math.round(100 * b)}%)`;
   const table = ms => ['| counts as flagged | TP | FP | FN | TN | precision | recall | F1 | false-alarm rate |', '|---|---|---|---|---|---|---|---|---|',
-    ...ms.map(x => `| ${x.threshold} | ${x.tp} | ${x.fp} | ${x.fn} | ${x.tn} | ${pct(x.precision)} | ${pct(x.recall)} | ${x.f1.toFixed(3)} | ${pct(x.fpr)} |`)].join('\n');
+    ...ms.map(x => `| ${x.threshold} | ${x.tp} | ${x.fp} | ${x.fn} | ${x.tn} | ${pct(x.precision)} | ${pct(x.recall)}${range(wilson(x.tp, x.tp + x.fn))} | ${x.f1.toFixed(3)} | ${pct(x.fpr)}${range(wilson(x.fp, x.fp + x.tn))} |`)].join('\n');
   console.log(`\n### ${name}, ${mode}${run.model ? ` (${run.model})` : ''}: ${rows.filter(r => r.label).length} malicious, ${rows.filter(r => !r.label).length} benign scored, ${damaged.length} damaged\n`);
   console.log(table(result.metrics));
   if (result.metrics_all) console.log(`\nAll ${benign.length} benign packages:\n\n${table(result.metrics_all)}`);
@@ -283,6 +299,23 @@ function lazy() {
     console.log(`\n${r.label}: ${r.npm} npm packages`, JSON.stringify(r.npm_levels), '\n', r.npm_flagged.map(f => `${f.name} ${f.level}: ${f.why.join('; ')}`).join('\n '));
 }
 
+// ---------- the same samples, scored twice: rules against the model, or one model run against another ----------
+function compare(a, b) {
+  const load = f => new Map(JSON.parse(readFileSync(resolve(f), 'utf8')).rows.map(r => [r.id, r]));
+  const A = load(a), B = load(b), flagged = l => l === 'hold' || l === 'review';
+  console.log(`| samples | in both | flagged only in ${basename(a)} | flagged only in ${basename(b)} | chance of a split this lopsided |
+|---|---|---|---|---|`);
+  for (const [label, name] of [[1, 'malicious'], [0, 'benign']]) {
+    let n = 0, onlyA = 0, onlyB = 0;
+    for (const [id, x] of A) {
+      const y = B.get(id);
+      if (x.label !== label || !y) continue;
+      n++; if (flagged(x.level) && !flagged(y.level)) onlyA++; if (!flagged(x.level) && flagged(y.level)) onlyB++;
+    }
+    console.log(`| ${name} | ${n} | ${onlyA} | ${onlyB} | ${mcnemar(onlyA, onlyB).toPrecision(2)} |`);
+  }
+}
+
 // ---------- the unzipper, checked against zips built here (stored, deflated, encrypted, hostile names) ----------
 function selftest() {
   const zip = entries => {
@@ -312,11 +345,16 @@ function selftest() {
     let wrong = false; try { unzip(zip([['a', 'x', { pw: 'infected' }]]), dest, 'nope'); } catch { wrong = true; }
     if (!wrong) throw new Error('a wrong password was accepted');
     console.log('unzip selftest ok');
+    const [lo, hi] = wilson(12, 100), near = (x, y) => Math.abs(x - y) < 0.005;
+    if (!near(lo, 0.0699) || !near(hi, 0.1996) || wilson(0, 0)[1] !== 1) throw new Error(`wilson ${lo} ${hi}`);
+    if (mcnemar(0, 0) !== 1 || !near(mcnemar(1, 1), 1) || !near(mcnemar(10, 0), 0.00195)) throw new Error('mcnemar');
+    console.log('statistics selftest ok');
   } finally { rmSync(dirname(dest), { recursive: true, force: true }); }
 }
 
 if (cmd === 'fetch' && SETS[set]) await fetchSet(set);
 else if (cmd === 'score' && SETS[set]) await score(set);
 else if (cmd === 'lazy') lazy();
+else if (cmd === 'compare' && process.argv[4]) compare(process.argv[3], process.argv[4]);
 else if (cmd === 'selftest') selftest();
 else { console.log(readFileSync(import.meta.filename, 'utf8').split('\n').slice(5, 9).join('\n').replaceAll('//   ', '')); process.exitCode = 1; }

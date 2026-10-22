@@ -29,6 +29,34 @@ What it means, plainly:
   come with a description written to make their behaviour look expected.
 - Rereading an unchanged machine takes about 2 seconds instead of 5 minutes, because results are cached by content.
 
+### How sure are these numbers?
+
+100 malicious and 100 benign skills can't pin a rate to the decimal point. Each rate has a range it is 95% likely to
+sit in (a Wilson interval, printed by `eval/run.mjs`; worked out on 22 Oct from the stored results, no new runs):
+
+| | rules only | rules + model |
+|---|---|---|
+| malicious skills held | 12 of 100, so 7–20% | 13 of 100, so 8–21% |
+| holds that were real malware | 12 of 14, so 60–96% | 13 of 16, so 57–93% |
+| malicious skills held or flagged for review | 53 of 100, so 43–62% | 36 and 33 of 100, so 27–46% and 25–43% |
+| benign skills flagged (false alarms) | 17 of 100, so 11–26% | 9 and 8 of 100, so 5–16% and 4–15% |
+| benign npm packages flagged | 18 of 174, so 7–16% | 3 of 174, so 1–5% |
+
+The ranges overlap, but that alone doesn't settle anything here, because both columns score the *same* 200 skills. So
+`eval/run.mjs compare` lines the two runs up skill by skill and counts which way each changed verdict went:
+
+| | flagged by rules, not with the model | flagged with the model, not by rules | chance of a split this lopsided |
+|---|---|---|---|
+| malicious, first model run | 19 | 2 | 0.0002 |
+| malicious, second model run | 22 | 2 | 0.00004 |
+| benign, first model run | 9 | 1 | 0.02 |
+| benign, second model run | 9 | 0 | 0.004 |
+| first model run against the second (malicious, benign) | 3, 1 flagged only in the first | 0, 0 flagged only in the second | 0.25, 1.0 |
+
+So both effects of the model are real, not luck: it lets real attacks through, and it removes real false alarms. The
+two model runs differ from each other by a few skills with no direction to it, which is the run-to-run noise noted in
+section 1.2. The two rules-only runs were identical.
+
 ## 1. Skills: MalSkillBench
 
 ### 1.1 Data
@@ -52,22 +80,22 @@ Counted as flagged = the levels that count as a positive. False-alarm rate = FP 
 
 | counts as flagged | TP | FP | FN | TN | precision | recall | F1 | false-alarm rate |
 |---|---|---|---|---|---|---|---|---|
-| hold | 12 | 2 | 88 | 98 | 85.7% | 12.0% | 0.211 | 2.0% |
-| hold or review | 53 | 17 | 47 | 83 | 75.7% | 53.0% | 0.624 | 17.0% |
+| hold | 12 | 2 | 88 | 98 | 85.7% | 12.0% (95%: 7–20%) | 0.211 | 2.0% (95%: 1–7%) |
+| hold or review | 53 | 17 | 47 | 83 | 75.7% | 53.0% (95%: 43–62%) | 0.624 | 17.0% (95%: 11–26%) |
 
 **Rules + gemma4:e2b, first run** (133.3 s for all 200: 75 model calls, 128.5 s of model time, 49,775 tokens)
 
 | counts as flagged | TP | FP | FN | TN | precision | recall | F1 | false-alarm rate |
 |---|---|---|---|---|---|---|---|---|
-| hold | 13 | 3 | 87 | 97 | 81.3% | 13.0% | 0.224 | 3.0% |
-| hold or review | 36 | 9 | 64 | 91 | 80.0% | 36.0% | 0.497 | 9.0% |
+| hold | 13 | 3 | 87 | 97 | 81.3% | 13.0% (95%: 8–21%) | 0.224 | 3.0% (95%: 1–8%) |
+| hold or review | 36 | 9 | 64 | 91 | 80.0% | 36.0% (95%: 27–46%) | 0.497 | 9.0% (95%: 5–16%) |
 
 **Rules + gemma4:e2b, second run** (144.4 s: 75 model calls, 142.6 s of model time, 49,598 tokens)
 
 | counts as flagged | TP | FP | FN | TN | precision | recall | F1 | false-alarm rate |
 |---|---|---|---|---|---|---|---|---|
-| hold | 13 | 3 | 87 | 97 | 81.3% | 13.0% | 0.224 | 3.0% |
-| hold or review | 33 | 8 | 67 | 92 | 80.5% | 33.0% | 0.468 | 8.0% |
+| hold | 13 | 3 | 87 | 97 | 81.3% | 13.0% (95%: 8–21%) | 0.224 | 3.0% (95%: 1–8%) |
+| hold or review | 33 | 8 | 67 | 92 | 80.5% | 33.0% (95%: 25–43%) | 0.468 | 8.0% (95%: 4–15%) |
 
 The model runs at temperature 0 with a fixed seed, yet 4 of 200 verdicts changed between the two runs (three
 malicious skills went from review to notable, and one benign skill from review to info). Ollama on a GPU isn't

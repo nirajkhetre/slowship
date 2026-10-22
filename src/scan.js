@@ -5,12 +5,12 @@ import { condense, dirFacts } from './facts.js';
 import { available, judge, MODEL } from './judge.js';
 import { assess, combos, keysOf, risk, worst } from './policy.js';
 import { claimOf, npmPackages } from './inventory.js';
-import { findMcpServers, findSkills, resolveServer, serverBinaryFacts, skillFacts } from './agents.js';
+import { findMcpServers, findSkills, keysFrom, resolveServer, serverBinaryFacts, skillFacts } from './agents.js';
 import { appFacts } from './app.js';
 import { fingerprint, load, newSince, save } from './state.js';
 
 // Bump when what gets read changes, so results cached by an older slowship are read again (approvals stay: same bytes).
-const RULES = 3;
+const RULES = 6;
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
 export async function checkItems(items, { model = true, onItem = () => {}, onStep = () => {} } = {}) {
@@ -34,6 +34,7 @@ export async function checkItems(items, { model = true, onItem = () => {}, onSte
       const a = assess(short, found, labels);
       r = {
         key: it.key, kind: it.kind, name: it.name, level: a.level, findings: a.findings, coverage, map, rules: RULES,
+        keys: it.kind === 'skill' || it.kind === 'mcp' ? keysFrom(facts, map?.keys) : undefined,  // agent tools only: who can spend your money
         facts: short.map(({ id, cap, detail, file, line, code }) => ({ id, cap, detail, file, line, code, ...labels[id] })),
         caps: [...new Set(short.map(f => f.cap))], model: judged ? MODEL : null, wanted, at: new Date().toISOString(),
       };
@@ -42,7 +43,7 @@ export async function checkItems(items, { model = true, onItem = () => {}, onSte
     }
     const approved = state.approved[it.key] === it.fp;
     const diff = approved ? null : newSince(state, `${it.kind}:${it.name}`, r.caps);
-    run.items.push({ ...r, key: it.key, name: it.name, kind: it.kind, fp: it.fp, dir: it.dir, claim: (it.claim || '').slice(0, 320), approved, diff });  // same bytes, other place: same result
+    run.items.push({ ...r, key: it.key, name: it.name, kind: it.kind, fp: it.fp, dir: it.dir, claim: (it.claim || '').slice(0, 320), approved, diff, given: it.given });  // same bytes, other place: same result
     onItem(run.items.at(-1), items.length, { how, ms });
   }
   save(state);
@@ -71,17 +72,17 @@ export async function scanProject(project, { packages = true, agents = true, fet
       if (items.some(i => i.key === `mcp:${m.name}`)) continue;  // the same server listed in two editors' settings
       const where = resolveServer(m, { fetch });
       if (where.binary) {
-        items.push({ kind: 'mcp', key: `mcp:${m.name}`, name: m.name, dir: where.binary, claim: `MCP server "${m.name}"`, fp: `bin-${fingerprint(where.binary)}`, read: () => serverBinaryFacts(where.binary) });
+        items.push({ kind: 'mcp', key: `mcp:${m.name}`, name: m.name, dir: where.binary, claim: `MCP server "${m.name}"`, fp: `bin-${fingerprint(where.binary)}`, given: m.given, read: () => serverBinaryFacts(where.binary) });
         continue;
       }
       if (!where.readable) {
-        if (!unread.some(u => u.key === `mcp:${m.name}` && u.why === where.why)) unread.push({ key: `mcp:${m.name}`, why: where.why, source: m.source });
+        if (!unread.some(u => u.key === `mcp:${m.name}` && u.why === where.why)) unread.push({ key: `mcp:${m.name}`, why: where.why, source: m.source, given: m.given });
         continue;
       }
       const manifest = (() => { try { return JSON.parse(readFileSync(join(where.dir, 'package.json'), 'utf8')); } catch { return null; } })();
       items.push({
         kind: 'mcp', key: `mcp:${m.name}`, name: manifest?.name ?? m.name, dir: where.dir, manifest,
-        claim: claimOf(where.dir, manifest) || `MCP server "${m.name}"`, fp: fingerprint(where.dir),
+        claim: claimOf(where.dir, manifest) || `MCP server "${m.name}"`, fp: fingerprint(where.dir), given: m.given,
       });
     }
   }

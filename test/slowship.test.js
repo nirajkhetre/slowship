@@ -167,6 +167,23 @@ test('Electron fuses as shipped: RunAsNode, NODE_OPTIONS and --inspect are worth
   assert.equal(fuseFacts('tool.exe', 'tool.exe', () => ({ normalized_result: { slices: [{ sentinels: [] }] } })), null, 'not Electron: nothing to say');
 });
 
+test('who can spend your money: key names from code and MCP configs, never their values; MAX_TOKENS is no key', async () => {
+  const { findMcpServers, keysFrom, scriptFacts, serviceOf } = await import('../src/agents.js');
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const k = keysFrom(scriptFacts('key = os.environ["TINKER_API_KEY"]\nMAX_TOKENS = int(os.environ.get("MAX_TOKENS", 512))\n', 'train.py'));
+  assert.deepEqual(k.map(x => `${x.name} ${x.service} ${x.line}`), ['TINKER_API_KEY Tinker 1']);
+  assert.equal(serviceOf('GITHUB_TOKEN'), 'GitHub');
+  const { keysNamed } = await import('../src/agents.js');
+  assert.deepEqual(keysNamed('Set API_KEY, then REMOTION_AWS_ACCESS_KEY_ID and $ELEVENLABS_API_KEY', 'SKILL.md').map(x => x.service), ['AWS', 'ElevenLabs'],
+    'a bare API_KEY placeholder is no account; a vendor prefix still finds AWS');
+  const dir = mkdtempSync(join(tmpdir(), 'slowship-'));
+  writeFileSync(join(dir, '.mcp.json'), JSON.stringify({ mcpServers: { pay: { command: 'npx', args: ['pay-mcp'],
+    env: { STRIPE_SECRET_KEY: 'sk_test_inert', LOG_LEVEL: 'debug' }, headers: { Authorization: 'Bearer inert' } } } }));
+  const pay = findMcpServers(dir).find(s => s.name === 'pay' && s.source.startsWith(dir));
+  assert.deepEqual(pay.given, [{ name: 'STRIPE_SECRET_KEY', service: 'Stripe' }, { name: 'Authorization', service: 'pay' }]);
+  assert.ok(!JSON.stringify(pay).includes('inert'), 'a key\'s value is never kept');
+});
+
 test('unpacking a tarball never writes outside the quarantine folder', async () => {
   const { untar } = await import('../src/agents.js');
   const { gzipSync } = await import('node:zlib');

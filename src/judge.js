@@ -32,7 +32,8 @@ For each fact, first write why, then label it:
 
 export async function available() {
   try {
-    const r = await fetch(`${OLLAMA}/api/tags`, { signal: AbortSignal.timeout(2000) });
+    // a cold Ollama can take seconds to answer; a closed port still fails at once
+    const r = await fetch(`${OLLAMA}/api/tags`, { signal: AbortSignal.timeout(10_000) });
     return (await r.json()).models.some(m => m.name.startsWith(MODEL));
   } catch { return false; }
 }
