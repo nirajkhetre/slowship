@@ -12,7 +12,7 @@ import { said, summary } from './notify.js';
 import { checkItems, scanProject } from './scan.js';
 import { folder, saveRun, settingsOf } from './server.js';
 import { fingerprint } from './state.js';
-import { advisoryStatus, stormText, syncAdvisories } from './storm.js';
+import { refreshAdvisories, stormText } from './storm.js';
 
 const VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const PROTOCOLS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
@@ -46,7 +46,7 @@ const TOOLS = [{
   description: 'When a big vulnerability breaks (like PHP2Shell): what this project runs on (runtimes, container images, whether anyone still fixes them), which packages are named in public advisories (matched on this computer: nothing about the project is sent anywhere), what a takeover of each would get, and the exact fix for each. Apply the fixes, then call storm again to confirm.',
   inputSchema: { type: 'object', properties: {
     project: { type: 'string', description: 'Absolute path of the project folder. Default: the folder slowship was started in.' },
-    sync: { type: 'boolean', description: 'Fetch the latest public advisories first. The first time downloads about 220 MB for npm; later only what changed. Default: only when the copy here is older than a day.' },
+    sync: { type: 'boolean', description: 'Fetch the latest public advisories first. The first time downloads each ecosystem this project uses (about 219 MB for npm, 37 MB for PyPI, less for the rest); later only what changed. Default: only when the copy here is older than a day.' },
   } },
   annotations: { readOnlyHint: true, openWorldHint: true },
 }];
@@ -81,11 +81,9 @@ const RUN = {
     return brief(await checkItems([item], { model, onItem }), ` in ${f.name}`);
   },
   async storm({ project, sync = false }, onItem) {
-    const st = advisoryStatus('npm'), stale = st && Date.now() - Date.parse(st.synced) > 20 * 3600e3;
-    let note = '';
-    if (sync || stale) note = await syncAdvisories('npm').then(r => `Advisories updated: ${r.changed ?? 'all'} changed.\n`, e => `Couldn't update the advisories (${e.message}); using the copy here.\n`);
     const f = folder(resolve(String(project || process.cwd())));
     if (!f) throw new Error(`${project} isn't a folder on this computer`);
+    const note = (await refreshAdvisories(f.dir, { force: sync })).map(n => `${n[0].toUpperCase()}${n.slice(1)}.\n`).join('');
     const saved = settingsOf().options ?? {};
     const options = { project: f.dir, packages: true, agents: true, fetch: true, model: false, app: saved.project === f.dir ? saved.app ?? null : null };
     const run = await scanProject(f.dir, { ...options, onItem });
@@ -95,7 +93,7 @@ const RUN = {
 };
 
 // ---------- the answer: slowship's words, plus where to look ----------
-const LABEL = { npm: i => i.key.replace(/^npm:/, ''), skill: i => `skill ${i.name}`, app: i => `your build ${i.name}`, mcp: i => `MCP server ${i.name}`, runtime: i => `runs on ${i.name}` };
+const LABEL = { npm: i => i.key.replace(/^npm:/, ''), skill: i => `skill ${i.name}`, app: i => `your build ${i.name}`, mcp: i => `MCP server ${i.name}`, runtime: i => `runs on ${i.name}`, dep: i => `${i.name}@${i.version} (${i.eco})` };
 const line = s => String(s).replace(/[\x00-\x1f\x7f\p{Zl}\p{Zp}]/gu, ' ').slice(0, 200);  // names and paths come from the scanned code: one line each
 const where = (i, e) => {
   const p = e.file && existsSync(join(i.dir, e.file)) ? join(i.dir, e.file) : i.dir;

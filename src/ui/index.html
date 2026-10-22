@@ -1796,7 +1796,7 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const S = { run: null, watch: null, filter: 'all', cap: null, q: '', shown: 60, v: null, undo: null, settings: null, sel: null, tab: 'review', drawn: false, prev: new Map() };
-const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime' };
+const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime', dep: 'Package' };
 const ORDER = { hold: 3, review: 2, notable: 1, info: 0 };
 
 // line icons drawn for slowship
@@ -1843,6 +1843,7 @@ const KICON = {
   app: svg('<rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M3 8h18M9 21h6M12 17v4"/><circle cx="12" cy="12.5" r="2"/>'),
   runtime: svg('<rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7 14V9h10v5M9.5 9V5.5h5V9"/><path d="M7.5 17h.01M11 17h5.5"/>'),
 };
+KICON.dep = KICON.npm;  // a package from any lockfile
 // what a thing can touch, grouped the way a person thinks about it
 const TOUCH = [
   ['net', 'Network calls', ['net']],
@@ -1897,7 +1898,7 @@ async function api(path, body) {
 let G = [];  // the same bytes installed in several places show up once
 const group = run => { const by = new Map(); for (const i of run.items) by.has(i.fp) ? by.get(i.fp).also.push(i) : by.set(i.fp, { ...i, also: [] }); return [...by.values()]; };
 const keysOf = i => [i.key, ...i.also.map(a => a.key)];
-const label = i => i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.name;
+const label = i => i.kind === 'npm' || i.kind === 'dep' ? i.key.replace(/^[^:]+:/, '') : i.name;
 const needs = i => ORDER[i.level] >= 2;
 const pl = (n, one, many = one + 's') => `${n.toLocaleString()} ${n === 1 ? one : many}`;
 const fmtDur = ms => ms < 1000 ? `${(ms / 1000).toFixed(1)} s` : ms < 60000 ? `${Math.round(ms / 1000)} s` : `${Math.floor(ms / 60000)} min ${Math.round(ms % 60000 / 1000)} s`;
@@ -2317,7 +2318,7 @@ function tabCounts() {
 // ---------- small parts shared by everything below ----------
 const SEP = '<svg class="i csep" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>';
 const wide = () => matchMedia('(min-width: 980px)').matches;
-const splitName = i => { const l = label(i), at = i.kind === 'npm' ? l.lastIndexOf('@') : -1; return at > 0 ? [l.slice(0, at), l.slice(at + 1)] : [l, '']; };
+const splitName = i => { const l = label(i), at = i.kind === 'npm' || i.kind === 'dep' ? l.lastIndexOf('@') : -1; return at > 0 ? [l.slice(0, at), l.slice(at + 1)] : [l, '']; };
 const itemPath = i => i.dir || (i.kind === 'app' ? i.key.replace(/^app:/, '') : '');
 const joinPath = (a, b) => a ? `${a.replace(/[\\/]+$/, '')}${a.includes('\\') ? '\\' : '/'}${b.replaceAll('/', a.includes('\\') ? '\\' : '/')}` : b;
 // a path that reads like one: home as ~, folders as steps, the file at the end, the middle folded away until asked for
@@ -2420,6 +2421,7 @@ function detailHTML(i) {
   const mc = i.findings.map(f => f.matches_claim).filter(x => x && x !== 'unknown');
   const rel = mc.includes('no') ? 'no' : mc.length && mc.every(x => x === 'yes') ? 'yes' : 'unknown';
   const says = i.kind === 'runtime' ? '<span class="muted">What this project runs on. Storm watch checks it against known storms and the date its fixes stop.</span>'
+    : i.kind === 'dep' ? `<span class="muted">A ${esc(i.eco)} package pinned in ${esc(i.facts[0].file)}. Only its name and version are matched against public advisories; its code isn’t read.</span>`
     : i.kind === 'app' ? '<span class="muted">Your own code. Here slowship looks for what you didn’t mean to ship: keys, debug switches, source maps, open doors in Electron.</span>'
     : i.claim ? claimHTML(i.claim) : '<span class="muted">No description, so there was nothing to compare its code against.</span>';
   return `<div class="dt" data-fp="${esc(i.fp)}">
@@ -2429,7 +2431,7 @@ function detailHTML(i) {
       ${crumb(itemPath(i))}
       <div class="dta">${needs(i) ? (i.approved ? `<button class="btn" data-act="unclear">${IC.undo}Take back the clearance</button>` : `<button class="btn primary" data-act="clear">${IC.check}Clear it</button>`) : ''}<button class="btn" data-act="find">${IC.search}Find in the list</button></div>
     </header>
-    ${i.kind === 'runtime' ? '' : scannerHTML(i, rel)}
+    ${i.kind === 'runtime' || i.kind === 'dep' ? '' : scannerHTML(i, rel)}
     <section class="says claimrow"><span class="sdl">What it says it does${rel !== 'unknown' ? `<span class="relw rel-${rel}" data-explain="relation-${rel}">${rel === 'no' ? '≠ not what its code does' : '= matches its code'}</span>` : ''}</span><blockquote${i.claim ? ' title="Tap to read more"' : ''}>${says}</blockquote></section>
     ${fs.length ? `<ol class="fl">${fs.map((f, k) => findingHTML(i, f, k)).join('')}</ol>` : `<div class="calm2">${IC.check}<span>${i.coverage?.compiled ? 'Nothing in its build record to look at.' : 'Read every file it ships: nothing to look at.'}</span></div>`}
     ${i.blast ? `<section class="blast"><span class="sdl">${IC.warn}If it were taken over</span><p>${esc(i.blast.says)}.</p></section>` : ''}
@@ -2899,7 +2901,11 @@ function chartBg() {
 const queueOrder = (a, b) => ORDER[b.level] - ORDER[a.level] || label(a).localeCompare(label(b));
 function review() {
   const open = G.filter(i => !i.approved && needs(i)).sort(queueOrder), all = G.filter(needs).length, done = all - open.length;
-  $('#needlede').textContent = open.length ? `${open.length === 1 ? 'This does' : `These ${open.length} do`} something ${open.length === 1 ? 'its' : 'their'} description doesn’t say. Look at each one. If you know why it’s there, clear it.` : 'Nothing needs you.';
+  const storm = open.filter(i => i.findings.filter(needs).every(f => STORMY.has(f.kind))).length, code = open.length - storm;
+  $('#needlede').textContent = !open.length ? 'Nothing needs you.'
+    : !storm ? `${code === 1 ? 'This does' : `These ${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say. Look at each one. If you know why it’s there, clear it.`
+    : !code ? `${storm === 1 ? 'This is' : `These ${storm} are`} in a known storm. Each comes with its fix; clear what you accept for now.`
+    : `${code === 1 ? '1 does' : `${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say, and ${storm} ${storm === 1 ? 'is' : 'are'} in a known storm. Look at each one; clear what you know or accept.`;
   const qp = $('#qprog');
   if (!all) qp.innerHTML = '';
   else {
@@ -3222,11 +3228,14 @@ const STORMY = new Set(['storm', 'malicious', 'eol', 'floating']);
 const stormy = () => G.filter(i => !i.approved && i.findings?.some(f => STORMY.has(f.kind) && needs(f)));
 const RTN = { node: 'Node.js', php: 'PHP', python: 'Python', ruby: 'Ruby', go: 'Go', java: 'Java', deno: 'Deno', bun: 'Bun', dotnet: '.NET' };
 function storms() {
-  const st = S.run?.storm ?? {}, adv = st.advisories?.npm, layer = st.layer ?? [], hit = stormy().sort((a, b) => LVN[b.level] - LVN[a.level] || (b.blast?.score ?? 0) - (a.blast?.score ?? 0));
+  const st = S.run?.storm ?? {}, layer = st.layer ?? [], advs = Object.entries(st.advisories ?? {});
+  const have = advs.filter(([, a]) => !a.missing), miss = advs.filter(([, a]) => a.missing);
+  const known = have.reduce((n, [, a]) => n + a.count, 0), checked = have.reduce((n, [, a]) => n + a.checked, 0), and = xs => xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`;
+  const hit = stormy().sort((a, b) => LVN[b.level] - LVN[a.level] || (b.blast?.score ?? 0) - (a.blast?.score ?? 0));
   const row = (i, k) => {
     const f = i.findings.find(x => STORMY.has(x.kind) && needs(x)), s = stateOf(i), [name, ver] = splitName(i);
     return `<li class="stormrow ${s}" style="--i:${k}"><button class="srbtn" data-sopen="${esc(i.fp)}" aria-label="Open ${esc(name)}">
-      <span class="srk">${KICON[i.kind]}</span><span class="srt"><b>${esc(name)}${ver ? `<span class="ver">${esc(ver)}</span>` : ''}</b><small>${esc(KIND[i.kind])}${i.kind === 'runtime' ? ` · ${esc(i.facts[0].file)}:${i.facts[0].line}` : ''}</small></span>
+      <span class="srk">${KICON[i.kind]}</span><span class="srt"><b>${esc(name)}${ver ? `<span class="ver">${esc(ver)}</span>` : ''}</b><small>${esc(i.kind === 'dep' ? `${i.eco} package` : KIND[i.kind])}${i.kind === 'runtime' || i.kind === 'dep' ? ` · ${esc(i.facts[0].file)}:${i.facts[0].line}` : ''}</small></span>
       <span class="tag ${s}"><span class="pip ${s}"></span>${ST[s]}</span></button>
       <p class="srs">${esc(cap1(f.says))}</p>
       ${f.fix ? `<p class="fixc">${IC.check}<span><b>Fix</b> ${esc(f.fix)}</span></p>` : ''}
@@ -3242,14 +3251,15 @@ function storms() {
   $('#p-storm').innerHTML = `
     <div class="ph"><div><h2>Storm watch</h2><p class="lede">When a big vulnerability breaks, the way PHP2Shell did on 21 October 2026: are you in it, what would a takeover get, and what’s the fix. Everything is matched on this computer.</p></div></div>
     <div class="sgrid">
-      <div class="scard${adv ? '' : ' off'}"><span class="sci">${IC.drive}</span><div><b>${adv ? `${adv.count.toLocaleString('en')} public advisories, here` : 'Public advisories not downloaded yet'}</b>
-        <small>${adv ? `npm, from OSV, updated ${ago(Date.parse(adv.synced))}. ${adv.checked} packages checked against them on this computer; nothing about this project was sent anywhere.` : 'Download them once (about 220 MB for npm), then only what changed each night. They are matched here: your inventory never leaves.'}</small>
-        ${adv ? '' : '<code class="scmd">slowship storm --sync</code>'}</div></div>
+      <div class="scard${have.length && !miss.length ? '' : ' off'}"><span class="sci">${IC.drive}</span><div><b>${have.length ? `${known.toLocaleString('en')} public advisories, here` : advs.length ? 'Public advisories not downloaded yet' : 'No packages to match'}</b>
+        <small>${have.length ? `${esc(and(have.map(([e]) => e)))}, from OSV, updated ${ago(Date.parse(have[0][1].synced))}. ${checked} packages checked against them on this computer; nothing about this project was sent anywhere.` : advs.length ? '' : 'No lockfile here, so there is nothing to match against public advisories.'}
+        ${miss.length ? `${esc(and(miss.map(([e, a]) => `${e}${a.mb ? ` (about ${a.mb} MB)` : ''}`)))}${have.length ? ' not here yet' : ''}: download once, then only what changed each night. They are matched here: your inventory never leaves.` : ''}</small>
+        ${miss.length ? '<code class="scmd">slowship storm --sync</code>' : ''}</div></div>
       <div class="scard"><span class="sci">${IC.warn}</span><div><b>${(st.storms ?? []).length} storm${(st.storms ?? []).length === 1 ? '' : 's'} in the runtimes on file</b>
         <small>${(st.storms ?? []).map(x => `${esc(x.id)} (${esc(x.published)}, ${esc(RTN[x.runtime] ?? x.runtime)})`).join(', ') || 'none'}. End-of-life dates as of ${esc(st.snapshot ?? '?')}, from endoflife.date.</small></div></div>
     </div>
     <h3 class="sh">In a storm <b>${hit.length}</b></h3>
-    ${hit.length ? `<ol class="stormrows">${hit.map(row).join('')}</ol>` : `<p class="sempty">${IC.check}<span>Nothing aboard is in a known storm${adv ? `: ${adv.checked} packages matched against ${adv.count.toLocaleString('en')} advisories` : ''}.</span></p>`}
+    ${hit.length ? `<ol class="stormrows">${hit.map(row).join('')}</ol>` : `<p class="sempty">${IC.check}<span>Nothing aboard is in a known storm${have.length ? `: ${checked} packages matched against ${known.toLocaleString('en')} advisories` : ''}.${(st.unpinned ?? []).length ? ` ${pl(st.unpinned.reduce((n, u) => n + u.names.length, 0), 'package')} with no exact version couldn’t be matched (see Blind spots).` : ''}</span></p>`}
     <h3 class="sh">What it runs on <b>${layer.length}</b></h3>
     ${layer.length ? `<ul class="lrows">${layer.map(lrow).join('')}</ul>` : '<p class="sempty">No runtime named in this project: no Dockerfile, .nvmrc, engines, composer.json or CI versions to read.</p>'}`;
 }
@@ -3266,6 +3276,9 @@ function blind() {
   if (broken) notes.push({ ic: 'code', t: `${pl(broken, 'file')} that wouldn’t parse`, w: 'Unusual syntax the parser couldn’t follow, so these were skipped rather than guessed at.' });
   if (big) notes.push({ ic: 'big', t: `${pl(big, 'file')} too large`, w: 'Over the size limit, so not parsed. Big bundles are usually generated code.' });
   if (lines) notes.push({ ic: 'term', t: `${pl(lines, 'script')} read line by line`, w: 'Python and shell are read with line rules, not a full parser. Quiet there means “nothing obvious”.' });
+  const others = Object.keys(r.storm?.advisories ?? {}).filter(e => e !== 'npm');
+  for (const u of r.storm?.unpinned ?? []) notes.push({ ic: 'files', t: `${pl(u.names.length, 'package')} in ${u.file} with no exact version`, w: `${u.names.slice(0, 4).join(', ')}${u.names.length > 4 ? '…' : ''}: a range doesn’t say what gets installed, so these weren’t matched against advisories. Pin them (pip freeze), or use a lockfile (uv lock, poetry lock).` });
+  if (others.length) notes.push({ ic: 'code', t: `${others.join(', ')} packages: version only`, w: 'Storm watch matches them against public advisories by name and version, from their lockfiles. Their code isn’t read.' });
   notes.push({ ic: 'code', t: 'TypeScript, and code inside markdown', w: 'TypeScript files aren’t parsed yet, and code in a markdown code block is read as instructions, not as code.' });
   if (r.options?.fetch && G.some(i => i.kind === 'mcp')) notes.push({ ic: 'down', t: 'MCP packages were downloaded', w: 'To read an npx server, slowship downloads it from npm into a quarantine folder. Download only; it is never run.' });
   notes.push({ ic: 'eyeoff', t: 'Anything that only exists while a program runs', w: 'slowship reads code; it never runs it. Code fetched or built at runtime can’t be seen.' });
@@ -4289,7 +4302,7 @@ const BOX = {  // front, top, side, ink: the container wears its verdict
   hold: ['#C2307F', '#D9549A', '#8C1A5A', '#FFFFFF'], glance: ['#EB9F2C', '#F4BC5E', '#B8751A', '#0F202C'], cleared: ['#0C8A5E', '#2BA779', '#086445', '#FFFFFF'],
   notable: ['#6B808C', '#8396A1', '#4E616C', '#FFFFFF'], quiet: ['#4B6270', '#61798A', '#364955', '#E4EDF0'],
 };
-const CODE = { npm: 'PKG', skill: 'SKILL', mcp: 'MCP', app: 'APP', runtime: 'RUN' };
+const CODE = { npm: 'PKG', skill: 'SKILL', mcp: 'MCP', app: 'APP', runtime: 'RUN', dep: 'PKG' };
 const short = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
 function boxSVG(i, st) {
   const [f, t, sd, ink] = BOX[st], [name, ver] = splitName(i);

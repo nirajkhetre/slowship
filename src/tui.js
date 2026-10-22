@@ -60,14 +60,14 @@ const WM = { night: wordmark('#F4F2EE', '#9CB0FF'), mid: wordmark('#5574FF', '#2
 
 // ---------- what the report knows about an item, in the same words ----------
 const ORDER = { info: 0, notable: 1, review: 2, hold: 3 };
-const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime' };
+const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime', dep: 'Package' };
 const ST = { hold: 'Held', glance: 'Worth a glance', cleared: 'Cleared by you', notable: 'Noted', quiet: 'Fine' };
 const stateOf = i => i.approved && ORDER[i.level] >= 2 ? 'cleared' : i.level === 'hold' ? 'hold' : i.level === 'review' ? 'glance' : i.level === 'notable' ? 'notable' : 'quiet';
 const PIP = { hold: '◆', glance: '●', cleared: '✓', notable: '○', quiet: '·' };
 const COL = { hold: 'hold', glance: 'glance', cleared: 'clear', notable: 'noted', quiet: 'quiet' };
 const needs = i => ORDER[i.level] >= 2;
-const label = i => i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.name;
-const split = i => { const l = label(i), at = i.kind === 'npm' ? l.lastIndexOf('@') : -1; return at > 0 ? [l.slice(0, at), l.slice(at + 1)] : [l, '']; };
+const label = i => i.kind === 'npm' || i.kind === 'dep' ? i.key.replace(/^[^:]+:/, '') : i.name;
+const split = i => { const l = label(i), at = i.kind === 'npm' || i.kind === 'dep' ? l.lastIndexOf('@') : -1; return at > 0 ? [l.slice(0, at), l.slice(at + 1)] : [l, '']; };
 const group = run => { const by = new Map(); for (const i of run.items) by.has(i.fp) ? by.get(i.fp).also.push(i) : by.set(i.fp, { ...i, also: [] }); return [...by.values()]; };
 const home = p => { const h = homedir(); return p && p.toLowerCase().startsWith(h.toLowerCase()) ? '~' + p.slice(h.length) : p || ''; };
 const pl = (n, one, many = one + 's') => `${n.toLocaleString()} ${n === 1 ? one : many}`;
@@ -472,6 +472,7 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
     push([['What it says it does', { fg: N.ink2, a: BOLD }], ...(rel ? [[rel === 'no' ? '   ≠ not what its code does' : '   = matches its code', { fg: rel === 'no' ? N.hold : N.clear, a: BOLD }]] : [])]);
     const claim = it.kind === 'app' ? 'Your own code. Here slowship looks for what you didn\'t mean to ship: keys, debug switches, source maps, open doors in Electron.'
       : it.kind === 'runtime' ? 'What this project runs on. Storm watch checks it against known storms and the dates its fixes stop.'
+      : it.kind === 'dep' ? `A ${it.eco} package pinned in ${it.facts[0].file}. Only its name and version are matched against public advisories; its code isn't read.`
       : (it.claim || 'No description, so there was nothing to compare its code against.').split('\n')[0];
     para(claim, { fg: N.ink, a: ITALIC }, 2);
     gap();

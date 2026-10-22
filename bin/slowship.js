@@ -118,14 +118,10 @@ slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itse
 }
 
 async function ping(run, manual) { return (await import('../src/notify.js')).after(run, { manual }); }
-/** Advisories: the first download only when asked (--sync); after that, what changed, at most once a day. Never fatal. */
+/** Advisories for the ecosystems this project uses: the first download only when asked (--sync); after that, what changed, at most once a day. */
 async function refresh(force = false) {
-  const st = await import('../src/storm.js'), m = st.advisoryStatus('npm');
-  if (!force && (!m || Date.now() - Date.parse(m.synced) < 20 * 3600e3)) return;
-  try {
-    const r = await st.syncAdvisories('npm', { log: t => process.stderr.write(`  ${t}\n`) });
-    console.log(`  advisories: ${r.count.toLocaleString('en')} for npm on this computer${r.changed != null ? `, ${r.changed} changed since last time` : ''}`);
-  } catch (e) { console.log(`  couldn't update the advisories (${e.message}); using the copy here`); }
+  const st = await import('../src/storm.js');
+  for (const n of await st.refreshAdvisories(options.project, { force, log: t => process.stderr.write(`  ${t}\n`) })) console.log(`  ${n}`);
 }
 function finish(run) {
   if (json) writeFileSync(json, JSON.stringify(run, null, 1));

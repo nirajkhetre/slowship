@@ -89,7 +89,8 @@ export async function scanProject(project, { packages = true, agents = true, fet
   }
   const run = await checkItems(items, opts);
   applyStorm(run, packages ? project : null);  // what it runs on, the advisories, the blast radius: fresh every time, never cached
-  return { ...run, warnings, unread, project };
+  const st = run.storm, other = st.layer.length || Object.keys(st.advisories).length || st.unpinned.length;  // a Python or Go project isn't "nothing to check"
+  return { ...run, warnings: other ? warnings.filter(w => !w.includes('nothing to check')) : warnings, unread, project };
 }
 
 /** Approve current results so they stop asking: by key, or every item at or below a level. */

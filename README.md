@@ -45,7 +45,7 @@ To get the model: `ollama pull gemma4:e2b`. Choose another with `SLOWSHIP_MODEL`
 
 | What | Where it looks |
 |---|---|
-| **Packages** | your lockfile (`package-lock.json`), so it reads what you'll actually ship |
+| **Packages** | your lockfile (`package-lock.json`), so it reads what you'll actually ship. For Storm watch, also the lockfiles of Python, Go, PHP, Ruby and Rust projects, and pnpm and Yarn |
 | **Agent skills** | the skill folders that coding agents use, in your home folder and in the project (for example `~/.agents/skills` and `~/.codex/skills`), plugin folders included |
 | **MCP servers** | the MCP configs of the popular coding agents and editors (Cursor, VS Code, Codex and others). `npx` servers are downloaded into a quarantine folder with scripts disabled and read there; compiled servers are read as far as their build record (see below). None are ever started |
 | **Compiled files** (with [REA](https://github.com/morluto/rea)) | Go and Rust programs and .NET assemblies, whether a compiled MCP server or a `.node`, `.exe` or `.dll` inside a package: what they were built from (modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes) and, for .NET, the native functions they declare (starting programs, raw network, keystroke hooks, writing into other programs, decrypting what Windows protects for the user) plus, method by method, the framework calls each method makes and the strings it loads. So a .NET method that decodes base64 and loads it as code, or names the browser's password file and posts, is held just like the same JavaScript function |
@@ -56,19 +56,32 @@ To get the model: `ollama pull gemma4:e2b`. Choose another with `SLOWSHIP_MODEL`
 Some of the worst days aren't a bad package. They're a hole in what everything runs on, like PHP2Shell (CVE-2026-109618 and CVE-2026-109619, fixed on 21 October 2026), where any PHP site could be taken over with no bug in its own code. Storm watch answers three questions about your project on a day like that:
 
 - **Is it in this storm?** It finds what the project runs on: Dockerfile `FROM` lines, `.nvmrc`, `.tool-versions`, `engines`, `composer.json`, `go.mod`, the Gemfile, CI versions and more. Each is checked against the runtime storms slowship knows about and against the date that runtime's fixes stop (from [endoflife.date](https://endoflife.date)). A floating tag like `php:8.3-fpm` is flagged as "check your build", because it only gets the fix when you pull and rebuild.
-- **Is anything aboard already named in an advisory?** Every package in your lockfile is matched against the public advisories in [OSV](https://osv.dev), malware reports included.
+- **Is anything aboard already named in an advisory?** Every package your lockfiles pin is matched against the public advisories in [OSV](https://osv.dev), malware reports included, in six languages (see below). Each language's own version rules are used, so Python's `1.0rc1` comes before `1.0` and Ruby's `1.0.0.rc1` before `1.0.0`.
 - **What would a takeover get?** Each finding says which keys that part of the project can read, so you know what to rotate first.
 
 Every finding comes with the fix: the exact version to move to, plus what people forget, like rebuilding the image and restarting every PHP worker. Distros that ship a fix without changing the version number are named, so you know to check the package changelog.
 
-The advisories are downloaded whole (`slowship storm --sync`, once) and matched on this computer, so the list of what your project uses never leaves it. After that, only what changed is fetched, at most once every 20 hours. Measured on 22 October 2026:
+| Language | Lockfiles read | OSV advisories (22 Oct 2026) | Download, once |
+|---|---|---|---|
+| JavaScript | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` (classic and berry), plus installed packages | 229,935 | 219 MB |
+| Python | `poetry.lock`, `uv.lock`, `Pipfile.lock`, exact pins in `requirements*.txt` | 25,922 | 37 MB |
+| Go | `go.mod` | 9,585 | 13 MB |
+| PHP | `composer.lock` | 6,531 | 11 MB |
+| Ruby | `Gemfile.lock` | 5,397 | 5 MB |
+| Rust | `Cargo.lock` | 2,836 | 4 MB |
+
+Lockfiles are found up to two folders down, so a `backend/` and a `web/` in one repository both count. A `requirements.txt` line with a range (`flask>=2.0`) doesn't say what gets installed, so it isn't matched; Storm watch names those instead of passing them as clean. Packages from lockfiles are matched by name and version only: their code isn't read (npm packages that are installed still are).
+
+The advisories are downloaded whole (`slowship storm --sync`, once, and only for the languages the project uses) and matched on this computer, so the list of what your project uses never leaves it. After that, only what changed is fetched, at most once every 20 hours. Measured on 22 October 2026:
 
 | | |
 |---|---|
 | npm advisories on this computer | 229,935 (a 35.8 MB index) |
-| First download | 219 MB in 80 s, then only the index is kept |
+| First download | npm: 219 MB in 80 s. The other five together: 34 s, kept as 11 MB of indexes |
 | Next sync, nothing new | 4.8 s |
-| Loading the index and matching a project | 0.7 s |
+| Loading the index and matching a project | 0.7 s for npm; 0.4 s for a project in the other five languages |
+| A test project pinning 17 versions with known advisories, across Python, Go, PHP, Ruby and Rust | all 17 found, each with its fix |
+| A real pnpm project, 508 packages | 6 with known advisories |
 | REA's 174 dependencies | 0 in a storm |
 
 Runtime storms are a short file in the repository (`src/storms.json`) that gets a new entry when a big one breaks.
@@ -189,6 +202,7 @@ slowship reads code; it never runs it. So:
 - TypeScript isn't read yet, and code inside markdown code blocks isn't read as code.
 - Instructions in SKILL.md are checked for four narrow things: hiding something from you, ignoring other instructions, downloading and running a script, and sending your data somewhere. Other prompt injection passes unnoticed.
 - Files over 2 MB (usually generated bundles) are skipped and named.
+- Storm watch knows a Python, Go, PHP, Ruby or Rust package only by its name and version in the lockfile. It says when a known advisory names that version, not whether your code reaches the vulnerable part. Maven, Gradle and NuGet aren't read yet.
 
 **No findings is not proof of nothing.** The report says so too.
 
@@ -230,7 +244,7 @@ node site/build.mjs              # build the site into site/dist: the landing pa
 
 The website lives in `site/web`: the landing page (`index.html`), one file per docs page (`docs/`), and the pictures `shots.mjs` makes. The live demo at `demo/` is the real report page answered from the recording, so nothing in it touches a visitor's computer.
 
-There are 28 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token, and the MCP server for your agent, which has no tool to clear anything, repeats only slowship's own words, and passes its own skill, and Storm watch, which must find what a project runs on, tell a PHP2Shell branch that's fixed from one that isn't, and match advisories without the network. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+There are 29 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token, and the MCP server for your agent, which has no tool to clear anything, repeats only slowship's own words, and passes its own skill, and Storm watch, which must find what a project runs on, tell a PHP2Shell branch that's fixed from one that isn't, match advisories without the network, and read the lockfiles of six languages with each one's own version order. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 

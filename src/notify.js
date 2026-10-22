@@ -111,7 +111,7 @@ export function summary(run, { test = false } = {}) {
   return {
     level, title: VERDICT[level], held, glance: open.length - held, aboard: G.length, test,
     project: basename(String(run?.options?.project || run?.project || '')) || 'your project',
-    items: open.slice(0, 5).map(i => ({ name: (i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.name).slice(0, 80), level: i.level, why: why(i) })),
+    items: open.slice(0, 5).map(i => ({ name: (i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.kind === 'dep' ? `${i.name}@${i.version}` : i.name).slice(0, 80), level: i.level, why: why(i) })),
     more: Math.max(0, open.length - 5), at: run?.finished || new Date().toISOString(),
   };
 }
