@@ -184,6 +184,34 @@ test('who can spend your money: key names from code and MCP configs, never their
   assert.ok(!JSON.stringify(pay).includes('inert'), 'a key\'s value is never kept');
 });
 
+test('the terminal review: every frame fills the screen exactly, at any size, whatever keys and clicks arrive', async () => {
+  const { review } = await import('../src/tui.js');
+  const { width } = await import('../src/term.js');
+  const fact = (id, cap, line) => ({ id, cap, detail: `${cap} fact`, file: 'index.js', line, code: 'fetch(url) // 世界', why: 'not in the description', label: 'unexpected' });
+  const run = { model: 'gemma4:e2b', stats: { total: 3, cached: 0, judged: 1, ms: 900 }, unread: [{ key: 'mcp:remote', why: 'remote server', given: [] }], options: { project: '/home/you/app' }, items: [
+    { key: 'npm:a-very-long-package-name-that-will-not-fit@1.0.0', name: 'a-very-long-package-name-that-will-not-fit', kind: 'npm', fp: 'f1', level: 'hold', approved: false, claim: 'Formats dates.',
+      findings: [{ kind: 'exfil', level: 'hold', says: 'reads credential files and sends them', evidence: ['E1', 'E2'], matches_claim: 'no' }], facts: [fact('E1', 'net', 3), fact('E2', 'secret-path', 0)], coverage: { files: 2, read: 2 } },
+    { key: 'skill:tts@x', name: 'tts', kind: 'skill', fp: 'f2', level: 'review', approved: false, claim: 'Speaks.', keys: [{ name: 'ELEVENLABS_API_KEY', service: 'ElevenLabs', file: 'SKILL.md', line: 2, how: 'docs' }],
+      findings: [{ kind: 'net', level: 'review', says: 'fetch()', evidence: ['E1'] }], facts: [fact('E1', 'net', 1)], coverage: { files: 1, read: 1, lineLevel: ['a.py'] } },
+    { key: 'app:/b', name: 'my-app', kind: 'app', fp: 'f3', level: 'hold', approved: false, claim: '', findings: [], facts: [], coverage: { files: 1, read: 1 },
+      map: { ipc: [{ channel: 'open', file: 'main.js', line: 7, checked: false, via: ['window.api.open'], from: [], does: ['opens a computed URL'] }],
+        binaries: [{ file: 'x.exe', lang: 'go', tool: 'go1.26', main: 'example.invalid/x v1', deps: [{ name: 'golang.org/x/net', version: 'v1', swap: '../fork' }] }] } },
+  ] };
+  for (const [W, H] of [[132, 40], [80, 24], [60, 16], [40, 10]]) {
+    const scr = { size: [W, H], start(on) { this.on = on; }, draw(l) { this.last = l; }, invalidate() {}, stop() { this.stopped = true; } };
+    const done = review(run, { screen: scr, depth: 24, motion: false });
+    const check = what => { assert.equal(scr.last.length, H, `${W}x${H} ${what}: rows`); scr.last.forEach((l, y) => assert.equal(width(l), W, `${W}x${H} ${what}: row ${y}`)); };
+    check('first frame');
+    for (const k of [{ name: 'down' }, { name: 'enter' }, { name: 'pagedown' }, { name: 'escape' }, { name: 'right' }, { ch: 'f' }, { name: 'right' }, { name: 'right' },
+      { mouse: 'click', x: 3, y: 7 }, { mouse: 'wheeldown', x: W - 3, y: 8 }, { ch: '?' }, { ch: 'x' }, { ch: '/' }, { ch: 'z' }, { name: 'backspace' }, { name: 'enter' }, { ch: '1' }]) {
+      scr.on(k); check(JSON.stringify(k));
+    }
+    scr.on({ ch: W > 100 ? 'r' : 'q' });
+    assert.equal(await done, W > 100 ? 'rerun' : 'quit');
+    assert.ok(scr.stopped, 'the terminal is always put back');
+  }
+});
+
 test('unpacking a tarball never writes outside the quarantine folder', async () => {
   const { untar } = await import('../src/agents.js');
   const { gzipSync } = await import('node:zlib');

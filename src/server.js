@@ -27,7 +27,7 @@ export function folder(path) {
 }
 
 const readJSON = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };
-const lastRun = () => readJSON(LAST);
+export const lastRun = () => readJSON(LAST);
 /** What the next watch reads, and the projects watched lately. Set from the page; a run from the terminal updates it too. */
 export const settingsOf = () => readJSON(SETTINGS) ?? { options: lastRun()?.options ?? {}, recent: lastRun()?.options?.project ? [lastRun().options.project] : [] };
 function keepSettings(options) {

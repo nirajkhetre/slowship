@@ -32,9 +32,10 @@ cd slowship && npm install && npm link
 Then, in the project you're about to ship:
 
 ```bash
-slowship                      # read the packages, skills and MCP servers
+slowship                      # read the packages, skills and MCP servers, then review them right there
 slowship --app dist/          # also check your own build before it ships
-slowship ui                   # open the morning report
+slowship review               # review the last watch again, in the terminal
+slowship ui                   # open the morning report in the browser
 slowship schedule             # do all of this every night, by itself
 ```
 
@@ -61,6 +62,18 @@ A funnel that goes from cheap to expensive, so a night's work stays small:
 5. **Claim against behaviour, on your laptop.** For anything worth a second opinion, the local model gets the item's own description and the short fact list (marked as untrusted data) and says, fact by fact, whether the description calls for it. It must cite fact ids that exist.
 6. **Severity stays in code.** The model can move a single fact one step up or down, never past "worth a glance". Only a combination found in code can hold the ship, and the model can never lower one, so a README that tells AI scanners to approve everything gets nowhere.
 7. **The morning report.** One verdict, a short queue of what to look at, the real code around each finding, and an honest map of what couldn't be read.
+
+## In your terminal
+
+Run `slowship` in a terminal and it draws instead of printing (no dependencies, true colour where the terminal has it):
+
+- **The mark.** A soft blob with pill eyes beside a wordmark drawn letter by letter in half blocks.
+- **The watch, live.** A ship crosses a row of containers, one per thing aboard, each turning the colour of what was found; its flag flies the worst colour so far. Under it the water moves. The step it's on (find, fingerprint, read, model, verdict) is lit, with counts of what's held, worth a glance and read from memory.
+- **The verdict.** A card with the headline, a wave under its accent, the whole manifest as coloured containers, and one key to press: review here, open the browser report, or done.
+- **The review, full screen.** Four tabs (Review, Aboard, Keys, Blind spots), a list of cards with a rail in each one's colour, and an inspector beside it: what it says, what its code does with the real lines around each finding (the flagged one lit), the model's note, the IPC map, what compiled files are built from, and the keys it holds. `c` clears an item (it slides away; `u` brings it back), `/` searches, `f` filters by kind, `o` opens the browser report, `r` watches again, `?` shows every key. The mouse works too: click to pick, wheel to scroll. When the last one is cleared, she sails.
+- **Kind to small and odd terminals.** Below 110 columns the inspector opens over the list; below 60×16 it asks for room. Esc only ever steps back; `q` quits, and the terminal is always put back as it was.
+
+Piped, in CI, overnight, with `NO_COLOR` or with `--plain`, it prints plain text exactly as before, and the exit code is the same. `--no-motion` (or `SLOWSHIP_NO_MOTION`) keeps everything still.
 
 ## The morning report
 
@@ -146,7 +159,8 @@ slowship reads code; it never runs it. So:
 ## Command reference
 
 ```text
-slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app build/] [--json out.json] [--approve <name|notable|review>]
+slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app build/] [--json out.json] [--approve <name|notable|review>] [--plain] [--no-motion]
+slowship review
 slowship ui [--port 7798] [--no-open]
 slowship schedule [dir] [--at 03:00] [same flags] | --status | --off
 ```
@@ -161,7 +175,7 @@ node site/record.mjs <project>   # record one real watch for the web demo (publi
 node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
-There are 22 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), and the "who can spend your money" ledger, which must never keep a key's value. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+There are 23 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, and the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 
