@@ -164,6 +164,9 @@ html = swap(html, '</style>', `.demoline{display:flex;align-items:center;justify
 <script>if (window.top !== window.self) document.documentElement.classList.add('framed');  /* inside the site's try-it window */</script>`);
 html = swap(html, '<header class="bar" id="bar">', `<div class="demoline"><a class="dback" href="../">← slowship</a><span class="dtag">Live demo</span><span>A replay of one real watch, recorded with gemma4 on a laptop: REA’s public npm dependencies plus slowship’s own inert test fixtures. Nothing here touches your computer.</span><a href="../docs/install/">Install it</a></div>
 <header class="bar" id="bar">`);
+// the site is light, so the demo opens in Day too; its own Settings can still switch it to Night
+html = swap(html, "return localStorage.getItem('slowship-theme') || 'system';", "return localStorage.getItem('slowship-theme') || 'light';");
+html = swap(html, "catch { return 'system'; } })();", "catch { return 'light'; } })();");
 // a replay is not the real thing: its length is the replay's, and it says so
 html = swap(html, 'say(`Done in ${clock(w.finished - w.started)}`)', 'say(`Replayed in ${clock(w.finished - w.started)}`)');
 html = swap(html, 'dn.innerHTML = `Done in <b>${clock(w.finished - w.started)}</b>.', 'dn.innerHTML = `Replayed in <b>${clock(w.finished - w.started)}</b> (the real night took ${clock(D_REAL)}).');
