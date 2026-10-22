@@ -159,6 +159,31 @@ mark{background:color-mix(in oklab,var(--glance) 38%,transparent);color:inherit;
 .chipbtn.ghost:hover .moon{transform:rotate(-24deg)}
 .chipbtn.ghost.on{color:var(--ink)}
 .chipbtn.ghost.on .moon{color:var(--clear-ink);filter:drop-shadow(0 0 4px color-mix(in oklab,var(--clear) 60%,transparent))}
+/* the command bar: one box for everything aboard and everything slowship can do, the project switcher at its start */
+.bar .wrap>.cmd{flex:0 1 640px;min-width:0}
+.cmd{position:relative;display:flex;align-items:center;height:48px;border-radius:15px;border:2px solid #040B22;background:rgb(255 255 255 / .07);box-shadow:inset 0 0 0 1px rgb(255 255 255 / .08),0 4px 0 #040B22;transition:background-color .2s,box-shadow .25s}
+.cmd:focus-within{background:rgb(255 255 255 / .11);box-shadow:inset 0 0 0 1px rgb(255 255 255 / .14),0 4px 0 #040B22,0 0 0 4px rgb(111 139 255 / .35)}
+.cmd .projsw{position:relative;height:100%;flex:none}
+.bar .cmd .projsw>.chipbtn{height:100%;max-width:210px;border:0;border-right:1.5px solid var(--rule2);border-radius:13px 0 0 13px;background:rgb(255 255 255 / .06);box-shadow:none}
+.cmdq{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:100%;padding:0 10px 0 14px;color:#F6F4EF;cursor:text}
+.cmdq svg.i{color:#8D98BD;width:17px;height:17px}
+.cmdq input{flex:1;min-width:0;border:0;background:none;outline:none;font:500 15px var(--sans);color:#F6F4EF}
+.cmdq input::placeholder{color:#8D98BD;opacity:1}
+.cmdq kbd{flex:none;background:none;color:#C3CCE8;border-color:rgb(246 244 239 / .3);box-shadow:none}
+.menu.cmdlist{left:-2px;right:-2px;width:auto;top:calc(100% + 12px);max-height:min(460px,70vh);overflow:auto}
+.cmdlist .mi.kb{background:var(--shoal)}
+.cmdlist .mi>.pip{margin:0 6px 0 auto}
+.cmdlist .mi kbd{margin-left:auto}
+.cmdlist .cempty{padding:10px 12px;color:var(--ink3);font-size:14px}
+.cmdlist mark{background:color-mix(in oklab,var(--glance) 45%,transparent)}
+/* the skipper rides in the bar too: its face is the verdict, the badge counts what's waiting for you */
+.skip{position:relative;display:grid;place-items:center;flex:none;width:44px;height:44px;padding:0;border-radius:50%;border:2px solid #040B22;background:var(--lamp);box-shadow:0 3px 0 #040B22;
+  transition:transform .25s var(--spring),box-shadow .25s var(--spring),background-color .6s}
+.skip .mf{width:34px;height:34px}
+.skip:hover{transform:translateY(-1px) rotate(-7deg);box-shadow:0 4px 0 #040B22}
+.skip:active{transform:translateY(3px);box-shadow:0 0 0 #040B22}
+.skip b{position:absolute;right:-7px;bottom:-6px;min-width:21px;height:21px;padding:0 5px;border-radius:999px;background:#0A1633;border:2px solid var(--lamp);color:var(--lamp);font:700 10px/17px var(--data);text-align:center}
+.skip b:empty{display:none}
 #gear svg{transition:transform .7s var(--spring)}
 #gear:hover svg,#gear[aria-expanded=true] svg{transform:rotate(90deg)}
 
@@ -1500,9 +1525,21 @@ body.empty .holds,body.empty .clearance{display:none}
   .wrap{width:calc(100% - 32px)}
   .hero{padding-top:20px}
   .bar .wrap{gap:6px}
-  .mark{font-size:18px;margin-right:2px;gap:7px}
+  .mark{font-size:0;margin-right:0;gap:0}  /* on a phone the logo alone; settings live in the command bar and the project menu */
+  #gear{display:none}
+  .bar .wrap>.cmd{flex:1 1 auto}
   .menu{position:fixed;left:16px;right:16px;top:66px;width:auto}
-  #help{display:none}
+  .cmd{height:42px;border-radius:13px}
+  .bar .cmd .projsw>.chipbtn{max-width:130px;border-right:0;border-radius:11px}
+  .cmdq{flex:none;gap:0;padding:0 10px}
+  .cmdq kbd{display:none}
+  .cmdq input{flex:0 0 0;width:0;opacity:0}  /* still focusable: a tap on the lens opens the box */
+  .cmd:focus-within .cmdq{flex:1;gap:10px}
+  .cmd:focus-within .cmdq input{flex:1;width:auto;opacity:1}
+  .cmd:focus-within .projsw,.cmd:focus-within~.runwrap,.cmd:focus-within~#gear{display:none}
+  .menu.cmdlist{position:fixed;left:16px;right:16px;top:70px}
+  .skip{width:38px;height:38px}
+  .skip .mf{width:29px;height:29px}
   .chipbtn .pico{display:none}
   .sd,.sd.solo{grid-template-columns:1fr}
   .sd .rel{border-inline:0;border-block:1px solid var(--rule);padding:6px 0}
@@ -1532,9 +1569,14 @@ body.empty .holds,body.empty .clearance{display:none}
 
 <header class="bar" id="bar"><div class="wrap">
   <a class="mark" href="#" aria-label="slowship"><svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="var(--ink)"/><rect x="8.5" y="7.5" width="5" height="4" rx=".8" fill="var(--paper)"/><rect class="mc" x="14.5" y="7.5" width="5" height="4" rx=".8"/><path d="M4 12.5h18l-2.6 6H6.8z" fill="var(--paper)"/></svg>slowship</a>
-  <div class="projsw">
-    <button class="chipbtn" id="projchip" aria-haspopup="menu" aria-expanded="false" aria-controls="projmenu" title="Switch project"><span class="pico"><svg class="i" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></span><span class="pn" id="projname">Choose a project</span><svg class="i ud" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
-    <div class="menu" id="projmenu" role="menu" aria-label="Projects"></div>
+  <span class="sp"></span>
+  <div class="cmd" id="cmd">
+    <div class="projsw">
+      <button class="chipbtn" id="projchip" aria-haspopup="menu" aria-expanded="false" aria-controls="projmenu" title="Switch project"><span class="pico"><svg class="i" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></span><span class="pn" id="projname">Choose a project</span><svg class="i ud" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
+      <div class="menu" id="projmenu" role="menu" aria-label="Projects"></div>
+    </div>
+    <label class="cmdq"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="cq" placeholder="Search everything aboard, or type a command…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="cmdlist" aria-label="Search everything aboard, or type a command"><kbd id="cqk">Ctrl K</kbd></label>
+    <div class="menu cmdlist" id="cmdlist" role="listbox" aria-label="Results"></div>
   </div>
   <span class="sp"></span>
   <button class="chipbtn ghost" id="nextw" title="The nightly watch"><svg class="i moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></svg><span id="nextwl">Nightly: off</span></button>
@@ -1543,7 +1585,7 @@ body.empty .holds,body.empty .clearance{display:none}
       <svg class="i ricon" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/></svg><svg class="i rcheck" viewBox="0 0 24 24"><path class="ck" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
     <span class="rtx" aria-hidden="true"><span class="r1"><span class="lbl">Run now</span><span class="rcount"></span></span><span class="r2"></span></span><span class="rtime" aria-hidden="true"></span></button></span>
   <button class="btn ib" id="gear" aria-label="Settings" aria-expanded="false" title="Settings (,)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
-  <button class="btn ib" id="help" aria-label="How to read this page" title="How to read this page"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.6a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.5v.3"/><circle cx="12" cy="16.4" r=".7" fill="currentColor"/></svg></button>
+  <button class="skip" id="skip" data-explain="skipper" aria-label="The skipper: what its face means"></button>
 </div></header>
 
 <section class="hero wrap" aria-label="The verdict">
@@ -1886,6 +1928,9 @@ function scene(v) {
   if (v === 'clear' && was && was !== 'clear' && was !== 'night' && !REDUCED) $('#horn').innerHTML = [0, 1, 2].map(k => `<circle cx="30" cy="-76" r="6" style="--n:${k}"/>`).join('');
   const sl = $('#sloth'), mood = { hold: 'worried', review: 'calm', clear: 'happy', watch: 'reading' }[v] ?? 'sleepy';
   if (sl.dataset.mood !== mood) { sl.dataset.mood = mood; nudge(); }
+  const waiting = v === 'hold' || v === 'review' ? open.length : 0;  // the skipper in the bar: the same face, and what's waiting
+  $('#skip').innerHTML = `${miniFace(mood)}<b>${waiting || ''}</b>`;
+  $('#skip').setAttribute('aria-label', `The skipper${waiting ? `: ${pl(waiting, 'thing')} waiting for you` : ''}. What its face means`);
 }
 function nudge() { const sl = $('#sloth'); if (!sl || REDUCED || !S.v) return; sl.classList.remove('nudge'); void sl.getBoundingClientRect(); sl.classList.add('nudge'); }
 function wireSloth() {
@@ -1992,6 +2037,7 @@ function bar() {
   const sc = sched();
   $('#nextwl').textContent = sc?.at ? `Next: ${nextLabel(sc.at)}` : 'Nightly: off';
   $('#nextw').classList.toggle('on', !!sc?.at);
+  CQ.placeholder = G.length ? `Search ${G.length} things aboard, or type a command…` : 'Type a command…';
 }
 // the project switcher: the one you're watching, the ones you watched lately, another folder, settings
 function menuHTML() {
@@ -2007,6 +2053,58 @@ const MENU = $('#projmenu'), CHIP = $('#projchip');
 function openMenu() { hidePop(); MENU.innerHTML = menuHTML(); MENU.classList.add('on'); CHIP.setAttribute('aria-expanded', 'true'); MENU.querySelector('.mi')?.focus({ preventScroll: true }); }
 function closeMenu() { MENU.classList.remove('on'); CHIP.setAttribute('aria-expanded', 'false'); }
 CHIP.onclick = e => { e.stopPropagation(); MENU.classList.contains('on') ? closeMenu() : openMenu(); };
+
+// the command bar: everything aboard and everything slowship can do, in one box. Items that need you come first.
+const CQ = $('#cq'), CL = $('#cmdlist');
+$('#cqk').textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K';
+const go = t => () => { setTab(t); toTabs(); };
+const COMMANDS = [
+  ['Run the watch now', 'Read everything again. Unchanged things are skipped', 'run', () => RUN.click()],
+  ['Review what needs you', 'The queue, one item at a time', 'search', go('review')],
+  ['Everything aboard', 'Every package, skill and server, and what it can touch', 'box', go('aboard')],
+  ['Blind spots', 'What couldn’t be read, and why', 'eye', go('blind')],
+  ['How it works', 'Three steps, and you only do the first', 'info', go('how')],
+  ['Switch project', 'A recent one, or another folder', 'folder', () => openMenu()],
+  ['Settings', 'The nightly watch, what to read, the model', 'gear', () => openSettings()],
+  ['Connect your coding agent', 'So it asks slowship before it installs anything', 'term', () => openSettings('agent')],
+  ['Morning ping', 'The verdict in Discord or Telegram', 'speech', () => openSettings('ping')],
+  ['Take the tour', 'A 30-second walk through this page', 'play', () => tourGo(0)],
+];
+let CR = [], CI = 0;
+const lit = (s, q) => { const k = q ? s.toLowerCase().indexOf(q) : -1; return k < 0 ? esc(s) : `${esc(s.slice(0, k))}<mark>${esc(s.slice(k, k + q.length))}</mark>${esc(s.slice(k + q.length))}`; };
+const RANK = { hold: 0, glance: 1, notable: 2, cleared: 3, quiet: 4 };
+function cmdFind(raw) {
+  const q = raw.trim().toLowerCase();
+  if (!q) return COMMANDS.slice(0, 7).map(c => ({ c }));
+  // a command named by what you typed comes first, then what's aboard, then commands that only mention it
+  const named = COMMANDS.filter(c => c[0].toLowerCase().includes(q)), said = COMMANDS.filter(c => !named.includes(c) && c[1].toLowerCase().includes(q));
+  const items = G.filter(i => label(i).toLowerCase().includes(q))
+    .sort((a, b) => RANK[stateOf(a)] - RANK[stateOf(b)] || label(b).toLowerCase().startsWith(q) - label(a).toLowerCase().startsWith(q))
+    .slice(0, 6).map(i => ({ i }));
+  return [...named.map(c => ({ c })), ...items, ...said.map(c => ({ c }))].slice(0, 9);
+}
+function cmdShow() {
+  const q = CQ.value.trim().toLowerCase();
+  CR = cmdFind(CQ.value); CI = Math.min(CI, Math.max(0, CR.length - 1));
+  CL.innerHTML = CR.length ? CR.map((r, k) => r.i
+    ? `<button class="mi${k === CI ? ' kb' : ''}" role="option" aria-selected="${k === CI}" data-k="${k}" tabindex="-1"><span class="mico">${KICON[r.i.kind]}</span><span class="mt"><b>${lit(label(r.i), q)}</b><small>${KIND[r.i.kind]} · ${ST[stateOf(r.i)]}</small></span><span class="pip ${stateOf(r.i)}"></span></button>`
+    : `<button class="mi${k === CI ? ' kb' : ''}" role="option" aria-selected="${k === CI}" data-k="${k}" tabindex="-1"><span class="mico">${IC[r.c[2]]}</span><span class="mt"><b>${lit(r.c[0], q)}</b><small>${esc(r.c[1])}</small></span>${k === CI ? '<kbd>↵</kbd>' : ''}</button>`).join('')
+    : `<p class="cempty">Nothing aboard is called “${esc(CQ.value.trim())}”.</p>`;
+  CL.classList.add('on'); CQ.setAttribute('aria-expanded', 'true');
+  CL.querySelector('.kb')?.scrollIntoView({ block: 'nearest' });
+}
+function cmdClose() { CL.classList.remove('on'); CQ.setAttribute('aria-expanded', 'false'); }
+function cmdGo(r) { if (!r) return; cmdClose(); CQ.value = ''; CQ.blur(); r.i ? openItem(r.i) : r.c[3](); }
+CQ.addEventListener('focus', () => { closeMenu(); hidePop(); CI = 0; cmdShow(); });
+CQ.addEventListener('input', () => { CI = 0; cmdShow(); });
+CQ.addEventListener('blur', () => setTimeout(cmdClose, 120));
+CQ.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); CI = (CI + (e.key === 'ArrowDown' ? 1 : -1) + CR.length) % Math.max(1, CR.length); cmdShow(); }
+  else if (e.key === 'Enter') { e.preventDefault(); cmdGo(CR[CI]); }
+  else if (e.key === 'Escape') { e.stopPropagation(); cmdClose(); CQ.blur(); }
+});
+CL.addEventListener('pointerdown', e => e.preventDefault());  // keep the box focused while a row is pressed
+CL.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) cmdGo(CR[+b.dataset.k]); });
 MENU.addEventListener('keydown', e => {
   const items = $$('#projmenu .mi'), k = items.indexOf(document.activeElement);
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[(k + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); }
@@ -3742,7 +3840,6 @@ function tourGo(n) {
 }
 function tourEnd() { tour = -1; document.body.classList.remove('touring'); try { localStorage.setItem('slowship-tour-3', '1'); } catch {} }
 $('#tourcard').addEventListener('click', e => { const t = e.target.closest('[data-t]')?.dataset.t; if (t === 'next') tourGo(tour + 1); else if (t === 'back') tourGo(tour - 1); else if (t === 'end') tourEnd(); });
-$('#help').onclick = () => tourGo(0);
 let rsT;
 addEventListener('resize', () => { if (tour >= 0) tourGo(tour); thumbTo(); thumb(); segThumb($('#viewseg')); moveSel(); clearTimeout(rsT); rsT = setTimeout(() => { if (S.tab === 'blind') sonarStart(); }, 250); });
 
@@ -4019,6 +4116,7 @@ addEventListener('scroll', () => $('#bar').classList.toggle('scrolled', scrollY 
 
 // keyboard: j/k move, a clears, / searches, r runs, , opens settings, 1-4 switch tabs
 addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); CQ.focus(); CQ.select(); return; }
   if (tour >= 0) { const k = e.key; if (k === 'Escape') tourEnd(); else if (k === 'ArrowRight') tourGo(tour + 1); else if (k === 'ArrowLeft') tourGo(tour - 1); return; }
   if (BR.open) return;
   if (e.key === 'Escape') {
