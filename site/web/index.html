@@ -291,6 +291,8 @@ h1.poster .acc{color:var(--glance);text-shadow:.05em .04em 0 #2B50FF}
       <rect y="628" width="1600" height="272" fill="#3E6BFF" style="opacity:calc(var(--dawn) * .55)"/>
       <g id="glints" style="opacity:calc(1 - var(--dawn))"></g>
       <path class="wv w1" fill="#2B50FF" opacity=".55" d=""/>
+    </svg>
+    <svg class="scene" id="scene2" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <g class="near">
         <g id="quay">
           <path d="M0 612 H624 V650 H0Z" fill="#0A1633"/>
@@ -304,6 +306,7 @@ h1.poster .acc{color:var(--glance);text-shadow:.05em .04em 0 #2B50FF}
         </g>
         <g id="ship" style="transform:translateX(calc(var(--sail) * 620px))">
           <g class="bob">
+            <g id="wake" fill="none" stroke="#C9D2EC" stroke-width="4" stroke-linecap="round"><path d="M520 700q20-7 40 0t40 0"/><path d="M470 716q22-7 44 0t44 0"/><path d="M540 728q18-6 36 0t36 0"/></g>
             <rect id="scanbeam" x="731" y="430" width="34" height="206" fill="url(#gScan)" opacity="0"/>
             <rect x="664" y="512" width="70" height="120" rx="4" fill="#F4F2EE" stroke="#0A1633" stroke-width="4"/>
             <rect x="672" y="524" width="54" height="12" rx="2" fill="#0A1633"/><rect x="672" y="546" width="54" height="8" rx="2" fill="#2B50FF"/>
@@ -317,6 +320,8 @@ h1.poster .acc{color:var(--glance);text-shadow:.05em .04em 0 #2B50FF}
           </g>
         </g>
       </g>
+    </svg>
+    <svg class="scene" id="scene3" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <path class="wv w2" fill="#1E44D8" opacity=".9" d=""/>
       <path class="wv w3" fill="#0E2C9A" d=""/>
     </svg>
@@ -701,6 +706,7 @@ h1.poster .acc{color:var(--glance);text-shadow:.05em .04em 0 #2B50FF}
 <script src="{{base}}site.js"></script>
 <script src="{{base}}play.js" defer></script>
 <script src="{{base}}yard.js" defer></script>
+<script src="{{base}}tow.js" defer></script>
 <script>
 (() => {
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -768,11 +774,11 @@ h1.poster .acc{color:var(--glance);text-shadow:.05em .04em 0 #2B50FF}
   addEventListener('scroll', ask, { passive: true }); addEventListener('resize', () => { fit(); ask(); });
   // a phone shows the middle of the harbour: the quay, the ship and her containers
   function fit() {
-    const sc = $('#scene'), a = innerWidth / innerHeight, OFF = 80;  // the harbour sits a little low, so the words have the sky
+    const a = innerWidth / innerHeight, OFF = 80;  // the harbour sits a little low, so the words have the sky
     if (!a || !isFinite(a)) return;
-    if (a >= 1.25) { sc.setAttribute('viewBox', `0 ${-OFF} 1600 900`); return; }
     const w = Math.max(840, 900 * a), h = w / a, cx = 850;
-    sc.setAttribute('viewBox', `${cx - w / 2} ${900 - OFF - h} ${w} ${h}`);
+    const vb = a >= 1.25 ? `0 ${-OFF} 1600 900` : `${cx - w / 2} ${900 - OFF - h} ${w} ${h}`;
+    $('.scene').forEach(sc => sc.setAttribute('viewBox', vb));  // all three layers see the same harbour
   }
   fit(); frame();
   if (!REDUCED && matchMedia('(pointer: fine)').matches) addEventListener('pointermove', e => {

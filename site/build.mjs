@@ -13,7 +13,7 @@ const GH = 'https://github.com/nirajkhetre/slowship';
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(join(dist, 'fonts'), { recursive: true });
 cpSync(join(ui, 'fonts'), join(dist, 'fonts'), { recursive: true });
-for (const f of ['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js', 'yard.css', 'yard.js', 'tide.css', 'tide.js']) cpSync(join(web, f), join(dist, f));
+for (const f of ['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js', 'yard.css', 'yard.js', 'tow.js']) cpSync(join(web, f), join(dist, f));
 if (existsSync(join(web, 'img'))) cpSync(join(web, 'img'), join(dist, 'img'), { recursive: true });
 if (existsSync(join(web, 'term', 'frames'))) cpSync(join(web, 'term', 'frames'), join(dist, 'term', 'frames'), { recursive: true });
 
@@ -76,13 +76,9 @@ const term = (html, base) => html.replace(/<!--term:([\w-]+)(?:\|([^>]*?))?-->/g
   return cmd ? `<figure class="termfig"><div class="term"><div class="tbar"><b>${cmd}</b></div>${pre}</div></figure>` : pre;
 });
 // the shared files carry a stamp of their content, so a browser never keeps an old copy after the site changes
-const STAMP = createHash('sha1').update(['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js', 'yard.css', 'yard.js', 'tide.css', 'tide.js', 'tide.html'].map(f => readFileSync(join(web, f))).join('') + readFileSync(join(dist, 'play.json'))).digest('hex').slice(0, 8);
-const TIDE = readFileSync(join(web, 'tide.html'), 'utf8');
+const STAMP = createHash('sha1').update(['site.css', 'site.js', 'docs.css', 'docs.js', 'play.css', 'play.js', 'yard.css', 'yard.js', 'tow.js'].map(f => readFileSync(join(web, f))).join('') + readFileSync(join(dist, 'play.json'))).digest('hex').slice(0, 8);
 const page = (html, base, at) => term(html, base).replace('<!--header-->', header(base, at)).replace('<!--footer-->', footer(base)).replaceAll('{{base}}', base)
-  .replace(/((?:site|docs|play|yard)\.(?:css|js))"/g, `$1?v=${STAMP}"`).replaceAll('{{stamp}}', STAMP)
-  // the tide, for setting sail to the live demo from any page
-  .replace('</head>', `<link rel="stylesheet" href="${base}tide.css?v=${STAMP}">\n</head>`)
-  .replace('</body>', `${TIDE}<script src="${base}tide.js?v=${STAMP}" defer></script>\n</body>`);
+  .replace(/((?:site|docs|play|yard|tow)\.(?:css|js))"/g, `$1?v=${STAMP}"`).replaceAll('{{stamp}}', STAMP);
 
 // ---------- the landing page ----------
 writeFileSync(join(dist, 'index.html'), page(readFileSync(join(web, 'index.html'), 'utf8'), '', 'home'));
@@ -165,7 +161,8 @@ html = swap(html, '</style>', `.demoline{display:flex;align-items:center;justify
 .demoline .dtag{font-weight:700;padding:3px 8px;border-radius:6px;background:#FFC21A;color:#0A1633}
 .framed .demoline{display:none}
 </style>
-<script>if (window.top !== window.self) document.documentElement.classList.add('framed');  /* inside the site's try-it window */</script>`);
+<script>var TOWED = /[?&]towed/.test(location.search);  /* sailed in from the landing page: it is the page, so its strip stays */
+if (window.top !== window.self && !TOWED) document.documentElement.classList.add('framed');  /* inside the site's try-it window */</script>`);
 html = swap(html, '<header class="bar" id="bar">', `<div class="demoline"><a class="dback" href="../">← slowship</a><span class="dtag">Live demo</span><span>A replay of one real watch, recorded with gemma4 on a laptop: REA’s public npm dependencies plus slowship’s own inert test fixtures. Nothing here touches your computer.</span><a href="../docs/install/">Install it</a></div>
 <header class="bar" id="bar">`);
 // the site is light, so the demo opens in Day too; its own Settings can still switch it to Night
@@ -175,13 +172,9 @@ html = swap(html, "catch { return 'system'; } })();", "catch { return 'light'; }
 html = swap(html, 'say(`Done in ${clock(w.finished - w.started)}`)', 'say(`Replayed in ${clock(w.finished - w.started)}`)');
 html = swap(html, 'dn.innerHTML = `Done in <b>${clock(w.finished - w.started)}</b>.', 'dn.innerHTML = `Replayed in <b>${clock(w.finished - w.started)}</b> (the real night took ${clock(D_REAL)}).');
 html = swap(html, '<script src="demo.js"></script>', `<script src="demo.js"></script>\n<script>const D_REAL = ${JSON.parse(readFileSync(data, 'utf8')).recorded.ms};</script>`);
-// the demo opens under the same sea when you sailed here, so there's no flash between the two pages; the tour waits for the tide
-html = swap(html, '<script src="demo.js"></script>', `<script>try{var s=JSON.parse(sessionStorage.getItem('slowship-sail')||'null');if(s&&Date.now()-s.t<20000&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('sailing')}catch(e){}</script>
-<style>${readFileSync(join(web, 'tide.css'), 'utf8')}</style>
-<script src="demo.js"></script>`);
-html = swap(html, '<body data-v="night" class="boot">', `<body data-v="night" class="boot">\n${TIDE}`);
-html = swap(html, '</body>', `<script src="../tide.js?v=${STAMP}" defer></script>\n</body>`);
-html = swap(html, 'if (!S.run?.empty && !seen) setTimeout(() => tourGo(0), 1800);', "if (!S.run?.empty && !seen) setTimeout(() => tourGo(0), document.documentElement.classList.contains('sailing') ? 4200 : 1800);");
+// towed in from the landing page (?towed), the demo loads out of sight: no first-visit tour or hello measured off-screen
+html = swap(html, 'if (!S.run?.empty && !seen) setTimeout(() => tourGo(0), 1800);', "if (!S.run?.empty && !seen && !TOWED) setTimeout(() => tourGo(0), 1800);");
+html = swap(html, "else if (!sessionStorage.getItem('slowship-hello'))", "else if (!TOWED && !sessionStorage.getItem('slowship-hello'))");
 writeFileSync(join(dist, 'demo', 'index.html'), html);
 
 if (cname) writeFileSync(join(dist, 'CNAME'), cname + '\n');

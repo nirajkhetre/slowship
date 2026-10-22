@@ -221,3 +221,17 @@
 .deskscene.away .glow{opacity:0;animation:none}
 .deskscene.back .mon{animation:monback .7s cubic-bezier(.3,1.6,.5,1)}
 @keyframes monback{0%{transform:translateY(-10%) scale(1.08)}60%{transform:translateY(2%) scale(.98)}100%{transform:none}}
+
+/* ---------- sailing to the demo (tow.js): the hero clears to the ship; the demo comes in from the left behind the quay ---------- */
+.towpage{position:fixed;inset:0;z-index:60;display:none;width:100%;height:100%;border:0;background:#F4F2EE;transform:translateX(-100%);
+  box-shadow:5px 0 0 #0A1633,40px 0 80px -30px rgb(1 4 13 / .55)}
+html.towing{overflow:hidden}
+html.towing .hcopy,html.towing .caps,html.towing .hint{opacity:0!important;translate:0 -26px;pointer-events:none;transition:opacity .42s var(--out),translate .6s var(--out)}
+html.towing .nav{opacity:0;pointer-events:none;transition:opacity .35s}
+html.towing .scene .far,html.towing .scene .mid,html.towing #glints{opacity:0!important;transition:opacity .5s var(--out)}
+#wake{opacity:0;transition:opacity .5s}
+html.towing #wake{opacity:.9}
+html.towing #wake path{stroke-dasharray:14 10;animation:wakeflow .5s linear infinite}
+@keyframes wakeflow{to{stroke-dashoffset:24}}
+.towdip{position:fixed;inset:0;z-index:70;background:#040B22;opacity:0;pointer-events:none;transition:opacity .28s}
+.towdip.on{opacity:1}
