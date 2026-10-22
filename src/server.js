@@ -13,7 +13,7 @@ import * as ping from './notify.js';
 
 const UI = join(import.meta.dirname, 'ui');
 const LAST = join(HOME, 'last-run.json'), SETTINGS = join(HOME, 'settings.json');
-const FONTS = new Set(['Fraunces.woff2', 'MartianMono.woff2', 'AtkinsonHyperlegibleNext.ttf', 'AtkinsonHyperlegibleMono.ttf']);
+const FONTS = new Set(['Fraunces.woff2', 'Eczar.ttf', 'MartianMono.woff2', 'AtkinsonHyperlegibleNext.ttf', 'AtkinsonHyperlegibleMono.ttf']);
 
 /** A folder the page asked to watch: an absolute path to a real directory on this machine, or null. */
 export function folder(path) {

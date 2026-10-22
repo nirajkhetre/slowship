@@ -9,9 +9,11 @@
 <style>
 /* bundled fonts (SIL OFL), so nothing is fetched from anywhere else.
    Fraunces, soft and a little wonky at its heaviest: the verdict, headings and big numbers.
+   Eczar at its heaviest, printed a little off register like a riso poster: the verdict itself.
    Martian Mono, wide like the codes stencilled on a container: counts, chips and labels.
    Atkinson Hyperlegible Next and Mono: drawn so 0/O and 1/l/I can never be mistaken, for reading and for code. */
 @font-face{font-family:"Fraunces";src:url(/fonts/Fraunces.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Eczar";src:url(/fonts/Eczar.ttf) format("truetype");font-weight:400 800;font-display:swap}
 @font-face{font-family:"Martian Mono";src:url(/fonts/MartianMono.woff2) format("woff2");font-weight:100 800;font-stretch:75% 112.5%;font-display:swap}
 @font-face{font-family:"Atkinson Hyperlegible Next";src:url(/fonts/AtkinsonHyperlegibleNext.ttf) format("truetype");font-weight:200 800;font-display:swap}
 @font-face{font-family:"Atkinson Hyperlegible Mono";src:url(/fonts/AtkinsonHyperlegibleMono.ttf) format("truetype");font-weight:200 800;font-display:swap}
@@ -221,7 +223,7 @@ mark{background:color-mix(in oklab,var(--glance) 38%,transparent);color:inherit;
 .vmeta .dot{position:relative;width:8px;height:8px;border-radius:50%;background:var(--lamp);transition:background-color .8s}
 .vmeta .dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--lamp);animation:radar 2.4s var(--out) infinite}
 @keyframes radar{from{opacity:.6}to{opacity:0;transform:scale(3.4)}}
-h1{font:900 clamp(48px,6.2vw,94px)/.95 var(--display);letter-spacing:-.04em;margin:18px 0 18px;text-wrap:balance;min-height:1em}
+h1{font:800 clamp(50px,6.6vw,104px)/.9 "Eczar",var(--display);letter-spacing:-.03em;margin:18px 0 20px;text-wrap:balance;min-height:1em}
 h1 .w{display:inline-block;white-space:nowrap}
 h1 .ch{display:inline-block;animation:chIn .9s var(--out) backwards;animation-delay:calc(var(--i) * 24ms);transition:transform .7s var(--spring),color .3s}
 @keyframes chIn{from{opacity:0;transform:translateY(.32em) rotate(5deg);filter:blur(7px)}}
@@ -229,7 +231,16 @@ h1 .ch{display:inline-block;animation:chIn .9s var(--out) backwards;animation-de
 h1 .ch:hover{transform:translateY(-.12em) rotate(-5deg);transition-duration:.18s}
 h1 .ch:hover + .ch,h1 .ch:has(+ .ch:hover){transform:translateY(-.06em) rotate(-2deg);transition-duration:.25s}
 h1 .acc{position:relative;display:inline-block;color:var(--accent-ink,var(--ink))}
-.hero h1 .acc{color:var(--accent)}
+/* the riso print: the verdict's own line is printed twice, its second ink cobalt and a little off register */
+.hero{--misreg:#6F8BFF}
+.hero h1 .acc{color:var(--accent);text-shadow:.055em .045em 0 var(--misreg)}
+.hero h1 .uw{display:none}
+/* and its button: a pill on an offset second ink that it presses down into */
+.hero .cta{border:0;border-radius:999px;box-shadow:6px 6px 0 var(--misreg)}
+.hero .cta.primary{box-shadow:6px 6px 0 var(--glance)}
+.hero .cta:hover{transform:translate(-1px,-1px);box-shadow:7px 7px 0 var(--misreg)}
+.hero .cta.primary:hover{box-shadow:7px 7px 0 var(--glance)}
+.hero .cta:active{transform:translate(6px,6px);box-shadow:0 0 0 var(--misreg)}
 h1 .uw{position:absolute;left:0;right:.08em;bottom:-.14em;width:calc(100% - .08em);height:.2em;overflow:visible;pointer-events:none}
 h1 .uw path{fill:none;stroke:var(--lamp);stroke-width:5;stroke-linecap:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--io) .75s forwards,uwave 2.6s ease-in-out 2s infinite}
 @keyframes uwave{50%{transform:translateY(-1.5px)}}
