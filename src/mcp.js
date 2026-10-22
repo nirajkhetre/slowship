@@ -6,7 +6,7 @@ import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
-import { findSkills, quarantineInstall, skillFacts } from './agents.js';
+import { findMcpServers, findSkills, quarantineInstall, skillFacts } from './agents.js';
 import { claimOf } from './inventory.js';
 import { said, summary } from './notify.js';
 import { checkItems, scanProject } from './scan.js';
@@ -135,20 +135,37 @@ export function serveMcp(input = process.stdin, output = process.stdout) {
   });
 }
 
-/** How to plug slowship into a coding agent here; the skill goes where agents on this computer already keep theirs. */
+// ---------- plugging it in ----------
+const BIN = fileURLToPath(new URL('../bin/slowship.js', import.meta.url)), SKILL = fileURLToPath(new URL('../skills/slowship', import.meta.url));
+const skillHomes = () => ['.claude', '.codex', '.agents'].map(d => join(homedir(), d, 'skills')).filter(existsSync);  // agents installed here
+const ours = s => s.name === 'slowship' || (s.args.includes('mcp') && s.args.some(a => /slowship\.js$/i.test(a)));
+const TERMINAL_AGENT = { claude: /\.claude\.json$/, codex: /config\.toml$/ };
+
+/** The lines that add slowship to an agent, which agents' settings already have it, and where its skill is. */
+export function setup(project = homedir()) {
+  const q = s => /\s/.test(s) ? `"${s}"` : s, run = `${q(process.execPath)} ${q(BIN)} mcp`;
+  const found = findMcpServers(project).filter(ours), want = readFileSync(join(SKILL, 'SKILL.md'), 'utf8');
+  const has = f => existsSync(f) && readFileSync(f, 'utf8');
+  return {
+    commands: { claude: `claude mcp add --scope user slowship -- ${run}`, codex: `codex mcp add slowship -- ${run}`,
+      json: `"slowship": ${JSON.stringify({ command: process.execPath, args: [BIN, 'mcp'] })}` },
+    connected: { claude: found.some(s => TERMINAL_AGENT.claude.test(s.source)), codex: found.some(s => TERMINAL_AGENT.codex.test(s.source)),
+      editor: [...new Set(found.filter(s => !Object.values(TERMINAL_AGENT).some(re => re.test(s.source))).map(s => s.source))] },
+    skill: skillHomes().map(d => { const t = has(join(d, 'slowship', 'SKILL.md')); return { dir: join(d, 'slowship'), installed: t !== false, current: t === want }; }),
+  };
+}
+/** The skill goes where agents on this computer already keep theirs. */
+export function installSkill() { for (const d of skillHomes()) cpSync(SKILL, join(d, 'slowship'), { recursive: true }); }
+
 export function connect() {
-  const q = s => /\s/.test(s) ? `"${s}"` : s, node = process.execPath, bin = fileURLToPath(new URL('../bin/slowship.js', import.meta.url));
-  const skill = fileURLToPath(new URL('../skills/slowship', import.meta.url));
-  const put = ['.claude', '.codex', '.agents'].map(d => join(homedir(), d, 'skills')).filter(existsSync);
-  for (const d of put) cpSync(skill, join(d, 'slowship'), { recursive: true });
-  const tilde = p => p.startsWith(homedir()) ? '~' + p.slice(homedir().length) : p;
+  installSkill();
+  const s = setup(process.cwd()), tilde = p => p.startsWith(homedir()) ? '~' + p.slice(homedir().length) : p;
+  const on = [...['claude', 'codex'].filter(a => s.connected[a]), ...s.connected.editor.map(tilde)];
   return ['', '  slowship for your coding agent: a local MCP server. It reads, it never runs, and nothing leaves this computer.', '',
-    '  Add it with your agent\'s own command:',
-    `    claude mcp add --scope user slowship -- ${q(node)} ${q(bin)} mcp`,
-    `    codex mcp add slowship -- ${q(node)} ${q(bin)} mcp`,
-    '  or in any editor\'s MCP settings:',
-    `    "slowship": ${JSON.stringify({ command: node, args: [bin, 'mcp'] })}`, '',
-    put.length ? `  The skill (when to ask slowship, and what a hold means) is now in ${put.map(d => tilde(join(d, 'slowship'))).join(', ')}.`
-      : `  The skill (when to ask slowship, and what a hold means): copy ${skill} into your agent's skills folder.`,
-    '  Your agent can watch and check. Only you can clear: slowship review, or slowship ui.', ''].join('\n');
+    ...on.length ? [`  Already connected in: ${on.join(', ')}`, ''] : [],
+    '  Add it with your agent\'s own command:', `    ${s.commands.claude}`, `    ${s.commands.codex}`,
+    '  or in any editor\'s MCP settings:', `    ${s.commands.json}`, '',
+    s.skill.length ? `  The skill (when to ask slowship, and what a hold means) is now in ${s.skill.map(k => tilde(k.dir)).join(', ')}.`
+      : `  The skill (when to ask slowship, and what a hold means): copy ${SKILL} into your agent's skills folder.`,
+    '  Your agent can watch and check. Only you can clear: slowship review, or slowship ui. The same setup is in slowship ui, Settings.', ''].join('\n');
 }

@@ -951,6 +951,9 @@ dialog.proj[open]{animation:dlg .45s var(--spring)}
 .ptile.on{border-color:color-mix(in oklab,var(--clear) 40%,var(--rule2))}
 .ptile.on .pico{background:var(--clear-bg);color:var(--clear-ink)}
 .ptile.on .led2{background:var(--clear);animation:led 2.6s ease-out infinite}
+.ptile b.mono,.pbrand h3.mono{font-family:var(--mono);letter-spacing:-.02em}
+.pcode{display:flex;align-items:flex-start;gap:6px;padding:12px 8px 12px 16px;border-radius:12px;background:var(--deep);border:1.5px solid var(--rule2)}
+.pcode code{flex:1;min-width:0;font:600 13px/1.6 var(--mono);color:var(--ink);overflow-wrap:anywhere;user-select:all}
 @keyframes led{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--clear) 55%,transparent)}70%,100%{box-shadow:0 0 0 9px transparent}}
 
 dialog.ping{margin:auto;border:0;padding:0;border-radius:24px;background:var(--sheet);color:var(--ink);width:min(1000px,calc(100% - 24px));max-height:calc(100dvh - 24px);box-shadow:var(--float);overflow:hidden}
@@ -3005,6 +3008,7 @@ function settingsHTML() {
     <div class="srow"><div><b>Second opinion from ${m}</b><small>A small model on this laptop compares what code does with what it says. Off: rules only. Faster, but more to glance at.</small></div>${sw('model', o.model !== false, 'Use the local model')}</div>
   </section>
   ${pingHTML(g++)}
+  ${agentHTML(g++)}
   <section class="sgrp" style="--i:${g++}"><h3>Appearance</h3>
     <div class="themes">${[['system', 'Auto'], ['light', 'Day'], ['dark', 'Night']].map(([t, l]) => `<button class="thm" data-theme="${t}" aria-pressed="${theme === t}">${thumbSVG(t)}<span>${l}</span></button>`).join('')}</div>
     <div class="srow"><div><b>The tour</b><small>A 30-second walk through this page.</small></div><button class="btn sm" data-tour>Take the tour</button></div>
@@ -3028,7 +3032,7 @@ function film(sc) {
     const size = e.size ?? 9, t = `<text x="${e.x}" y="${e.y}" font-size="${size}" font-weight="${e.weight ?? 500}" fill="${e.fill ?? 'var(--ink)'}"${e.anchor ? ` text-anchor="${e.anchor}"` : ''} font-family="${e.mono ? 'var(--mono)' : 'var(--sans)'}"${e.italic ? ' font-style="italic"' : ''}>${esc(e.s)}</text>`;
     if (!e.type) return t;
     // typed: a clip that opens a letter at a time
-    const [a, b] = e.type, w = e.s.length * size * (e.mono ? .62 : .56), x0 = e.anchor === 'middle' ? e.x - w / 2 : e.x, cid = `${id}k${k}`;
+    const [a, b] = e.type, w = e.s.length * size * (e.mono ? .66 : .56), x0 = e.anchor === 'middle' ? e.x - w / 2 : e.x, cid = `${id}k${k}`;
     return `<clipPath id="${cid}"><rect x="${x0}" y="${e.y - size}" width="${w + 2}" height="${size * 1.6}" ${anim(`0%,${pc(a)}{transform:scaleX(0)}${pc(b)},100%{transform:scaleX(1)}`, `transform-box:fill-box;transform-origin:left;animation-timing-function:steps(${e.s.length})`)}/></clipPath><g clip-path="url(#${cid})">${t}</g>`;
   };
   const shape = e => {
@@ -3172,6 +3176,86 @@ const PINGS = {
   ].map((s, i) => ({ ...s, film: TSCENES[i] })) },
 };
 
+// ---------- your coding agent: slowship as a local MCP server, set up step by step, in the same dialog ----------
+const TBG = '#0F202C', TTX = '#E6F0F2', TDIM = '#7E97A3', TPROMPT = '#7FB3C8';
+const keyPill = (s, show, x = 286, fg = TBG, bg = TTX) => [bx(x, 26, 44, 15, { r: 5, fill: bg, show, pop: true }), tx(x + 22, 36.5, s, { anchor: 'middle', fill: fg, size: 7.4, weight: 800, show })];
+const seesIt = (x, y, show) => ({ t: 'g', show, pop: true, els: [bx(x, y, 140, 32, { r: 16, fill: 'var(--paper)', stroke: 'var(--rule2)' }), blob(x + 20, y + 16), tx(x + 38, y + 20, 'slowship sees it', { weight: 800, size: 9.5 })] });
+const copyScene = (name, cmd) => ({ label: 'Copy the line from slowship', els: [FRAME,
+  tx(26, 34, 'slowship', { weight: 800, size: 11 }), tx(80, 34, '· Settings · Your coding agent', { fill: 'var(--ink3)', size: 9 }),
+  bx(26, 50, 308, 50, { r: 12, fill: 'var(--sheet)', stroke: 'var(--rule2)' }), bx(38, 61, 28, 28, { r: 8, fill: 'var(--shoal)' }),
+  { t: 'path', d: 'M45 70l5 4-5 4M53 79h6', stroke: 'var(--ink)', sw: 1.6 },
+  tx(78, 72, name, { mono: true, weight: 800, size: 10 }), tx(78, 87, 'Not connected', { fill: 'var(--ink3)', size: 8 }),
+  bx(26, 114, 308, 34, { r: 9, fill: 'var(--deep)', stroke: 'var(--rule2)' }), bx(26, 114, 308, 34, { r: 9, fill: 'var(--ink)', op: .08, show: [38, 100] }),
+  tx(38, 135, cmd, { mono: true, size: 7.8 }),
+  bx(304, 120, 22, 22, { r: 6, fill: 'var(--shoal)' }), bx(310, 125, 9, 10, { r: 2, stroke: 'var(--ink)', sw: 1.3 }), bx(313, 128, 9, 10, { r: 2, fill: 'var(--shoal)', stroke: 'var(--ink)', sw: 1.3 }),
+  bx(270, 156, 60, 18, { r: 9, fill: 'var(--ink)', show: [40, 74], pop: true }), tx(300, 168, 'Copied', { anchor: 'middle', fill: 'var(--paper)', size: 8.5, weight: 800, show: [40, 74] })],
+  path: [[230, 205, 0], [315, 131, 34, true], [315, 131, 100]] });
+const termScene = cmd => ({ label: 'Paste it into a terminal and press Enter', dur: 7, els: [FRAME,
+  bx(20, 20, 320, 180, { r: 12, fill: TBG }), tx(34, 37, 'terminal', { mono: true, size: 8, fill: TDIM }), bx(20, 46, 320, 1, { r: 0, fill: '#22394A' }),
+  ...keyPill('Ctrl V', [16, 30]), ...keyPill('Enter', [40, 52]),
+  tx(34, 70, '$', { mono: true, size: 8.5, fill: TPROMPT }), tx(46, 70, cmd, { mono: true, size: 7.8, fill: TTX, type: [20, 34], show: [19, 100] }),
+  tx(34, 94, 'Added MCP server slowship', { mono: true, size: 7.8, fill: '#8FD3AE', show: [50, 100] }),
+  tx(34, 118, '$', { mono: true, size: 8.5, fill: TPROMPT, show: [54, 100] }), bx(46, 110, 6, 10, { r: 1, fill: TTX, show: [54, 100] }),
+  seesIt(176, 152, [64, 100])],
+  path: [[300, 210, 0], [190, 72, 12, true], [190, 72, 100]] });
+// [y, indent, text, typed at]: SVG drops leading spaces, so indents are offsets
+const JSONL = [[60, 0, '{'], [77, 1, '"mcpServers": {'], [94, 2, '"slowship": {', 26], [111, 3, '"command": "node",', 28], [128, 3, '"args": ["…/slowship.js", "mcp"] }', 30], [145, 1, '}'], [162, 0, '}']];
+const jsonScene = { label: 'Paste the lines into the MCP settings, then save', dur: 7, els: [FRAME,
+  bx(18, 16, 84, 22, { r: 7, fill: 'var(--sheet)', stroke: 'var(--rule2)' }), tx(30, 31, 'mcp.json', { mono: true, size: 8.5, weight: 700 }), bx(8, 44, 344, 1, { r: 0, fill: 'var(--rule)' }),
+  ...keyPill('Ctrl V', [18, 30], 286, 'var(--paper)', 'var(--ink)'), ...keyPill('Ctrl S', [52, 64], 286, 'var(--paper)', 'var(--ink)'),
+  bx(38, 83, 300, 52, { r: 5, fill: 'var(--ink)', op: .06, show: [26, 100] }),
+  ...JSONL.flatMap(([y, ind, s, t], i) => [tx(24, y, String(i + 1), { mono: true, size: 7.5, fill: 'var(--ink3)' }),
+    tx(44 + ind * 12, y, s, { mono: true, size: 8.2, ...(t ? { show: [t, 100], type: [t, t + 8] } : {}) })]),
+  seesIt(196, 168, [66, 100])],
+  path: [[300, 210, 0], [200, 94, 14, true], [200, 94, 100]] };
+const askScene = { label: 'Your agent asks slowship before it installs', dur: 7.6, els: [FRAME,
+  tx(24, 30, 'your agent', { weight: 800, size: 11 }), bx(8, 40, 344, 1, { r: 0, fill: 'var(--rule)' }),
+  bx(184, 52, 150, 20, { r: 10, fill: 'var(--ink)', show: [4, 100], rise: 8 }), tx(259, 65.5, 'add left-pad to this project', { anchor: 'middle', fill: 'var(--paper)', size: 8.2, weight: 700, show: [4, 100], type: [6, 16] }),
+  { t: 'g', show: [24, 100], rise: 8, els: [bx(24, 84, 196, 26, { r: 13, fill: 'var(--sheet)', stroke: 'var(--rule2)' }), blob(40, 97), tx(58, 100.5, 'slowship · check left-pad', { mono: true, size: 8, weight: 700 })] },
+  bx(228, 86, 96, 22, { r: 11, fill: 'var(--clear-bg)', show: [42, 100], pop: true }), tx(276, 100.5, 'Cleared to sail', { anchor: 'middle', fill: 'var(--clear-ink)', size: 8.2, weight: 800, show: [42, 100] }),
+  { t: 'g', show: [56, 100], rise: 10, els: [bx(24, 122, 268, 38, { r: 12, fill: 'var(--shoal)' }), tx(36, 138, 'slowship read it, never ran it: cleared.', { size: 8.4 }), tx(36, 152, 'Adding left-pad now.', { size: 8.4 })] },
+  tx(24, 190, 'Held would stop it here, and the call would be yours.', { fill: 'var(--ink3)', size: 8, italic: true, show: [70, 100] })] };
+const askStep = { t: 'Ask before you install', p: 'Start a new session: agents read their tools when one starts. Then ask it to add a package, and it checks with slowship first. The skill tells it when to ask, and what a hold means.', skill: true, film: askScene };
+const terminalAgent = name => ({ name, mono: true, ic: () => IC.term, kicker: 'Your coding agent',
+  lede: 'A coding agent in your terminal, with its own command for adding MCP servers. Run it once and every session can ask slowship.', steps: [
+    { t: 'Copy the line', p: 'It starts slowship with this computer’s own Node, so it works in every project. Nothing in it is secret.', copy: name, film: copyScene(name, `${name} mcp add slowship -- node …/slowship.js mcp`) },
+    { t: 'Run it in a terminal', p: 'Paste it into any terminal and press <b>Enter</b>. Your agent adds slowship for every project. slowship is watching its settings, and will see it arrive.', watch: true, film: termScene(`${name} mcp add slowship -- node …/slowship.js mcp`) },
+    askStep] });
+const AGENTS = {
+  claude: terminalAgent('claude'), codex: terminalAgent('codex'),
+  editor: { name: 'Any editor or app', ic: () => IC.app, kicker: 'Your coding agent', lede: 'Cursor, VS Code, desktop apps, and anything else that keeps its MCP servers as JSON.', steps: [
+    { t: 'Copy these lines', p: 'They start slowship with this computer’s own Node. Nothing in them is secret.', copy: 'json', film: copyScene('editor', '"slowship": { "command": "node", "args": [ … ] }') },
+    { t: 'Paste them into its MCP settings', p: 'Open the editor’s MCP settings, often a file called <b>mcp.json</b>, paste them inside <b>"mcpServers"</b> and save. slowship is watching for them.', watch: true, film: jsonScene },
+    askStep] },
+};
+const FLOW = () => PINGS[PG.pf] ?? AGENTS[PG.pf];
+const agentOn = k => k === 'editor' ? !!S.agent?.connected?.editor?.length : !!S.agent?.connected?.[k];
+async function loadAgent() { try { S.agent = await api('/api/agent'); } catch { S.agent = null; } }
+function agentHTML(g) {
+  const sk = S.agent?.skill ?? [], done = sk.filter(s => s.current).length, old = sk.some(s => s.installed && !s.current);
+  const home = S.run?.home || '', tilde = p => home && p.toLowerCase().startsWith(home.toLowerCase()) ? '~' + p.slice(home.length) : p;
+  const sub = k => !agentOn(k) ? (k === 'editor' ? 'A few lines of JSON in its MCP settings' : 'Its own command adds slowship')
+    : k === 'editor' ? `Connected · ${esc(tilde(S.agent.connected.editor[0]))}` : 'Connected · for every project';
+  const tile = k => `<div class="ptile${agentOn(k) ? ' on' : ''}" data-pf="${k}"><span class="led2"></span><span class="pico">${AGENTS[k].ic()}</span><b${AGENTS[k].mono ? ' class="mono"' : ''}>${esc(AGENTS[k].name)}</b><small>${sub(k)}</small>
+    <div class="pact"><button class="btn sm${agentOn(k) ? '' : ' primary'}" data-aconnect="${k}">${agentOn(k) ? 'Show the steps' : 'Set up…'}</button></div></div>`;
+  return `<section class="sgrp wide" id="sg-agent" style="--i:${g}"><h3>Your coding agent</h3>
+    <p class="shelp">Optional. Let your agent ask slowship before it installs a package, skill or MCP server, and watch the project before it ships. It can look and check. Clearing stays here, with you.</p>
+    <div class="pings">${Object.keys(AGENTS).map(tile).join('')}</div>
+    <div class="srow"><div><b>The skill</b><small>${!sk.length ? 'No agent skill folders on this computer yet.' : done === sk.length ? `In place for all ${sk.length} agents here. It says when to ask slowship, and what a hold means.` : 'Tells your agent to check before it installs anything, and what a hold means.'}</small></div>
+      ${sk.length ? `<button class="btn sm${done === sk.length ? '' : ' primary'}" data-askill${done === sk.length ? ' disabled' : ''}>${done === sk.length ? 'Installed' : old ? 'Update' : 'Install'}</button>` : ''}</div>
+  </section>`;
+}
+async function watchAgent() {  // the "run it" step: look at the agents' settings until slowship turns up there
+  if (PG.watching) return;
+  PG.watching = true;
+  while (PG.open && AGENTS[PG.pf] && FLOW().steps[PG.i].watch && !agentOn(PG.pf)) {
+    await new Promise(r => setTimeout(r, 1500));
+    try { S.agent = await api('/api/agent'); } catch { break; }
+    if (agentOn(PG.pf) && PG.open && FLOW().steps[PG.i].watch) { PG.msg = null; renderPing(1); break; }
+  }
+  PG.watching = false;
+}
+
 // the Settings section: what's connected, and how often it speaks
 function pingHTML(g) {
   const s = S.ping ?? { discord: {}, telegram: {} };
@@ -3197,16 +3281,25 @@ function openPing(pf, at = 0) {
   renderPing(1, true);
   PD.showModal();
 }
-PD.addEventListener('close', () => { PG.open = false; renderSettings(); });
+PD.addEventListener('close', () => { PG.open = PD.open; renderSettings(); });  // a late close event can't shut a dialog opened again since
 function railHTML() {
-  const p = PINGS[PG.pf];
-  return `<div class="pbrand"><span class="pico">${p.ic()}</span><div><small>Morning ping</small><h3 id="pgh">${p.name}</h3></div></div><p>${p.lede}</p>
+  const p = FLOW();
+  return `<div class="pbrand"><span class="pico">${p.ic()}</span><div><small>${p.kicker ?? 'Morning ping'}</small><h3 id="pgh"${p.mono ? ' class="mono"' : ''}>${esc(p.name)}</h3></div></div><p>${p.lede}</p>
     <ol class="steps">${'<span class="fillv"></span>'}${p.steps.map((s, i) => `<li class="${i < PG.i ? 'done' : i === PG.i ? 'cur' : ''}" data-pgo="${i}"><span class="nd">${i < PG.i ? '✓' : i + 1}</span><span>${s.t}</span></li>`).join('')}</ol>
-    <p class="pfine">${IC.lock}<span>Kept on this computer, in a file only you can read. Off again any time: <code>slowship notify off</code>.</span></p>`;
+    <p class="pfine">${IC.lock}<span>${p.kicker ? 'It runs here, over stdin and stdout, with no network port. Your agent can watch and check; only you can clear.'
+      : 'Kept on this computer, in a file only you can read. Off again any time: <code>slowship notify off</code>.'}</span></p>`;
 }
 function stageHTML() {
-  const p = PINGS[PG.pf], s = p.steps[PG.i], last = PG.i === p.steps.length - 1, st = S.ping?.[PG.pf] ?? {};
+  const p = FLOW(), s = p.steps[PG.i], last = PG.i === p.steps.length - 1, st = S.ping?.[PG.pf] ?? {};
   let ctl = '';
+  if (s.copy) { const c = S.agent?.commands?.[s.copy] ?? ''; ctl = c ? `<div class="pcode"><code>${esc(c)}</code><button class="cbtn" data-copy="${esc(c)}" aria-label="Copy">${IC.copy}</button></div>` : `<div class="pmsg err">${IC.warn}<span>Couldn’t ask slowship for the line. Run <code>slowship connect</code> in a terminal instead.</span></div>`; }
+  if (s.watch) ctl = agentOn(PG.pf) ? `<div class="pmsg ok">${IC.check}<span>Found slowship in its settings.</span></div>` : `<div class="listen"><i></i><span>Watching its settings for slowship…</span></div>`;
+  if (s.skill) {
+    const sk = S.agent?.skill ?? [], n = sk.length;
+    ctl = !n ? `<div class="pmsg err">${IC.warn}<span>No agent skill folders here yet. The tools work without it.</span></div>`
+      : sk.every(k => k.current) ? `<div class="pmsg ok">${IC.check}<span>The skill is in place for ${n === 1 ? 'the agent' : `all ${n} agents`} here.</span></div>`
+      : `<div class="pfield"><button class="btn primary" data-pskill>${sk.some(k => k.installed) ? 'Update the skill' : 'Install the skill'}</button></div>`;
+  }
   if (s.input) ctl = `<form class="pfield" data-pform><label class="pathin">${IC.lock}<input id="psecret" type="password" autocomplete="off" spellcheck="false" placeholder="${s.input}" aria-label="${s.t}"></label><button class="btn primary" type="submit">Connect</button></form>`;
   if (s.listen) ctl = !st.bot ? `<div class="pmsg err">${IC.warn}<span>Paste your bot’s token in step 4 first.</span></div>` : st.on ? `<div class="pmsg ok">${IC.check}<span>Found you: ${esc(st.chat)}. The morning ping goes to this chat.</span></div>`
     : `<div class="listen"><i></i><span>Listening for your message to <b>@${esc(st.bot ?? 'your bot')}</b>…</span></div>${st.bot ? `<a class="btn sm" href="https://t.me/${encodeURIComponent(st.bot)}" target="_blank" rel="noopener">Open @${esc(st.bot)}</a>` : ''}`;
@@ -3231,12 +3324,13 @@ function renderPing(dir = 1, first = false) {
     parts.forEach((el, k) => el.animate([{ opacity: 0, transform: `translateX(${(first ? 0 : 56) * dir}px) translateY(${first ? 14 : 0}px) scale(${k ? 1 : .94})`, filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
       { duration: 640, delay: k * 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
   }
-  const s = PINGS[PG.pf].steps[PG.i];
+  const s = FLOW().steps[PG.i];
   if (s.input) setTimeout(() => $('#psecret')?.focus(), 80);
+  if (s.watch && !agentOn(PG.pf)) watchAgent();
   if (s.listen && S.ping?.telegram?.bot && !S.ping.telegram.on) listen();  // nothing to listen to until there's a bot
 }
 async function pingGo(i) {
-  const n = PINGS[PG.pf].steps.length;
+  const n = FLOW().steps.length;
   if (i < 0 || i >= n || i === PG.i) return;
   const dir = i > PG.i ? 1 : -1, b = $('#pstage .pbody');
   if (b && !REDUCED) await b.animate([{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: `translateX(${-40 * dir}px) scale(.97)`, filter: 'blur(5px)' }], { duration: 200, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' }).finished;
@@ -3272,7 +3366,14 @@ PD.addEventListener('click', async e => {
   const go = e.target.closest('[data-pgo]');
   if (go) { const i = +go.dataset.pgo; if (i <= PG.i || $('#pstage [data-pnext]:not([disabled])')) pingGo(i); return; }
   if (e.target.closest('[data-pback]')) return pingGo(PG.i - 1);
-  if (e.target.closest('[data-pnext]')) return PG.i === PINGS[PG.pf].steps.length - 1 ? PD.close() : pingGo(PG.i + 1);
+  if (e.target.closest('[data-pnext]')) return PG.i === FLOW().steps.length - 1 ? PD.close() : pingGo(PG.i + 1);
+  const sk = e.target.closest('[data-pskill]');
+  if (sk) {
+    sk.disabled = true;
+    try { S.agent = await api('/api/agent/skill', {}); PG.msg = { ok: true, t: 'Done. Your agents read it when their next session starts.' }; }
+    catch (err) { PG.msg = { ok: false, t: err.message }; }
+    return renderPing(1);
+  }
   const t = e.target.closest('[data-ptest]');
   if (t) {
     t.disabled = true;
@@ -3293,7 +3394,7 @@ function themeThumb() { const on = $(`#themeseg button[aria-pressed="true"]`), t
 function openSettings(focus) {
   closeMenu(); hidePop(); closePanel();
   renderSettings();
-  loadPing().then(() => SET.classList.contains('on') && renderSettings());
+  Promise.all([loadPing(), loadAgent()]).then(() => SET.classList.contains('on') && renderSettings());
   // the window opens out of the gear: the reveal is centred on it
   const p = $('.dpanel'), g = $('#gear').getBoundingClientRect();
   const cx = g.left + g.width / 2 - (innerWidth - p.offsetWidth) / 2, cy = g.top + g.height / 2 - (innerHeight - p.offsetHeight) / 2;
@@ -3327,6 +3428,15 @@ SET.addEventListener('click', e => {
   // the morning ping: connect (the setup), a test, disconnect, how often
   const pc = e.target.closest('[data-pconnect]');
   if (pc) return openPing(pc.dataset.pconnect, +(pc.dataset.pstep || 0));
+  // your coding agent: the steps for one agent, or the skill put in place
+  const ac = e.target.closest('[data-aconnect]');
+  if (ac) return openPing(ac.dataset.aconnect);
+  const ak = e.target.closest('[data-askill]');
+  if (ak) {
+    ak.disabled = true;
+    api('/api/agent/skill', {}).then(r => { S.agent = r; toast('The skill is in place. Your agents read it when their next session starts.'); }, err => toast(`Couldn’t put the skill in place: ${esc(err.message)}`)).finally(renderSettings);
+    return;
+  }
   const pt = e.target.closest('[data-ptest-now]');
   if (pt) {
     const pf = pt.dataset.ptestNow; pt.disabled = true;

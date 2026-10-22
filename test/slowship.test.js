@@ -392,4 +392,13 @@ test('your coding agent: slowship as an MCP server checks and watches, can\'t cl
     assert.equal((await ask('tools/call', { name: 'approve', arguments: { key: 'x' } })).error.code, -32602);
     assert.ok(seen.every(m => m.id !== undefined || m.method === 'notifications/progress'), 'stdout carries the protocol only');
   } finally { p.kill(); }
+  // the page's setup: an editor's settings that start slowship count as connected, whatever the entry is called
+  const { mkdirSync, writeFileSync } = await import('node:fs');
+  const { setup } = await import('../src/mcp.js');
+  const proj = mkdtempSync(join(tmpdir(), 'slowship-agent-'));
+  mkdirSync(join(proj, '.vscode'));
+  writeFileSync(join(proj, '.vscode', 'mcp.json'), JSON.stringify({ servers: { mine: { command: 'node', args: ['/x/slowship/bin/slowship.js', 'mcp'] }, other: { command: 'node', args: ['/x/other.js'] } } }));
+  const s = setup(proj);
+  assert.deepEqual(s.connected.editor, [join(proj, '.vscode', 'mcp.json')]);
+  assert.match(s.commands.codex, /^codex mcp add slowship -- .+slowship\.js"? mcp$/);
 });

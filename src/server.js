@@ -105,6 +105,7 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
       if (url.pathname === '/api/watch') return send(res, 200, watch ?? { idle: true });
       if (url.pathname === '/api/schedule') return send(res, 200, scheduleOf() ?? { off: true });
       if (url.pathname === '/api/notify') return send(res, 200, ping.status());
+      if (url.pathname === '/api/agent') return send(res, 200, (await import('./mcp.js')).setup(settingsOf().options?.project || homedir()));
       return send(res, 404, { error: 'not found' });
     }
     if (req.method !== 'POST') return send(res, 405, { error: 'method' });
@@ -171,6 +172,12 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
         }
       } catch (e) { return send(res, 400, { error: String(e.message).slice(0, 200) }); }
       return send(res, 404, { error: 'not found' });
+    }
+    // your coding agent: the page can put the skill in place; adding the server stays the agent's own command
+    if (url.pathname === '/api/agent/skill') {
+      const m = await import('./mcp.js');
+      try { m.installSkill(); } catch (e) { return send(res, 400, { error: String(e.message).slice(0, 200) }); }
+      return send(res, 200, m.setup(settingsOf().options?.project || homedir()));
     }
     if (url.pathname === '/api/scan') {
       if (watch && !watch.finished) return send(res, 409, { error: 'already watching' });

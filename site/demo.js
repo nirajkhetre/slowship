@@ -50,6 +50,8 @@
     if (path === '/api/settings') return init.method === 'POST' ? json({ error: 'this demo can’t change settings. Install slowship to make them yours' }, 400) : json({ options: d.run.options, recent: [d.run.options.project], schedule: null });
     if (path === '/api/notify') return json({ discord: { on: false }, telegram: { on: false }, when: 'always', manual: false });
     if (path.startsWith('/api/notify/')) return json({ error: 'this demo can’t connect anything. Install slowship to get the morning ping' }, 400);
+    if (path === '/api/agent') return json({ commands: { claude: 'claude mcp add --scope user slowship -- node /path/to/slowship/bin/slowship.js mcp', codex: 'codex mcp add slowship -- node /path/to/slowship/bin/slowship.js mcp', json: '"slowship": {"command":"node","args":["/path/to/slowship/bin/slowship.js","mcp"]}' }, connected: { claude: false, codex: false, editor: [] }, skill: [] });
+    if (path === '/api/agent/skill') return json({ error: 'this demo can’t install anything. Install slowship to connect your agent' }, 400);
     if (path === '/api/watch') return json(replay ? snapshot() : { idle: true });
     if (path === '/api/scan') {
       if (body.project && body.project !== d.run.options.project) return json({ error: 'this demo can only replay its recorded watch. Install slowship to watch your own project' }, 400);
