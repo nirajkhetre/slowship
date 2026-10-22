@@ -362,3 +362,34 @@ test('the nightly watch: quoted paths, a real time, and anything shell-like refu
   assert.throws(() => windowsTask('03:00', [...argv, 'D:/a & calc'], 'D:/home'), /can't be scheduled safely/);
   assert.throws(() => cronLine('03:00', ["/x/it's"], '/h'), /can't be scheduled safely/);
 });
+
+test('your coding agent: slowship as an MCP server checks and watches, can\'t clear, and repeats only its own words', async () => {
+  const { spawn } = await import('node:child_process');
+  const { mkdtempSync } = await import('node:fs');
+  const home = mkdtempSync(join(tmpdir(), 'slowship-mcp-'));
+  const p = spawn(process.execPath, [join(import.meta.dirname, '..', 'bin', 'slowship.js'), 'mcp'], { env: { ...process.env, SLOWSHIP_HOME: home }, stdio: ['pipe', 'pipe', 'inherit'] });
+  const waiting = new Map(), seen = [];
+  let buf = '', id = 0;
+  p.stdout.on('data', d => {
+    buf += d;
+    for (let i; (i = buf.indexOf('\n')) >= 0; buf = buf.slice(i + 1)) { const m = JSON.parse(buf.slice(0, i)); seen.push(m); waiting.get(m.id)?.(m); }
+  });
+  const ask = (method, params) => new Promise(ok => { waiting.set(++id, ok); p.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n'); });
+  const check = async args => (await ask('tools/call', { name: 'check', arguments: args })).result;
+  try {
+    assert.equal((await ask('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'test', version: '0' } })).result.protocolVersion, '2025-06-18');
+    p.stdin.write('{"jsonrpc":"2.0","method":"notifications/initialized"}\n');
+    assert.deepEqual((await ask('tools/list')).result.tools.map(t => t.name), ['watch', 'check'], 'look and check, nothing that clears');
+    const evil = (await check({ folder: join(FX, 'evil-skill') })).content[0].text;
+    assert.match(evil, /^Held in port\. 1 held/);
+    assert.match(evil, /HELD {2}skill table-tidy\n {2}- reads credential files/);
+    assert.match(evil, /SKILL\.md:\d+/);
+    assert.ok(!evil.includes('example.invalid'), 'nothing the skill wrote');
+    assert.match((await check({ folder: join(import.meta.dirname, '..', 'skills', 'slowship') })).content[0].text, /^Cleared to sail\./, 'slowship\'s own skill passes slowship');
+    const bad = await check({ package: 'x & calc' });
+    assert.equal(bad.isError, true); assert.match(bad.content[0].text, /not a plain npm package name/);
+    assert.equal((await check({})).isError, true);
+    assert.equal((await ask('tools/call', { name: 'approve', arguments: { key: 'x' } })).error.code, -32602);
+    assert.ok(seen.every(m => m.id !== undefined || m.method === 'notifications/progress'), 'stdout carries the protocol only');
+  } finally { p.kill(); }
+});

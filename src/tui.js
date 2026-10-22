@@ -115,6 +115,8 @@ export function help(io) {
     ['--packages-only, --agents-only', 'read only one side'], ['--offline', 'don\'t fetch npx MCP packages to read them'],
     ['--json <file>', 'write everything found as JSON'], ['--approve <name|notable|review>', 'mark results as seen'],
     ['--plain', 'plain text: no colour, no screens (also when piped)'], ['--no-motion', 'no animation']]) L.push([['  ' + a.padEnd(36), { fg: M.glance }], [b, { fg: M.quiet }]]);
+  head('Your coding agent (optional)');
+  cmd('slowship connect', 'let it watch, and check before it installs; only you clear');
   head('Morning ping (optional)');
   cmd('slowship discord', 'send the verdict to a Discord channel after each nightly watch');
   cmd('slowship telegram', 'or to a Telegram chat, through a bot you make');

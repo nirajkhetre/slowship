@@ -86,6 +86,17 @@ Set it up in the browser report (Settings, Morning ping): each step has a short 
 
 It sends after each nightly watch. You can make it send only when something needs you, and also after watches you start; `slowship notify` shows what's connected, `slowship notify test` sends one, `slowship notify off` stops it.
 
+## For your coding agent (optional)
+
+Your coding agent installs packages, skills and MCP servers for you now, usually without reading them. slowship can be what it asks first. `slowship connect` prints the exact line to add slowship to your agent as a local MCP server (`slowship mcp`), with your agent's own command or in any editor's MCP settings. It also puts a short skill where your agents keep theirs, saying when to ask and what a hold means. The agent gets two tools:
+
+- **check**, before something comes aboard. Give it an npm package, and slowship installs it into a quarantine folder with every script off and reads it with its whole dependency tree: exactly what `npm install` would bring. Or give it a downloaded skill, plugin or MCP server folder.
+- **watch**, before shipping. It's the same watch as `slowship`, read from memory when nothing has changed (2.4 s on the project measured below). The run lands in `slowship review` and `slowship ui`, for you.
+
+There is no tool to clear anything, on purpose. The agent is reading text a package wrote, and that text can be written to talk it into things. It's the same reason the model can't lower a hold: clearing stays with you. Answers use slowship's own words and the file and line to open, never the scanned code itself, and they say plainly that names and paths are data.
+
+It talks over stdin and stdout, with no network port. The only download is the package you asked it to check, from npm. The model is off by default for these calls, because some agents give a tool a minute at most. Answers the nightly watch already got from the model are reused either way.
+
 ## The morning report
 
 `slowship ui` serves the report on `127.0.0.1` only.
@@ -164,7 +175,8 @@ slowship reads code; it never runs it. So:
 - **No shell anywhere.** Programs are started with `execFile` and fixed arguments. Package names are validated before `npm pack`, and tarballs are unpacked by our own reader, which refuses paths that try to leave the quarantine folder.
 - **The report server answers only this machine.** It checks the `Host` header (no DNS rebinding) and the `Origin`, takes JSON only, and caps request bodies.
 - **Code context is safe to serve.** The code shown around a finding is read only from inside that item's own folder, and secrets are cut down before they reach the page.
-- **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read (`--offline` turns that off), and the morning ping if you connect one: it talks only to `discord.com` and `api.telegram.org`, with the summary described above.
+- **Your agent can look, never clear.** Its two tools read and report; clearing is only in `slowship review` and `slowship ui`.
+- **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read (`--offline` turns that off), a package your agent asks slowship to check, and the morning ping if you connect one: it talks only to `discord.com` and `api.telegram.org`, with the summary described above.
 - **Key names, never values.** The "who can spend your money" ledger keeps only the names of keys an MCP config hands a server (`env` and auth headers); their values are never read into the report.
 
 ## Command reference
@@ -174,6 +186,8 @@ slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app
 slowship review
 slowship discord | telegram
 slowship notify [test | off [discord|telegram|all] | when needs|always | manual on|off]
+slowship connect
+slowship mcp
 slowship ui [--port 7798] [--no-open]
 slowship schedule [dir] [--at 03:00] [same flags] | --status | --off
 ```
@@ -188,7 +202,7 @@ node site/record.mjs <project>   # record one real watch for the web demo (publi
 node site/build.mjs              # build the demo into site/dist: the real report page, answered from the recording
 ```
 
-There are 26 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+There are 27 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token, and the MCP server for your agent, which has no tool to clear anything, repeats only slowship's own words, and passes its own skill. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 

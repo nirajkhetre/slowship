@@ -21,14 +21,18 @@ const onlyPackages = flag('--packages-only'), onlyAgents = flag('--agents-only')
 const app = opt('--app'), at = opt('--at'), off = flag('--off'), status = flag('--status');
 const plain = flag('--plain'); flag('--no-motion');  // read by term.caps()
 const asksHelp = flag('--help') || flag('-h'), forcePing = flag('--notify');
-const COMMANDS = ['scan', 'ui', 'schedule', 'review', 'help', 'discord', 'telegram', 'notify'];
+const COMMANDS = ['scan', 'ui', 'schedule', 'review', 'help', 'discord', 'telegram', 'notify', 'mcp', 'connect'];
 const [cmd = 'scan', target = '.'] = COMMANDS.includes(args[0]) ? args : ['scan', ...args];
 const options = { project: resolve(target), model: !noModel, packages: !onlyAgents, agents: !onlyPackages, fetch: !offline, app: app && resolve(app) };
 // drawn only where a person is watching: a real terminal both ways, colour allowed, and not asked for plain text
 const drawn = !plain && process.stdout.isTTY && process.stdin.isTTY && !process.env.NO_COLOR;
 const tilde = p => p.toLowerCase().startsWith(homedir().toLowerCase()) ? '~' + p.slice(homedir().length) : p;
 
-if (cmd === 'ui') {  // the morning report, on this machine only
+if (cmd === 'mcp') {  // for your coding agent: a local MCP server on stdin and stdout
+  (await import('../src/mcp.js')).serveMcp();
+} else if (cmd === 'connect') {  // how to plug that server into your agent, and its skill
+  console.log((await import('../src/mcp.js')).connect());
+} else if (cmd === 'ui') {  // the morning report, on this machine only
   const port = Number(opt('--port') || process.env.SLOWSHIP_PORT || 7798), url = `http://127.0.0.1:${port}/`;
   serve(port);
   console.log(`morning report: ${url}  (Ctrl+C to stop)`);
@@ -69,6 +73,7 @@ turn it off with: slowship schedule --off`); }
 slowship review             reviews the last watch in the terminal
 slowship discord | telegram   sends the verdict after each nightly watch (optional: only the summary, never code, paths or keys)
 slowship notify [test | off [discord|telegram|all] | when needs|always | manual on|off]
+slowship connect           lets your coding agent ask slowship before it installs anything (a local MCP server, slowship mcp)
 slowship ui [--port 7798]   opens the morning report for the last run
 slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itself (--off to stop, --status to check)`);
   process.exitCode = cmd === 'help' || asksHelp ? 0 : 1;

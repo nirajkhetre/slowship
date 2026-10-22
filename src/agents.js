@@ -1,7 +1,7 @@
 // Your agent's supply chain: installed skills (instructions + scripts) and configured MCP servers.
 // A skill is read as both code and instructions, because a skill attacks through either, or through the two together.
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { gunzipSync } from 'node:zlib';
@@ -18,7 +18,7 @@ const SKILL_ROOTS = project => [
   join(homedir(), '.codex', 'skills'), join(project, '.claude', 'skills'), join(project, '.agents', 'skills'),
 ];
 
-export function findSkills(project) {
+export function findSkills(project, roots = SKILL_ROOTS(project)) {
   const found = new Map();
   const visit = (dir, depth) => {
     if (depth > 8 || !existsSync(dir)) return;
@@ -29,7 +29,7 @@ export function findSkills(project) {
       else if (/^skill\.md$/i.test(e.name)) found.set(dir, p);
     }
   };
-  for (const r of SKILL_ROOTS(project)) visit(r, 0);
+  for (const r of roots) visit(r, 0);
   return [...found].map(([dir, md]) => {
     const fm = readText(md).match(/^---\s*\n([\s\S]*?)\n---/)?.[1] ?? '';
     const field = k => fm.match(new RegExp(`^${k}:\\s*["']?(.+?)["']?\\s*$`, 'm'))?.[1] ?? '';
@@ -232,23 +232,43 @@ export function untar(tgz, dest) {
   }
 }
 
+// only a plain package spec may reach npm: name, optional scope, optional version
+const PLAIN_SPEC = /^(@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*(@[\w.^~<>=*|+-]+)?$/i;
+const notPlain = spec => ({ readable: false, why: `not a plain npm package name: ${String(spec).slice(0, 60)}` });
+const cantFetch = (spec, e) => ({ readable: false, why: `couldn't fetch ${spec}: ${String(e.message).split('\n')[0].slice(0, 80)}` });
+
+/** npm with no shell anywhere: on Windows npm is a .cmd wrapper, so run npm's own JavaScript with this Node instead. */
+function npm(args, cwd, timeout = 120_000) {
+  if (process.platform !== 'win32') return execFileSync('npm', args, { cwd, encoding: 'utf8', timeout });
+  const cli = join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
+  if (!existsSync(cli)) throw new Error('couldn\'t find npm next to node');
+  return execFileSync(process.execPath, [cli, ...args], { cwd, encoding: 'utf8', timeout });
+}
+
 /** Fetch an npm package's tarball into a quarantine folder. npm pack downloads; it never runs install scripts. */
 function quarantine(spec) {
-  // npm.cmd needs a shell on Windows, so only a plain package spec may reach it: name, optional scope, optional version
-  if (!/^(@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*(@[\w.^~<>=*|+-]+)?$/i.test(spec)) return { readable: false, why: `not a plain npm package name: ${spec.slice(0, 60)}` };
+  if (!PLAIN_SPEC.test(spec)) return notPlain(spec);
   const root = join(HOME, 'quarantine'), safe = spec.replace(/[^\w.@-]/g, '_'), dir = join(root, safe);
   if (existsSync(join(dir, 'package.json'))) return { readable: true, dir };
   try {
     mkdirSync(dir, { recursive: true });
-    // No shell anywhere: on Windows npm is a .cmd wrapper, so run npm's own JavaScript with this Node instead.
-    const npmCli = join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
-    const [bin, pre] = process.platform === 'win32' ? [process.execPath, [npmCli]] : ['npm', []];
-    if (process.platform === 'win32' && !existsSync(npmCli)) return { readable: false, why: `couldn't find npm next to node to fetch ${spec}` };
-    const out = execFileSync(bin, [...pre, 'pack', spec, '--silent', '--ignore-scripts'], { cwd: root, encoding: 'utf8', timeout: 120_000 });
-    const tgz = out.trim().split(/\r?\n/).pop();
+    const tgz = npm(['pack', spec, '--silent', '--ignore-scripts'], root).trim().split(/\r?\n/).pop();
     untar(readFileSync(join(root, tgz)), dir);
     return { readable: true, dir };
-  } catch (e) {
-    return { readable: false, why: `couldn't fetch ${spec}: ${String(e.message).split('\n')[0].slice(0, 80)}` };
-  }
+  } catch (e) { return cantFetch(spec, e); }
+}
+
+/** What `npm install <spec>` would bring aboard, the package and its whole tree, installed into a quarantine folder
+ *  with every script off. Fresh each time (an old lockfile would pin an old version), and only the latest check stays
+ *  on disk: a big tree shouldn't pile up. Its results stay remembered by their bytes. */
+export function quarantineInstall(spec) {
+  if (!PLAIN_SPEC.test(spec)) return notPlain(spec);
+  const dir = join(HOME, 'quarantine', 'install');
+  try {
+    rmSync(dir, { recursive: true, force: true });
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'package.json'), '{ "private": true }\n');
+    npm(['install', spec, '--ignore-scripts', '--no-bin-links', '--no-audit', '--no-fund', '--silent'], dir, 300_000);
+    return { readable: true, dir };
+  } catch (e) { return cantFetch(spec, e); }
 }

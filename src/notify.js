@@ -92,6 +92,8 @@ const PHRASE = {
 };
 const VERDICT = { hold: 'Held in port.', review: 'Ready after a glance.', ok: 'Cleared to sail.' };
 const MARK = { hold: '◆', review: '●', ok: '✓' };
+/** A finding in slowship's words: combinations are its own sentences, a single fact is named by its kind. */
+export const said = f => f.evidence?.length > 1 ? f.says : PHRASE[f.kind] ?? 'is worth a look';
 
 /** The run as a ping: verdict, counts, the first five that need you. */
 export function summary(run, { test = false } = {}) {
@@ -101,8 +103,7 @@ export function summary(run, { test = false } = {}) {
   const held = open.filter(i => i.level === 'hold').length, level = held ? 'hold' : open.length ? 'review' : 'ok';
   const why = i => {
     const f = i.findings?.find(f => ORDER[f.level] >= 2);
-    const t = !f ? 'is worth a look' : f.evidence?.length > 1 ? f.says : PHRASE[f.kind] ?? 'is worth a look';  // combinations are slowship's own sentences
-    return t.slice(0, 140);
+    return (f ? said(f) : 'is worth a look').slice(0, 140);
   };
   return {
     level, title: VERDICT[level], held, glance: open.length - held, aboard: G.length, test,
