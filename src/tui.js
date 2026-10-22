@@ -20,22 +20,22 @@ const N = {
 };
 const M = { hold: '#FF2E88', glance: '#FFC21A', clear: '#14D18F', noted: '#8B93AA', quiet: '#8D98BD', sea: '#2B50FF', sea2: '#5574FF', foam: '#9CB0FF' };
 
-// ---------- the mark: a soft blob with pill eyes, and a wordmark drawn letter by letter in half blocks ----------
+// ---------- the mark: the mochi captain (pill eyes, a captain's cap, a hard sticker shadow), and a wordmark drawn letter by letter in half blocks ----------
 const MASCOT = [
-  '.....oooooo.....',
-  '...oobbbbbboo...',
-  '..obbbbbbbbbbo..',
-  '.obbffffffffbbo.',
-  'obbffeffffeffbbo',
-  'obbffeffffeffbbo',
-  'obbfrrffffrrfbbo',
-  '.obbfffssfffbbo.',
-  '..oobbbbbbbboo..',
-  '....oooooooo....',
+  '....bbbbbbb.....',
+  '...bbbbbybbbb...',
+  '.ooooooooooooo..',
+  '..fffffffffff...',
+  '.fffefffffefffo.',
+  '.fffefffffefffo.',
+  '.frrfffffffrrfo.',
+  '.ffffffssfffffo.',
+  '..fffffffffffo..',
+  '...ooooooooooo..',
 ];
-const MINI = ['..oooooo..', '.obbbbbbo.', 'obffffffbo', 'obfeffefbo', 'obfeffefbo', '.oooooooo.'];
+const MINI = ['..bbbbbb..', '.oooooooo.', '.ffffffff.', '.feffffefo', '.feffffefo', '..ooooooo.'];
 const blink = g => g.map((r, y) => y === g.findIndex(row => row.includes('e')) ? r.replaceAll('e', 'f') : r);
-const MPAL = { o: '#2944D2', b: '#5574FF', f: '#F4F2EE', e: '#0A1633', r: '#FF7AB8', s: '#0A1633' };
+const MPAL = { o: '#2944D2', b: '#5574FF', y: '#FFC21A', f: '#F4F2EE', e: '#0A1633', r: '#FF7AB8', s: '#0A1633' };
 // x-height in rows 1-4, ascenders in 0, the descender in 5
 const GLYPH = {
   s: ['....', '.###', '##..', '..##', '###.', '....'],

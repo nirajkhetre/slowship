@@ -494,8 +494,13 @@ h1 .uw path{fill:none;stroke:var(--lamp);stroke-width:5;stroke-linecap:round;vec
 .harbour[data-v=night] .anno path,.harbour[data-v=watch] .anno path{stroke:#7C87A6}
 .harbour .anno{transition:opacity .6s}
 .harbour[data-v=night] .anno.cg,.harbour[data-v=error] .anno.cg,.harbour[data-v=clear] .anno.cg,.harbour:not([data-v=hold]):not([data-v=review]) .anno.by{opacity:0}
-/* the skipper: a soft blob with pill eyes; its face says the verdict too */
+/* the skipper: the mochi captain; its face says the verdict too, and it tips its cap now and then */
 .sloth{overflow:visible;cursor:pointer}
+.sloth .cap{transform-box:fill-box;transform-origin:10% 100%;animation:captip 7s ease-in-out infinite}
+@keyframes captip{0%,84%,100%{rotate:-4deg}90%{rotate:-14deg;translate:0 -3px}}
+.sloth .glass{transform-box:fill-box;transform-origin:20% 90%;animation:spy 6s ease-in-out infinite}
+@keyframes spy{0%,40%,100%{rotate:0deg}50%,70%{rotate:-8deg}}
+.sloth[data-mood=sleepy] .cap{animation:none;rotate:-4deg}.sloth[data-mood=sleepy] .glass{animation:none}
 .sloth .jelly{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 5s ease-in-out infinite}
 @keyframes breathe{50%{transform:scale(1.012,.99)}}
 .sloth[data-mood=worried] .jelly{animation:breathe 5s ease-in-out infinite,fret 6s ease-in-out infinite}
@@ -1873,30 +1878,27 @@ const dayWord = d => { const t = new Date(), y = new Date(t); y.setDate(t.getDat
 const hm = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
 // ---------- the harbour ----------
-// the skipper: the same soft blob as in the terminal, cobalt, pill eyes, a pink blush and a captain's cap
+// the skipper: the mochi captain, as in the terminal. A soft square of mochi on a hard sticker shadow, pill eyes, a pink blush, a captain's cap and a spyglass
 const SKIPPER = `<svg class="sloth" id="sloth" x="4" y="171" width="78" height="74" viewBox="0 0 200 190" data-mood="sleepy" data-explain="skipper" role="button" tabindex="0" aria-label="The skipper: what its face means">
-  <defs><radialGradient id="skg" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#9CB0FF"/><stop offset=".5" stop-color="#5574FF"/><stop offset="1" stop-color="#2944D2"/></radialGradient></defs>
-  <ellipse cx="92" cy="182" rx="58" ry="6.5" fill="#0A1633" opacity=".2"/>
+  <ellipse cx="98" cy="183" rx="62" ry="6" fill="#0A1633" opacity=".2"/>
   <g class="jelly">
-    <g class="flag"><rect x="149" y="32" width="6" height="134" rx="3" fill="#0A1633"/><g class="wave"><rect class="fl" x="155" y="36" width="40" height="28" rx="3"/></g></g>
-    <path d="M28 128 C24 76 52 38 92 38 C134 38 160 76 156 128 C153 166 128 178 92 178 C56 178 31 166 28 128Z" fill="url(#skg)" stroke="#0A1633" stroke-width="5"/>
-    <path d="M48 80 C54 62 70 52 88 50" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none" opacity=".45"/>
-    <path d="M127 142 C141 134 147 120 150 106" stroke="#0A1633" stroke-width="25" stroke-linecap="round" fill="none"/>
-    <path d="M127 142 C141 134 147 120 150 106" stroke="#3D5BF0" stroke-width="15" stroke-linecap="round" fill="none"/>
-    <ellipse cx="152" cy="100" rx="11" ry="10" fill="#3D5BF0" stroke="#0A1633" stroke-width="4"/>
-    <ellipse cx="90" cy="110" rx="45" ry="35" fill="#F4F2EE"/>
-    <ellipse cx="58" cy="124" rx="9" ry="5.5" fill="#FF7AB8" opacity=".85"/><ellipse cx="122" cy="124" rx="9" ry="5.5" fill="#FF7AB8" opacity=".85"/>
-    <g class="mood brows" stroke="#0A1633" stroke-width="4" stroke-linecap="round"><path d="M57 86 L75 80"/><path d="M123 86 L105 80"/></g>
+    <g class="flag"><rect x="14" y="8" width="6" height="168" rx="3" fill="#0A1633"/><g class="wave"><rect class="fl" x="20" y="10" width="34" height="24" rx="3"/></g></g>
+    <rect x="48" y="74" width="112" height="104" rx="40" fill="#0A1633"/>
+    <rect x="38" y="64" width="112" height="104" rx="40" fill="#F4F2EE" stroke="#0A1633" stroke-width="5"/>
+    <path d="M56 82 C62 75 72 72 84 71" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <ellipse cx="64" cy="132" rx="9" ry="5.5" fill="#FF7AB8"/><ellipse cx="124" cy="132" rx="9" ry="5.5" fill="#FF7AB8"/>
+    <g class="mood brows" stroke="#0A1633" stroke-width="4" stroke-linecap="round"><path d="M66 96 L82 90"/><path d="M122 96 L106 90"/></g>
     <g class="eyes" id="eyes">
-      <g class="mood e-pill"><g class="blink"><rect x="62" y="94" width="11" height="19" rx="5.5" fill="#0A1633"/><rect x="107" y="94" width="11" height="19" rx="5.5" fill="#0A1633"/><circle cx="66" cy="99" r="2.4" fill="#fff"/><circle cx="111" cy="99" r="2.4" fill="#fff"/></g></g>
-      <g class="mood e-happy" stroke="#0A1633" stroke-width="4.5" fill="none" stroke-linecap="round"><path d="M60 106 q7.5 -11 15 0"/><path d="M105 106 q7.5 -11 15 0"/></g>
-      <g class="mood e-sleep" stroke="#0A1633" stroke-width="4.2" fill="none" stroke-linecap="round"><path d="M60 103 q7.5 6 15 0"/><path d="M105 103 q7.5 6 15 0"/></g>
+      <g class="mood e-pill"><g class="blink"><rect x="71" y="102" width="11" height="19" rx="5.5" fill="#0A1633"/><rect x="106" y="102" width="11" height="19" rx="5.5" fill="#0A1633"/><circle cx="75" cy="107" r="2.4" fill="#fff"/><circle cx="110" cy="107" r="2.4" fill="#fff"/></g></g>
+      <g class="mood e-happy" stroke="#0A1633" stroke-width="4.5" fill="none" stroke-linecap="round"><path d="M69 116 q7.5 -11 15 0"/><path d="M104 116 q7.5 -11 15 0"/></g>
+      <g class="mood e-sleep" stroke="#0A1633" stroke-width="4.2" fill="none" stroke-linecap="round"><path d="M69 112 q7.5 6 15 0"/><path d="M104 112 q7.5 6 15 0"/></g>
     </g>
-    <path class="mood m-smile" d="M82 126 q8 7 16 0" stroke="#0A1633" stroke-width="3.6" fill="none" stroke-linecap="round"/>
-    <path class="mood m-flat" d="M83 128 q7 -3.5 14 0" stroke="#0A1633" stroke-width="3.6" fill="none" stroke-linecap="round"/>
-    <ellipse class="mood m-o" cx="90" cy="127" rx="3.6" ry="3.2" fill="#0A1633"/>
-    <g transform="rotate(-7 90 40)"><path d="M55 47 C57 15 123 15 125 47Z" fill="#0A1633"/><rect x="49" y="42" width="82" height="11" rx="5.5" fill="#F4F2EE" stroke="#0A1633" stroke-width="4"/><circle cx="90" cy="31" r="6.5" fill="#FFC21A" stroke="#F4F2EE" stroke-width="2"/></g>
-    <g class="mood zz"><text x="128" y="28">z</text><text x="141" y="14">z</text></g>
+    <path class="mood m-smile" d="M86 134 q8 7 16 0" stroke="#0A1633" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+    <path class="mood m-flat" d="M87 136 q7 -3.5 14 0" stroke="#0A1633" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+    <ellipse class="mood m-o" cx="94" cy="135" rx="3.6" ry="3.2" fill="#0A1633"/>
+    <g class="glass"><g transform="rotate(-26 146 108)" fill="#FFC21A" stroke="#0A1633" stroke-width="4.5" stroke-linejoin="round"><rect x="166" y="101" width="22" height="14" rx="3"/><rect x="142" y="97" width="27" height="22" rx="4"/><rect x="186" y="98" width="8" height="20" rx="3" fill="#0A1633"/><path d="M150 101v14" stroke-width="3"/></g><ellipse cx="150" cy="130" rx="10" ry="8.5" fill="#F4F2EE" stroke="#0A1633" stroke-width="4.5"/></g>
+    <g class="cap"><path d="M46 74 C50 34 138 34 142 74Z" fill="#0A1633"/><rect x="34" y="68" width="120" height="13" rx="6.5" fill="#0A1633"/><circle cx="94" cy="52" r="8" fill="#FFC21A"/></g>
+    <g class="mood zz"><text x="150" y="40">z</text><text x="164" y="24">z</text></g>
   </g></svg>`;
 const wave = (y, amp, len, from = -60, to = 720) => { let d = `M${from} ${y}`; for (let x = from; x < to; x += len) d += ` q${len / 4} ${-amp} ${len / 2} 0 t${len / 2} 0`; return d; };
 const cloud = (x, y, s) => `<path d="M${x} ${y}a${9 * s} ${9 * s} 0 0 1 ${17 * s} -4a${12 * s} ${12 * s} 0 0 1 ${22 * s} 3a${8 * s} ${8 * s} 0 0 1 ${2 * s} ${15 * s}h${-41 * s}a${7 * s} ${7 * s} 0 0 1 0 -14z"/>`;
@@ -3813,9 +3815,9 @@ const EYES = {
   reading: '<g class="scan"><rect x="10.2" y="16.2" width="2" height="3" rx="1" fill="#0B1820"/><rect x="19.8" y="16.2" width="2" height="3" rx="1" fill="#0B1820"/></g>',
   happy: '<path d="M9.4 17.6q1.8-2.6 3.6 0M19 17.6q1.8-2.6 3.6 0" stroke="#0B1820" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
 };
-const miniFace = m => `<svg class="mf" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17.5" r="13.5" fill="#5574FF" stroke="#0A1633" stroke-width="1.6"/><ellipse cx="16" cy="19.5" rx="10" ry="8" fill="#F4F2EE"/>
-  <ellipse cx="9.6" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/>${EYES[m]}
-  <path d="M7.5 9.5C8.5 3 23.5 3 24.5 9.5Z" fill="#0A1633"/><circle cx="16" cy="6.3" r="1.5" fill="#FFC21A"/></svg>`;
+const miniFace = m => `<svg class="mf" viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#0A1633"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/>
+  <ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/>${EYES[m]}
+  <path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>`;
 function skipperLine() {
   const open = G.filter(i => !i.approved && needs(i)), hs = open.filter(i => i.level === 'hold');
   return {
