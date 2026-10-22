@@ -90,6 +90,7 @@ function finish(run) {
 }
 async function watchOnce(tui) {
   const t0 = Date.now(), run = await tui.watch(scanProject, options.project, options);
+  run.options = { ...options };  // the card says what was read, and from where
   finish(run);
   tui.card(run, Date.now() - t0);
   return run;

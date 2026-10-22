@@ -193,9 +193,25 @@ export async function watch(scan, project, options, io) {
 // ---------- the verdict, as a card in the scrollback, then one key: review here, the browser, or done ----------
 export function card(run, ms, io) {
   const { depth, W, out } = inline(io), G = group(run), v = verdictOf(G), [a, b] = VERDICT[v], col = { hold: M.hold, review: M.glance, ok: M.clear }[v];
-  const open = G.filter(i => needs(i) && !i.approved), held = open.filter(i => i.level === 'hold').length;
-  const c = new Canvas(W, 12), w = W - 2;
-  c.box(1, 0, w, 12, M.quiet, null);
+  const open = G.filter(i => needs(i) && !i.approved), held = open.filter(i => i.level === 'hold').length, w = W - 2;
+  // what it read, and from where: the project's lockfile, the agents' skill folders, the editors' MCP settings, the build
+  const o = run.options ?? {}, n = k => G.filter(i => i.kind === k).length, unread = run.unread ?? [], warn = run.warnings ?? [];
+  const noProject = o.packages !== false && !n('npm') && warn.some(x => x.includes('nothing to check'));
+  const where = !o.project ? 'this folder' : o.project.toLowerCase() === homedir().toLowerCase() ? 'your home folder (~)' : home(o.project), lock = !warn.some(x => x.includes('reading node_modules directly'));
+  const rows = [
+    ['Packages', o.packages === false ? [['not read (--agents-only)', { fg: M.quiet }]]
+      : noProject ? [['0', { fg: M.glance, a: BOLD }], [`  ${where} has no package-lock.json`, { fg: M.glance }]]
+      : [[String(n('npm')), { a: BOLD }], [`  from ${where}${lock ? ', its package-lock.json' : ', its node_modules (no lockfile, so versions aren\'t pinned)'}`, { fg: M.quiet }]]],
+    ['Agent skills', o.agents === false ? [['not read (--packages-only)', { fg: M.quiet }]]
+      : [[String(n('skill')), { a: BOLD }], ['  from the folders your AI agents load skills from, on this computer', { fg: M.quiet }]]],
+    ['MCP servers', o.agents === false ? [['not read (--packages-only)', { fg: M.quiet }]]
+      : [[String(n('mcp')), { a: BOLD }], ['  from your editors\' settings', { fg: M.quiet }], ...(unread.length ? [[` · ${unread.length} unreadable: `, { fg: M.glance }], [unread.map(u => `${u.key.replace(/^mcp:/, '')} (${/compiled/.test(u.why) ? 'compiled' : /remote/.test(u.why) ? 'remote' : /container/.test(u.why) ? 'a container' : /not fetched/.test(u.why) ? 'not fetched' : 'see Blind spots'})`).join(', '), { fg: M.quiet }]] : [])]],
+    ['Your build', o.app ? [[home(o.app), { a: BOLD }]] : [['not checked', { fg: M.quiet }], ['  (add --app <folder>)', { fg: M.quiet, a: DIM }]]],
+  ];
+  const note = noProject ? wrap(`${where.charAt(0).toUpperCase() + where.slice(1)} has no package-lock.json, so there were no packages to read. Run slowship inside a project, or give it one: slowship <folder>`, w - 12) : [];
+  const base = 10 + rows.length, ky = note.length ? base + note.length + 3 : base + 1, H = ky + 3;  // rows, a gap, the note, a gap, the keys
+  const c = new Canvas(W, H);
+  c.box(1, 0, w, H, M.quiet, null);
   c.pixels(4, 2, MINI, MPAL);
   c.text(17, 2, [[a + ' ', { a: BOLD }], [b, { fg: col, a: BOLD }]]);
   c.text(17 + width(a) + 1, 3, '∿'.repeat(width(b)), { fg: col });
@@ -210,8 +226,15 @@ export function card(run, ms, io) {
   }
   const s = run.stats;
   c.text(4, 7, [[`${G.length} aboard`, { a: BOLD }], [`  ·  ${held} held  ·  ${open.length - held} to glance  ·  ${run.model ? `${s.judged} judged by ${run.model.split(':')[0]}` : 'rules only'}${ms ? `  ·  ${dur(ms)}` : ''}`, { fg: M.quiet }]], {}, w - 6);
+  c.text(4, 9, [['What it read', { a: BOLD }], ['   read, never run; nothing else on this computer is touched', { fg: M.quiet, a: DIM }]], {}, w - 6);
+  rows.forEach(([label, parts], r) => c.text(4, 10 + r, [['▸ ', { fg: M.sea2 }], [label.padEnd(14), { fg: M.quiet }], ...parts], {}, w - 6));
+  if (note.length) {
+    const ny = base + 1;
+    c.text(4, ny, [['! ', { fg: M.glance, a: BOLD }], ['No project here.', { fg: M.glance, a: BOLD }]]);
+    note.forEach((l, r) => c.text(6, ny + 1 + r, [[l, { fg: M.quiet }]], {}, w - 8));
+  }
   const k = (key, t) => [[` ${key} `, { fg: '#0B1820', bg: M.foam, a: BOLD }], [` ${t}     `, { fg: M.quiet }]];
-  c.text(4, 9, [...k('↵', 'review here'), ...k('o', 'morning report in the browser'), ...k('q', 'done')]);
+  c.text(4, ky, [...k('↵', 'review here'), ...k('o', 'morning report in the browser'), ...k('q', 'done')]);
   out.write(c.lines(depth).join('\n') + '\n');
 }
 

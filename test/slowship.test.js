@@ -212,6 +212,24 @@ test('the terminal review: every frame fills the screen exactly, at any size, wh
   }
 });
 
+test('the verdict card says what it read and from where, and plainly when the folder has no project', async () => {
+  const { card } = await import('../src/tui.js');
+  const { homedir } = await import('node:os');
+  const show = run => { let s = ''; card(run, 1000, { depth: 0, W: 100, out: { write: t => { s += t; } } }); return s; };
+  const skill = { key: 'skill:a', name: 'a', kind: 'skill', fp: 'a', level: 'info', findings: [], facts: [], coverage: {} };
+  const bare = show({ stats: { judged: 0 }, options: { project: homedir(), packages: true, agents: true }, items: [skill],
+    warnings: ['no package-lock.json and no node_modules: nothing to check'], unread: [{ key: 'mcp:gw', why: 'gw.exe is a compiled program: …' }] });
+  assert.match(bare, /No project here\./);
+  assert.match(bare, /your home folder \(~\) has no package-lock\.json\s/);
+  assert.match(bare, /Your home folder \(~\) has no package-lock\.json, so there were no packages/);
+  assert.match(bare, /1 unreadable: gw \(compiled\)/);
+  const proj = show({ stats: { judged: 0 }, options: { project: '/work/app', packages: true, agents: true }, warnings: [], unread: [],
+    items: [{ ...skill, key: 'npm:x@1', name: 'x', kind: 'npm', fp: 'x' }, skill] });
+  assert.match(proj, /Packages\s+1\s+from \/work\/app, its package-lock\.json/);
+  assert.doesNotMatch(proj, /No project here/);
+  for (const out of [bare, proj]) for (const l of out.split('\n').filter(Boolean)) assert.ok(l.length <= 100, `fits: ${l}`);
+});
+
 test('unpacking a tarball never writes outside the quarantine folder', async () => {
   const { untar } = await import('../src/agents.js');
   const { gzipSync } = await import('node:zlib');
