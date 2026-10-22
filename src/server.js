@@ -13,7 +13,7 @@ import * as ping from './notify.js';
 
 const UI = join(import.meta.dirname, 'ui');
 const LAST = join(HOME, 'last-run.json'), SETTINGS = join(HOME, 'settings.json');
-const FONTS = new Set(['Besley.ttf', 'AtkinsonHyperlegibleNext.ttf', 'AtkinsonHyperlegibleMono.ttf']);
+const FONTS = new Set(['Fraunces.woff2', 'MartianMono.woff2', 'AtkinsonHyperlegibleNext.ttf', 'AtkinsonHyperlegibleMono.ttf']);
 
 /** A folder the page asked to watch: an absolute path to a real directory on this machine, or null. */
 export function folder(path) {
@@ -92,7 +92,7 @@ export function serve(port = Number(process.env.SLOWSHIP_PORT || 7798)) {
     if (req.method === 'GET') {
       if (url.pathname === '/') return send(res, 200, readFileSync(join(UI, 'index.html')), 'text/html; charset=utf-8');
       if (url.pathname.startsWith('/fonts/') && FONTS.has(url.pathname.slice(7)))
-        return send(res, 200, readFileSync(join(UI, 'fonts', url.pathname.slice(7))), 'font/ttf');
+        return send(res, 200, readFileSync(join(UI, 'fonts', url.pathname.slice(7))), url.pathname.endsWith('.woff2') ? 'font/woff2' : 'font/ttf');
       if (url.pathname === '/api/run') { const r = lastRun(); return send(res, 200, r ? relevel(r) : { empty: true }); }
       if (url.pathname === '/api/code') {
         const item = lastRun()?.items.find(i => i.key === url.searchParams.get('key'));

@@ -108,7 +108,7 @@ It talks over stdin and stdout, with no network port. The only download is the p
 - **Who can spend your money.** A ledger of every key to an outside account that your agent's skills and MCP servers read in their code, name in their instructions, or are handed in an editor's MCP config, by account (OpenAI, GitHub, ElevenLabs…), with the tools that hold each one. Agents with paid keys can run up a bill on their own. Only key names are read, never their values.
 - **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run: the ship docks, a gantry scans each thing aboard, and every step from fingerprint to verdict lights up as it happens.
 
-Colours come from nautical charts: magenta marks what's held (no red anywhere), amber what's worth a glance, green what's cleared. Behind the report is a live sea chart of the watch: every open finding is a shoal on it, and it sinks once you clear it. Come near one to read its name, click it to open it. A `?` next to any part explains it, and a short tour runs on your first visit.
+Colours come from signal flags and shipping containers: hot magenta marks what's held (no red anywhere), signal yellow what's worth a glance, mint what's cleared, and cobalt is slowship itself, all on sailcloth with navy ink. Everything you can press has an ink outline and sits on a hard shadow, like a hull on its waterline, and the verdict sits on a navy sea that meets the page in a moving wave. Behind the report is a live sea chart of the watch: every open finding is a shoal on it, and it sinks once you clear it. Come near one to read its name, click it to open it. A `?` next to any part explains it, and a short tour runs on your first visit.
 
 ## Measured so far
 
@@ -209,7 +209,7 @@ There are 27 tests: held fixtures, prompt injection that can't lower a hold, par
 - [REA](https://github.com/morluto/rea) (MIT) maps the structure of Electron builds and reads compiled Go, Rust and .NET files and Electron fuses, all without running them.
 - [acorn](https://github.com/acornjs/acorn) (MIT) parses JavaScript.
 - [Ollama](https://ollama.com) and Google's Gemma 4 (under the Gemma terms) are the local model.
-- Fonts (SIL Open Font License): [Besley](https://github.com/indestructible-type/Besley) for the verdict, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else, drawn so that 0/O and 1/l/I can't be mistaken. They're bundled, so the report makes no outside requests.
+- Fonts (SIL Open Font License): [Fraunces](https://github.com/undercasetype/Fraunces) at its softest and heaviest for the verdict and headings, [Martian Mono](https://github.com/evilmartians/mono) for counts and labels, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else, drawn so that 0/O and 1/l/I can't be mistaken. They're bundled, so the report makes no outside requests.
 
 ## About this project
 
