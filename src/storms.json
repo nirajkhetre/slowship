@@ -1,0 +1,18 @@
+{
+ "about": "Storms in the runtimes themselves, which the package advisory databases don't cover. Add an entry when a big one breaks.",
+ "runtime": [
+  {
+   "id": "PHP2Shell",
+   "cves": ["CVE-2026-109618", "CVE-2026-109619"],
+   "published": "2026-10-21",
+   "runtime": "php",
+   "severity": "critical",
+   "says": "lets anyone run code on the server, with no login and no bug in your own code",
+   "from": "5.4",
+   "fixed": { "8.2": "8.2.35", "8.3": "8.3.36", "8.4": "8.4.27", "8.5": "8.5.12" },
+   "backports": "Debian, Ubuntu and Red Hat ship the fix without changing the version number: check the package changelog for CVE-2026-109618.",
+   "restart": "restart every PHP worker (PHP-FPM, Apache, queue workers) after updating",
+   "link": "https://en.wikipedia.org/wiki/PHP2Shell"
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "name": "storm-app",
+ "version": "1.0.0",
+ "private": true,
+ "description": "INERT TEST FIXTURE for Storm watch",
+ "dependencies": { "minimist": "1.2.5", "tiny-mailer": "1.0.0" }
+}

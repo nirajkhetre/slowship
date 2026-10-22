@@ -8,6 +8,7 @@ import { claimOf, npmPackages } from './inventory.js';
 import { findMcpServers, findSkills, keysFrom, resolveServer, serverBinaryFacts, skillFacts } from './agents.js';
 import { appFacts } from './app.js';
 import { fingerprint, load, newSince, save } from './state.js';
+import { applyStorm } from './storm.js';
 
 // Bump when what gets read changes, so results cached by an older slowship are read again (approvals stay: same bytes).
 const RULES = 6;
@@ -87,6 +88,7 @@ export async function scanProject(project, { packages = true, agents = true, fet
     }
   }
   const run = await checkItems(items, opts);
+  applyStorm(run, packages ? project : null);  // what it runs on, the advisories, the blast radius: fresh every time, never cached
   return { ...run, warnings, unread, project };
 }
 

@@ -51,6 +51,28 @@ To get the model: `ollama pull gemma4:e2b`. Choose another with `SLOWSHIP_MODEL`
 | **Compiled files** (with [REA](https://github.com/morluto/rea)) | Go and Rust programs and .NET assemblies, whether a compiled MCP server or a `.node`, `.exe` or `.dll` inside a package: what they were built from (modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes) and, for .NET, the native functions they declare (starting programs, raw network, keystroke hooks, writing into other programs, decrypting what Windows protects for the user) plus, method by method, the framework calls each method makes and the strings it loads. So a .NET method that decodes base64 and loads it as code, or names the browser's password file and posts, is held just like the same JavaScript function |
 | **Your build** (`--app`) | secrets that slipped in (redacted in every output), shipped `.env` files and source maps, Electron switches like `nodeIntegration` or `contextIsolation: false`, DevTools left on, and, if REA is installed, a map of every IPC handler: which page function (`window.api.x`) reaches it, whether it checks who sent the message, and what it does. A packaged Electron executable gets its fuses read: whether it still lets anyone run it as plain Node.js, inject code through `NODE_OPTIONS`, attach a debugger with `--inspect`, or change its code after signing |
 
+## Storm watch
+
+Some of the worst days aren't a bad package. They're a hole in what everything runs on, like PHP2Shell (CVE-2026-109618 and CVE-2026-109619, fixed on 21 October 2026), where any PHP site could be taken over with no bug in its own code. Storm watch answers three questions about your project on a day like that:
+
+- **Is it in this storm?** It finds what the project runs on: Dockerfile `FROM` lines, `.nvmrc`, `.tool-versions`, `engines`, `composer.json`, `go.mod`, the Gemfile, CI versions and more. Each is checked against the runtime storms slowship knows about and against the date that runtime's fixes stop (from [endoflife.date](https://endoflife.date)). A floating tag like `php:8.3-fpm` is flagged as "check your build", because it only gets the fix when you pull and rebuild.
+- **Is anything aboard already named in an advisory?** Every package in your lockfile is matched against the public advisories in [OSV](https://osv.dev), malware reports included.
+- **What would a takeover get?** Each finding says which keys that part of the project can read, so you know what to rotate first.
+
+Every finding comes with the fix: the exact version to move to, plus what people forget, like rebuilding the image and restarting every PHP worker. Distros that ship a fix without changing the version number are named, so you know to check the package changelog.
+
+The advisories are downloaded whole (`slowship storm --sync`, once) and matched on this computer, so the list of what your project uses never leaves it. After that, only what changed is fetched, at most once every 20 hours. Measured on 22 October 2026:
+
+| | |
+|---|---|
+| npm advisories on this computer | 229,935 (a 35.8 MB index) |
+| First download | 219 MB in 80 s, then only the index is kept |
+| Next sync, nothing new | 4.8 s |
+| Loading the index and matching a project | 0.7 s |
+| REA's 174 dependencies | 0 in a storm |
+
+Runtime storms are a short file in the repository (`src/storms.json`) that gets a new entry when a big one breaks.
+
 ## How it works
 
 A funnel that goes from cheap to expensive, so a night's work stays small:
@@ -88,10 +110,11 @@ It sends after each nightly watch. You can make it send only when something need
 
 ## For your coding agent (optional)
 
-Your coding agent installs packages, skills and MCP servers for you now, usually without reading them. slowship can be what it asks first. `slowship connect` prints the exact line to add slowship to your agent as a local MCP server (`slowship mcp`), with your agent's own command or in any editor's MCP settings. It also puts a short skill where your agents keep theirs, saying when to ask and what a hold means. The agent gets two tools:
+Your coding agent installs packages, skills and MCP servers for you now, usually without reading them. slowship can be what it asks first. `slowship connect` prints the exact line to add slowship to your agent as a local MCP server (`slowship mcp`), with your agent's own command or in any editor's MCP settings. It also puts a short skill where your agents keep theirs, saying when to ask and what a hold means. The agent gets three tools:
 
 - **check**, before something comes aboard. Give it an npm package, and slowship installs it into a quarantine folder with every script off and reads it with its whole dependency tree: exactly what `npm install` would bring. Or give it a downloaded skill, plugin or MCP server folder.
 - **watch**, before shipping. It's the same watch as `slowship`, read from memory when nothing has changed (2.4 s on the project measured below). The run lands in `slowship review` and `slowship ui`, for you.
+- **storm**, on a day like PHP2Shell. It runs Storm watch and gives back each finding with its fix, so the agent can make the change and you only have to look.
 
 There is no tool to clear anything, on purpose. The agent is reading text a package wrote, and that text can be written to talk it into things. It's the same reason the model can't lower a hold: clearing stays with you. Answers use slowship's own words and the file and line to open, never the scanned code itself, and they say plainly that names and paths are data.
 
@@ -176,8 +199,8 @@ slowship reads code; it never runs it. So:
 - **No shell anywhere.** Programs are started with `execFile` and fixed arguments. Package names are validated before `npm pack`, and tarballs are unpacked by our own reader, which refuses paths that try to leave the quarantine folder.
 - **The report server answers only this machine.** It checks the `Host` header (no DNS rebinding) and the `Origin`, takes JSON only, and caps request bodies.
 - **Code context is safe to serve.** The code shown around a finding is read only from inside that item's own folder, and secrets are cut down before they reach the page.
-- **Your agent can look, never clear.** Its two tools read and report; clearing is only in `slowship review` and `slowship ui`.
-- **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read (`--offline` turns that off), a package your agent asks slowship to check, and the morning ping if you connect one: it talks only to `discord.com` and `api.telegram.org`, with the summary described above.
+- **Your agent can look, never clear.** Its three tools read and report; clearing is only in `slowship review` and `slowship ui`.
+- **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read (`--offline` turns that off), a package your agent asks slowship to check, the public advisory files from `osv-vulnerabilities.storage.googleapis.com` (downloaded whole, so nothing about your project is sent), and the morning ping if you connect one: it talks only to `discord.com` and `api.telegram.org`, with the summary described above.
 - **Key names, never values.** The "who can spend your money" ledger keeps only the names of keys an MCP config hands a server (`env` and auth headers); their values are never read into the report.
 
 ## Command reference
@@ -185,6 +208,7 @@ slowship reads code; it never runs it. So:
 ```text
 slowship [dir] [--no-model] [--packages-only | --agents-only] [--offline] [--app build/] [--json out.json] [--approve <name|notable|review>] [--plain] [--no-motion] [--notify]
 slowship review
+slowship storm [dir] [--sync]
 slowship discord | telegram
 slowship notify [test | off [discord|telegram|all] | when needs|always | manual on|off]
 slowship connect
@@ -193,7 +217,7 @@ slowship ui [--port 7798] [--no-open]
 slowship schedule [dir] [--at 03:00] [same flags] | --status | --off
 ```
 
-The exit code is `2` when the verdict is "held", so it can gate CI. The nightly task always exits cleanly; the verdict waits in the report.
+The exit code is `2` when the verdict is "held", so it can gate CI. For `slowship storm` it's `2` when a storm or a known-malicious package is held. The nightly task always exits cleanly; the verdict waits in the report.
 
 ## Development
 
@@ -206,12 +230,13 @@ node site/build.mjs              # build the site into site/dist: the landing pa
 
 The website lives in `site/web`: the landing page (`index.html`), one file per docs page (`docs/`), and the pictures `shots.mjs` makes. The live demo at `demo/` is the real report page answered from the recording, so nothing in it touches a visitor's computer.
 
-There are 27 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token, and the MCP server for your agent, which has no tool to clear anything, repeats only slowship's own words, and passes its own skill. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+There are 28 tests: held fixtures, prompt injection that can't lower a hold, parser traps, path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token, and the MCP server for your agent, which has no tool to clear anything, repeats only slowship's own words, and passes its own skill, and Storm watch, which must find what a project runs on, tell a PHP2Shell branch that's fixed from one that isn't, and match advisories without the network. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 ## Credits
 
 - [REA](https://github.com/morluto/rea) (MIT) maps the structure of Electron builds and reads compiled Go, Rust and .NET files and Electron fuses, all without running them.
 - [acorn](https://github.com/acornjs/acorn) (MIT) parses JavaScript.
+- [OSV](https://osv.dev) gathers the public advisories Storm watch matches against, and [endoflife.date](https://endoflife.date) says when each runtime's fixes stop.
 - [Ollama](https://ollama.com) and Google's Gemma 4 (under the Gemma terms) are the local model.
 - Fonts (SIL Open Font License): [Eczar](https://github.com/rosettatype/eczar) for the verdict, printed a little off register like a riso poster, [Fraunces](https://github.com/undercasetype/Fraunces) at its softest and heaviest for headings and big numbers, [Martian Mono](https://github.com/evilmartians/mono) for counts and labels, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else, drawn so that 0/O and 1/l/I can't be mistaken. They're bundled, so the report makes no outside requests.
 

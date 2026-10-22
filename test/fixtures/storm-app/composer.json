@@ -1,0 +1,5 @@
+{
+ "name": "fixture/storm-app",
+ "description": "INERT TEST FIXTURE",
+ "require": { "php": "^8.1" }
+}

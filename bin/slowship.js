@@ -20,15 +20,23 @@ const noModel = flag('--no-model'), json = opt('--json'), approveWhat = opt('--a
 const onlyPackages = flag('--packages-only'), onlyAgents = flag('--agents-only'), offline = flag('--offline');
 const app = opt('--app'), at = opt('--at'), off = flag('--off'), status = flag('--status');
 const plain = flag('--plain'); flag('--no-motion');  // read by term.caps()
-const asksHelp = flag('--help') || flag('-h'), forcePing = flag('--notify');
-const COMMANDS = ['scan', 'ui', 'schedule', 'review', 'help', 'discord', 'telegram', 'notify', 'mcp', 'connect'];
+const asksHelp = flag('--help') || flag('-h'), forcePing = flag('--notify'), sync = flag('--sync');
+const COMMANDS = ['scan', 'ui', 'schedule', 'review', 'help', 'discord', 'telegram', 'notify', 'mcp', 'connect', 'storm'];
 const [cmd = 'scan', target = '.'] = COMMANDS.includes(args[0]) ? args : ['scan', ...args];
 const options = { project: resolve(target), model: !noModel, packages: !onlyAgents, agents: !onlyPackages, fetch: !offline, app: app && resolve(app) };
 // drawn only where a person is watching: a real terminal both ways, colour allowed, and not asked for plain text
 const drawn = !plain && process.stdout.isTTY && process.stdin.isTTY && !process.env.NO_COLOR;
 const tilde = p => p.toLowerCase().startsWith(homedir().toLowerCase()) ? '~' + p.slice(homedir().length) : p;
 
-if (cmd === 'mcp') {  // for your coding agent: a local MCP server on stdin and stdout
+if (cmd === 'storm') {  // Storm watch: is this project in a known storm, what a takeover would get, and the fix
+  const st = await import('../src/storm.js');
+  if (sync) console.log('  Fetching the public advisories (OSV). Your inventory stays here: they are matched on this computer.');
+  if (sync || !offline) await refresh(sync);
+  const run = await scanProject(options.project, { ...options, model: false });
+  finish(run);
+  console.log(st.stormText(run));
+  process.exitCode = run.items.some(i => !i.approved && i.level === 'hold' && i.findings.some(f => f.kind === 'storm' || f.kind === 'malicious')) ? 2 : 0;
+} else if (cmd === 'mcp') {  // for your coding agent: a local MCP server on stdin and stdout
   (await import('../src/mcp.js')).serveMcp();
 } else if (cmd === 'connect') {  // how to plug that server into your agent, and its skill
   console.log((await import('../src/mcp.js')).connect());
@@ -73,6 +81,7 @@ turn it off with: slowship schedule --off`); }
 slowship review             reviews the last watch in the terminal
 slowship discord | telegram   sends the verdict after each nightly watch (optional: only the summary, never code, paths or keys)
 slowship notify [test | off [discord|telegram|all] | when needs|always | manual on|off]
+slowship storm [dir] [--sync]   Storm watch: what it runs on, known advisories matched here, what a takeover gets, the fix
 slowship connect           lets your coding agent ask slowship before it installs anything (a local MCP server, slowship mcp)
 slowship ui [--port 7798]   opens the morning report for the last run
 slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itself (--off to stop, --status to check)`);
@@ -88,6 +97,7 @@ slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itse
     await interactive(run, run.options ?? options);
   }
 } else if (!drawn) {  // plain text: piped, in CI, overnight, or asked for
+  if (!offline) await refresh();
   let n = 0;
   const run = await scanProject(options.project, {
     ...options,
@@ -108,12 +118,22 @@ slowship schedule [dir] [--at 03:00] [same flags]   reads it every night by itse
 }
 
 async function ping(run, manual) { return (await import('../src/notify.js')).after(run, { manual }); }
+/** Advisories: the first download only when asked (--sync); after that, what changed, at most once a day. Never fatal. */
+async function refresh(force = false) {
+  const st = await import('../src/storm.js'), m = st.advisoryStatus('npm');
+  if (!force && (!m || Date.now() - Date.parse(m.synced) < 20 * 3600e3)) return;
+  try {
+    const r = await st.syncAdvisories('npm', { log: t => process.stderr.write(`  ${t}\n`) });
+    console.log(`  advisories: ${r.count.toLocaleString('en')} for npm on this computer${r.changed != null ? `, ${r.changed} changed since last time` : ''}`);
+  } catch (e) { console.log(`  couldn't update the advisories (${e.message}); using the copy here`); }
+}
 function finish(run) {
   if (json) writeFileSync(json, JSON.stringify(run, null, 1));
   saveRun(run, options);
   if (approveWhat) console.log(`approved ${approve(run, approveWhat)} item(s); they won't ask again until their code changes.`);
 }
 async function watchOnce(tui) {
+  if (!offline) await refresh();
   const t0 = Date.now(), run = await tui.watch(scanProject, options.project, options);
   run.options = { ...options };  // the card says what was read, and from where
   finish(run);

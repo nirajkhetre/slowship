@@ -905,7 +905,7 @@ body>footer::before{content:"";position:absolute;left:0;right:0;top:-25px;height
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 26'%3E%3Cpath d='M0 26V14C20 14 20 4 40 4s20 10 40 10 20-10 40-10 20 10 40 10v12z'/%3E%3C/svg%3E") repeat-x 0 100%/160px 26px;animation:shore 9s linear infinite reverse}
 body>footer .wrap{display:flex;gap:24px;flex-wrap:wrap;justify-content:space-between;align-items:center}
 body>footer b{font:900 24px var(--display);letter-spacing:-.02em}
-body>footer p{color:var(--ink2);font:600 11.5px var(--data)}
+body>footer p{color:var(--ink2);font:600 11.5px var(--data);overflow-wrap:anywhere}
 
 /* ---------- the project menu ---------- */
 .menu{position:absolute;left:0;top:calc(100% + 8px);z-index:70;width:min(360px,calc(100vw - 32px));padding:8px;border-radius:14px;background:var(--sheet);border:1px solid var(--rule);box-shadow:var(--float);
@@ -1634,6 +1634,47 @@ body.empty .holds,body.empty .clearance{display:none}
   .sheet .panel,.dpanel{top:auto;left:0;right:0;bottom:0;width:100%;max-height:92vh;border-radius:18px 18px 0 0;transform:translateY(100%)}
   .tab{padding:0 11px;font-size:14.5px}
 }
+/* ---------- storm watch: the advisories here, what's caught in a storm, what each project runs on ---------- */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:28px}
+.scard{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border:2px solid var(--line);border-radius:18px;background:var(--sheet);box-shadow:var(--lift)}
+.scard.off{background:color-mix(in oklab,var(--glance) 14%,var(--sheet))}
+.scard b{display:block;font-weight:800;font-size:16px}
+.scard small{display:block;margin-top:4px;color:var(--ink2);font-size:13.5px;line-height:1.5}
+.sci{flex:none;display:grid;place-items:center;width:40px;height:40px;border:2px solid var(--line);border-radius:12px;background:var(--shoal)}
+.scmd{display:inline-block;margin-top:10px;padding:6px 10px;border:2px solid var(--line);border-radius:9px;background:var(--ink);color:var(--paper);font:700 12.5px var(--data)}
+.sh{display:flex;align-items:center;gap:10px;margin:8px 0 14px;font:800 22px var(--display);letter-spacing:-.015em}
+.sh b{font:700 11px/1 var(--data);padding:5px 8px;border-radius:7px;background:var(--shoal);color:var(--ink2)}
+.stormrows,.lrows{list-style:none;padding:0;display:grid;gap:12px;margin-bottom:30px}
+.stormrow{--sc:var(--glance);position:relative;padding:14px 18px 14px 26px;border:2px solid var(--line);border-radius:16px;background:var(--sheet);box-shadow:var(--lift);animation:rise .5s var(--out) both;animation-delay:calc(var(--i) * 60ms)}
+.stormrow.hold{--sc:var(--hold)}
+.stormrow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:12px;border-right:2px solid var(--line);border-radius:14px 0 0 14px;background:var(--sc)}
+.srbtn{display:flex;align-items:center;gap:12px;width:100%;padding:0;border:0;background:none;text-align:left;color:inherit}
+.srk{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--shoal)}
+.srt{flex:1;min-width:0;display:grid}
+.srt b{font-weight:800;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srt b .ver{margin-left:8px;font:600 12px var(--data);color:var(--ink3)}
+.srt small{font:600 11.5px var(--data);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srs{margin:10px 0 0;font-size:15px;line-height:1.5}
+.srb{display:flex;gap:8px;margin-top:8px;font-size:13.5px;color:var(--ink2)}
+.srb svg.i,.fixc svg.i{flex:none;width:16px;height:16px;margin-top:2px}
+.fixc{display:flex;gap:8px;margin-top:8px;padding:8px 12px;border:1.5px solid color-mix(in oklab,var(--clear) 55%,var(--line));border-radius:10px;background:color-mix(in oklab,var(--clear) 10%,var(--sheet));font-size:14px;line-height:1.45}
+.fixc b{margin-right:4px;color:var(--clear-ink)}
+.blast{margin-top:14px;padding:14px 16px;border:2px solid var(--line);border-radius:14px;background:color-mix(in oklab,var(--hold) 7%,var(--sheet))}
+.blast p{margin-top:6px;font-size:15px}
+.sempty{display:flex;gap:10px;align-items:center;margin-bottom:30px;color:var(--ink2)}
+.sempty svg.i{color:var(--clear-ink)}
+.lrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border:2px solid var(--line);border-radius:14px;background:var(--sheet)}
+.lrk{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--shoal)}
+.lrt{flex:1;min-width:220px;display:grid}
+.lrt b{font-weight:800}
+.lrt small{color:var(--ink3);font-size:13px}
+.lrt code{font:600 11.5px var(--data)}
+.lchips{display:flex;gap:6px;flex-wrap:wrap}
+.lchip{padding:4px 9px;border:1.5px solid var(--line);border-radius:7px;font:700 11px var(--data);background:var(--sheet)}
+.lchip.hold{background:var(--hold);color:var(--on)}.lchip.glance{background:var(--glance);color:var(--on)}.lchip.ok{background:var(--clear);color:var(--on)}.lchip.note{background:var(--shoal);color:var(--ink2)}
+.tab[aria-selected=true] .bolt{animation:bolt 2.4s ease-in-out infinite}
+@keyframes bolt{0%,80%,100%{opacity:1}85%{opacity:.2}90%{opacity:1}93%{opacity:.4}}
+
 /* ---------- the finish: every plate you read has an ink outline and sits on a hard shadow ---------- */
 .inspector,.purse,.pmap,.claimrow,.stepbox,.projcard,.ptile,.rcard,.wpanel{border:2px solid var(--line);box-shadow:var(--lift)}
 .menu,#pop,.peek,.dpanel{border:2px solid var(--line);box-shadow:var(--lift-lg),var(--float)}
@@ -1692,6 +1733,7 @@ body.empty .holds,body.empty .clearance{display:none}
 <nav class="tabs" id="tabs" aria-label="Sections"><div class="wrap tabsin" role="tablist" id="tablist">
   <span class="thover" id="thover"></span><span class="tthumb" id="tthumb"></span>
   <button class="tab" role="tab" data-tab="review" id="t-review" aria-controls="p-review"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="9" width="12" height="9" rx="1.5"/><path d="M5.5 9v9M8.5 9v9M11.5 9v9"/><g class="lens"><circle cx="17" cy="8" r="3.6"/><path d="M19.6 10.6L22 13"/></g></svg>Review <b id="tc-review">0</b></button>
+  <button class="tab" role="tab" data-tab="storm" id="t-storm" aria-controls="p-storm"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 16a4.5 4.5 0 1 1 1.3-8.8A5.6 5.6 0 0 1 18.8 9.6 3.6 3.6 0 0 1 17.5 16.5"/><path class="bolt" d="M12.8 12.5l-2.4 4h3l-2.3 4.2"/></svg>Storms <b id="tc-storm">…</b></button>
   <button class="tab" role="tab" data-tab="aboard" id="t-aboard" aria-controls="p-aboard"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="13" width="9" height="6.5" rx="1"/><rect x="12.5" y="13" width="9" height="6.5" rx="1"/><rect class="top" x="7.5" y="5.5" width="9" height="6.5" rx="1"/></svg>Everything aboard <b id="tc-aboard">0</b></button>
   <button class="tab" role="tab" data-tab="blind" id="t-blind" aria-controls="p-blind"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.3"/><path class="sweep" d="M12 12L18 6"/></svg>Blind spots <b id="tc-blind">…</b></button>
   <button class="tab" role="tab" data-tab="how" id="t-how" aria-controls="p-how"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path class="needle" d="M12 5.5l2.2 6.5-2.2 6.5-2.2-6.5z"/></svg>How it works</button>
@@ -1702,6 +1744,7 @@ body.empty .holds,body.empty .clearance{display:none}
     <div class="ph"><div><h2>Before you ship</h2><p class="lede" id="needlede"></p><p class="keys"><kbd>J</kbd><kbd>K</kbd> move <kbd>A</kbd> clear <kbd>/</kbd> search <kbd>,</kbd> settings</p></div><div class="qprog" id="qprog"></div></div>
     <div class="review" id="review"><div class="qwrap"><div class="queue" id="queue" aria-label="To review"></div><div class="qrail" id="qrail" aria-hidden="true"></div></div><div class="inspector" id="insp" aria-live="polite"></div></div>
   </section>
+  <section class="panel" id="p-storm" role="tabpanel" aria-labelledby="t-storm" hidden></section>
   <section class="panel" id="p-aboard" role="tabpanel" aria-labelledby="t-aboard" hidden>
     <div class="ph"><div><h2>Everything aboard</h2><p class="lede" id="manlede"></p></div></div>
     <section class="purse" id="purse" aria-label="Who can spend your money"></section>
@@ -1753,7 +1796,7 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const S = { run: null, watch: null, filter: 'all', cap: null, q: '', shown: 60, v: null, undo: null, settings: null, sel: null, tab: 'review', drawn: false, prev: new Map() };
-const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build' };
+const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime' };
 const ORDER = { hold: 3, review: 2, notable: 1, info: 0 };
 
 // line icons drawn for slowship
@@ -1798,6 +1841,7 @@ const KICON = {
   skill: svg('<path d="M7 4h10a2 2 0 0 1 2 2v11a3 3 0 0 1-3 3H8"/><path d="M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 4 0v-1h8M9.5 8.5h6M9.5 11.5h6"/>'),
   mcp: svg('<path d="M9 3.5v4.5M15 3.5v4.5M6.5 8h11v3a5.5 5.5 0 0 1-11 0z"/><path d="M12 16.5v4"/>'),
   app: svg('<rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M3 8h18M9 21h6M12 17v4"/><circle cx="12" cy="12.5" r="2"/>'),
+  runtime: svg('<rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7 14V9h10v5M9.5 9V5.5h5V9"/><path d="M7.5 17h.01M11 17h5.5"/>'),
 };
 // what a thing can touch, grouped the way a person thinks about it
 const TOUCH = [
@@ -1834,6 +1878,10 @@ const WHY = {
   'swapped-dep': 'The build record says this dependency was replaced or came from outside the public registry. Sometimes that’s a quick fix; it’s also how a tampered build hides.',
   'dirty-build': 'Built from changes that were never committed, so no published source matches it exactly.',
   'fuse-node': 'Fuses are switches baked into the Electron executable when it’s packaged, and Electron ships them open. With these on, anything that can start your app can run code under its name and signature. Turn them off with @electron/fuses when you package.',
+  storm: 'A public advisory names this version, or the branch it can land on. Advisories are downloaded whole and matched on this computer, so nothing about your project leaves it. Clearing it means you accept the risk until the version changes.',
+  malicious: 'This exact package is in the public list of known malicious packages. Remove it first, then check what it could reach while it was installed.',
+  eol: 'Once a runtime’s fixes stop, the next PHP2Shell never gets patched for it. Plan the move before a storm makes it urgent.',
+  floating: 'A floating tag like node:20 moves when you pull it. Your running image keeps what it had when it was built, so a fix reaches you only when you rebuild.',
   'fuse-asar': 'Without asar integrity checks (or with code allowed outside app.asar), someone who can write to the install folder can change your app’s code and it still runs as your signed app.',
 };
 const whyOf = f => WHY[f.kind] ?? (f.matches_claim === 'no'
@@ -2198,7 +2246,7 @@ document.addEventListener('click', e => { if (MENU.classList.contains('on') && !
 // ---------- tabs: four places along one coast, left to right. Switching pans the camera along it: what you leave
 // slips away behind you, the sea chart underneath glides at its own depth, and the new place arrives from the side you
 // headed, its heading first and each part a beat after. A second click mid-way settles the first switch at once ----------
-const TABS = ['review', 'aboard', 'blind', 'how'];
+const TABS = ['review', 'storm', 'aboard', 'blind', 'how'];
 // the pill moves like a drop of ink: it stretches to reach the new tab, then lets go of the old one
 function thumbTo() {
   const on = $(`.tab[data-tab="${S.tab}"]`), th = $('#tthumb'); if (!on) return;
@@ -2261,6 +2309,7 @@ function tabCounts() {
   const open = G.filter(i => !i.approved && needs(i)).length;
   tween($('#tc-review'), open); $('#tc-review').classList.toggle('hot', open > 0);
   tween($('#tc-aboard'), G.length);
+  const sn = stormy().length; tween($('#tc-storm'), sn); $('#tc-storm').classList.toggle('hot', sn > 0);
   const c = coverage(); $('#tc-blind').textContent = `${(c.pct * 100).toFixed(c.pct < 1 && c.pct > .999 ? 2 : 1)}%`;
   requestAnimationFrame(thumbTo);
 }
@@ -2345,6 +2394,7 @@ function findingHTML(i, f, k) {
     <div class="fitags"><span class="tag ${sev}">${{ hold: 'Held', glance: 'Worth a glance', note: 'Noted' }[sev]}</span>${f.matches_claim === 'no' ? '<span class="tag no">Not what it says it does</span>' : ''}</div>
     ${ev.slice(0, 2).map(e => editor(i, e, sev, sayHTML(f))).join('')}
     ${said ? `<div class="second"><span class="who">${IC.model}<b>${modelName()}</b>on this laptop<span class="vw ${said.label}">${WORDS[said.label] ?? ''}</span></span><p>${words(said.why)}</p></div>` : ''}
+    ${f.fix ? `<p class="fixc">${IC.check}<span><b>Fix</b> ${esc(f.fix)}</span></p>` : ''}
     ${needs(f) ? `<p class="whyc">${IC.info}<span>${esc(whyOf(f))}</span></p>` : ''}</li>`;
 }
 // a description, read the way a person would: the one-liner, its keywords, then a little of the README without the markdown
@@ -2369,7 +2419,8 @@ function detailHTML(i) {
   const fs = [...i.findings.filter(needs), ...i.findings.filter(f => !needs(f))].slice(0, 6);
   const mc = i.findings.map(f => f.matches_claim).filter(x => x && x !== 'unknown');
   const rel = mc.includes('no') ? 'no' : mc.length && mc.every(x => x === 'yes') ? 'yes' : 'unknown';
-  const says = i.kind === 'app' ? '<span class="muted">Your own code. Here slowship looks for what you didn’t mean to ship: keys, debug switches, source maps, open doors in Electron.</span>'
+  const says = i.kind === 'runtime' ? '<span class="muted">What this project runs on. Storm watch checks it against known storms and the date its fixes stop.</span>'
+    : i.kind === 'app' ? '<span class="muted">Your own code. Here slowship looks for what you didn’t mean to ship: keys, debug switches, source maps, open doors in Electron.</span>'
     : i.claim ? claimHTML(i.claim) : '<span class="muted">No description, so there was nothing to compare its code against.</span>';
   return `<div class="dt" data-fp="${esc(i.fp)}">
     <header class="dth">
@@ -2378,9 +2429,10 @@ function detailHTML(i) {
       ${crumb(itemPath(i))}
       <div class="dta">${needs(i) ? (i.approved ? `<button class="btn" data-act="unclear">${IC.undo}Take back the clearance</button>` : `<button class="btn primary" data-act="clear">${IC.check}Clear it</button>`) : ''}<button class="btn" data-act="find">${IC.search}Find in the list</button></div>
     </header>
-    ${scannerHTML(i, rel)}
+    ${i.kind === 'runtime' ? '' : scannerHTML(i, rel)}
     <section class="says claimrow"><span class="sdl">What it says it does${rel !== 'unknown' ? `<span class="relw rel-${rel}" data-explain="relation-${rel}">${rel === 'no' ? '≠ not what its code does' : '= matches its code'}</span>` : ''}</span><blockquote${i.claim ? ' title="Tap to read more"' : ''}>${says}</blockquote></section>
     ${fs.length ? `<ol class="fl">${fs.map((f, k) => findingHTML(i, f, k)).join('')}</ol>` : `<div class="calm2">${IC.check}<span>${i.coverage?.compiled ? 'Nothing in its build record to look at.' : 'Read every file it ships: nothing to look at.'}</span></div>`}
+    ${i.blast ? `<section class="blast"><span class="sdl">${IC.warn}If it were taken over</span><p>${esc(i.blast.says)}.</p></section>` : ''}
     ${keysHTML(i)}${ipcHTML(i)}${builtHTML(i)}
     ${COVER(i)}
   </div>`;
@@ -3165,6 +3217,44 @@ function coverage() {
   const code = files - tests;  // test files are left out on purpose, so they don't count against coverage
   return { read, code, pct: code ? read / code : 1 };
 }
+// ---------- storm watch: are you in a known storm, what would a takeover get, what's the fix ----------
+const STORMY = new Set(['storm', 'malicious', 'eol', 'floating']);
+const stormy = () => G.filter(i => !i.approved && i.findings?.some(f => STORMY.has(f.kind) && needs(f)));
+const RTN = { node: 'Node.js', php: 'PHP', python: 'Python', ruby: 'Ruby', go: 'Go', java: 'Java', deno: 'Deno', bun: 'Bun', dotnet: '.NET' };
+function storms() {
+  const st = S.run?.storm ?? {}, adv = st.advisories?.npm, layer = st.layer ?? [], hit = stormy().sort((a, b) => LVN[b.level] - LVN[a.level] || (b.blast?.score ?? 0) - (a.blast?.score ?? 0));
+  const row = (i, k) => {
+    const f = i.findings.find(x => STORMY.has(x.kind) && needs(x)), s = stateOf(i), [name, ver] = splitName(i);
+    return `<li class="stormrow ${s}" style="--i:${k}"><button class="srbtn" data-sopen="${esc(i.fp)}" aria-label="Open ${esc(name)}">
+      <span class="srk">${KICON[i.kind]}</span><span class="srt"><b>${esc(name)}${ver ? `<span class="ver">${esc(ver)}</span>` : ''}</b><small>${esc(KIND[i.kind])}${i.kind === 'runtime' ? ` · ${esc(i.facts[0].file)}:${i.facts[0].line}` : ''}</small></span>
+      <span class="tag ${s}"><span class="pip ${s}"></span>${ST[s]}</span></button>
+      <p class="srs">${esc(cap1(f.says))}</p>
+      ${f.fix ? `<p class="fixc">${IC.check}<span><b>Fix</b> ${esc(f.fix)}</span></p>` : ''}
+      ${i.blast ? `<p class="srb">${IC.warn}<span>${esc(i.blast.says)}.</span></p>` : ''}</li>`;
+  };
+  const chip = (cls, t) => `<span class="lchip ${cls}">${t}</span>`;
+  const lrow = d => {
+    const e = d.eol, chips = [...(d.storms ?? []).map(h => chip(h.status === 'clear' ? 'ok' : h.status === 'in' ? 'hold' : 'glance', `${esc(h.id)}: ${{ in: 'in it', check: 'check your build', clear: 'fixed' }[h.status]}`)),
+      e ? chip(e.past ? (d.runs ? 'glance' : 'note') : e.soon ? 'note' : 'ok', e.past ? `No fixes since ${e.end ?? 'long ago'}` : e.end ? `Fixed until ${e.end}` : 'Fixed, no end set') : '',
+      d.floating ? chip('note', 'Floating tag') : ''].join('');
+    return `<li class="lrow"><span class="lrk">${KICON.runtime}</span><span class="lrt"><b>${esc(RTN[d.runtime] ?? d.runtime)} ${esc(d.version ?? '')}</b><small>${d.runs ? 'runs on' : d.how === 'CI' ? 'tested on' : 'allows'} · ${esc(d.image ?? d.how)} · <code>${esc(d.file)}:${d.line}</code></small></span><span class="lchips">${chips}</span></li>`;
+  };
+  $('#p-storm').innerHTML = `
+    <div class="ph"><div><h2>Storm watch</h2><p class="lede">When a big vulnerability breaks, the way PHP2Shell did on 21 October 2026: are you in it, what would a takeover get, and what’s the fix. Everything is matched on this computer.</p></div></div>
+    <div class="sgrid">
+      <div class="scard${adv ? '' : ' off'}"><span class="sci">${IC.drive}</span><div><b>${adv ? `${adv.count.toLocaleString('en')} public advisories, here` : 'Public advisories not downloaded yet'}</b>
+        <small>${adv ? `npm, from OSV, updated ${ago(Date.parse(adv.synced))}. ${adv.checked} packages checked against them on this computer; nothing about this project was sent anywhere.` : 'Download them once (about 220 MB for npm), then only what changed each night. They are matched here: your inventory never leaves.'}</small>
+        ${adv ? '' : '<code class="scmd">slowship storm --sync</code>'}</div></div>
+      <div class="scard"><span class="sci">${IC.warn}</span><div><b>${(st.storms ?? []).length} storm${(st.storms ?? []).length === 1 ? '' : 's'} in the runtimes on file</b>
+        <small>${(st.storms ?? []).map(x => `${esc(x.id)} (${esc(x.published)}, ${esc(RTN[x.runtime] ?? x.runtime)})`).join(', ') || 'none'}. End-of-life dates as of ${esc(st.snapshot ?? '?')}, from endoflife.date.</small></div></div>
+    </div>
+    <h3 class="sh">In a storm <b>${hit.length}</b></h3>
+    ${hit.length ? `<ol class="stormrows">${hit.map(row).join('')}</ol>` : `<p class="sempty">${IC.check}<span>Nothing aboard is in a known storm${adv ? `: ${adv.checked} packages matched against ${adv.count.toLocaleString('en')} advisories` : ''}.</span></p>`}
+    <h3 class="sh">What it runs on <b>${layer.length}</b></h3>
+    ${layer.length ? `<ul class="lrows">${layer.map(lrow).join('')}</ul>` : '<p class="sempty">No runtime named in this project: no Dockerfile, .nvmrc, engines, composer.json or CI versions to read.</p>'}`;
+}
+$('#p-storm').addEventListener('click', e => { const b = e.target.closest('[data-sopen]'); if (b) openItem(G.find(i => i.fp === b.dataset.sopen)); });
+
 function blind() {
   const r = S.run, notes = [];
   let big = 0, lines = 0, tests = 0, broken = 0;
@@ -3792,7 +3882,7 @@ function render() {
   const r = S.run, empty = !r || !!r.empty;
   document.body.classList.toggle('empty', empty && !S.watch);
   hero(); bar(); how(); chartShoals();
-  if (!empty) { holds(); review(); filters(); powers(); purse(); table(); blind(); tabCounts(); if (S.tab === 'blind') blindOpen(); }
+  if (!empty) { holds(); review(); storms(); filters(); powers(); purse(); table(); blind(); tabCounts(); if (S.tab === 'blind') blindOpen(); }
   else { $('#queue').innerHTML = ''; $('#insp').innerHTML = `<div class="calm">${miniFace('sleepy')}<div><b>No watch yet.</b><p>Choose a project and run the first watch. The review list appears here.</p></div></div>`; $('#review').classList.add('done'); $('#qprog').innerHTML = ''; $('#needlede').textContent = ''; }
   $('#footmeta').textContent = projOf();
   S.drawn = true;
@@ -4199,7 +4289,7 @@ const BOX = {  // front, top, side, ink: the container wears its verdict
   hold: ['#C2307F', '#D9549A', '#8C1A5A', '#FFFFFF'], glance: ['#EB9F2C', '#F4BC5E', '#B8751A', '#0F202C'], cleared: ['#0C8A5E', '#2BA779', '#086445', '#FFFFFF'],
   notable: ['#6B808C', '#8396A1', '#4E616C', '#FFFFFF'], quiet: ['#4B6270', '#61798A', '#364955', '#E4EDF0'],
 };
-const CODE = { npm: 'PKG', skill: 'SKILL', mcp: 'MCP', app: 'APP' };
+const CODE = { npm: 'PKG', skill: 'SKILL', mcp: 'MCP', app: 'APP', runtime: 'RUN' };
 const short = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
 function boxSVG(i, st) {
   const [f, t, sd, ink] = BOX[st], [name, ver] = splitName(i);
@@ -4312,7 +4402,7 @@ addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.key === '/') { e.preventDefault(); setTab('aboard'); toTabs(); setTimeout(() => $('#q').focus(), 60); }
   else if (e.key === ',') { e.preventDefault(); openSettings(); }
-  else if (/^[1-4]$/.test(e.key)) setTab(TABS[+e.key - 1]);
+  else if (/^[1-5]$/.test(e.key)) setTab(TABS[+e.key - 1]);
   else if ((e.key === 'j' || e.key === 'k') && S.tab === 'review') {
     const q = $$('#queue .qc:not(.gone)'); if (!q.length) return;
     const n = Math.max(0, Math.min(q.length - 1, q.findIndex(c => c.classList.contains('sel')) + (e.key === 'j' ? 1 : -1)));

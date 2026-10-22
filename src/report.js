@@ -17,7 +17,8 @@ export function terminal(run) {
   const s = run.stats, lines = [];
   lines.push('', color(VERDICT[run.level] ?? VERDICT.info), '');
   for (const i of open) {
-    const label = i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.kind === 'skill' ? `skill ${i.name}  ${C.dim(i.key.split('@').slice(1).join('@'))}` : i.kind === 'app' ? `your build ${i.name}` : `MCP server ${i.key.replace(/^mcp:/, '')}`;
+    const label = i.kind === 'npm' ? i.key.replace(/^npm:/, '') : i.kind === 'skill' ? `skill ${i.name}  ${C.dim(i.key.split('@').slice(1).join('@'))}` : i.kind === 'app' ? `your build ${i.name}`
+      : i.kind === 'runtime' ? `runs on ${i.name}` : `MCP server ${i.key.replace(/^mcp:/, '')}`;
     lines.push(`${i.level === 'hold' ? C.hold('hold  ') : C.review('review')} ${C.b(label)}`);
     if (i.diff?.added?.length) lines.push(C.dim(`       new since ${i.diff.version.replace(/^npm:/, '')} you approved: ${i.diff.added.join(', ')}`));
     for (const f of i.findings.filter(f => f.level === 'hold' || f.level === 'review').slice(0, 3)) {
@@ -28,12 +29,17 @@ export function terminal(run) {
       }
       const why = f.evidence.map(id => i.facts.find(x => x.id === id)?.why).find(Boolean);
       if (why) lines.push(C.dim(`         model: ${why.slice(0, 140)}`));
+      if (f.fix) lines.push(`         fix: ${f.fix}`);
     }
+    if (i.blast) lines.push(C.dim(`       ${i.blast.says}`));
   }
   const skipped = run.items.reduce((n, i) => n + i.coverage.skipped.length, 0);
   lines.push('', C.dim(`${s.total} checked · ${s.cached} unchanged since last run · ${s.judged} read by ${run.model ?? 'no model (rules only)'}`
     + (s.judged ? ` in ${(s.ms / 1000).toFixed(1)}s` : '') + ` · ${notable.length} notable, not listed`
     + (skipped ? ` · ${skipped} files too large to read` : '')));
+  const adv = run.storm?.advisories?.npm;
+  lines.push(C.dim(adv ? `storm watch: ${adv.checked} packages matched against ${adv.count.toLocaleString('en')} public advisories on this computer, ${adv.hits} in a storm`
+    : 'storm watch: public advisories not downloaded yet (slowship storm --sync, once); runtimes and end-of-life were still checked'));
   for (const u of run.unread ?? []) lines.push(C.dim(`not read: ${u.key}: ${u.why}`));
   for (const w of run.warnings ?? []) lines.push(C.dim(`note: ${w}`));
   lines.push(C.dim('Nothing found is not the same as nothing there: slowship reads code, it never runs it.'), '');

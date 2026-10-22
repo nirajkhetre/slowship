@@ -60,7 +60,7 @@ const WM = { night: wordmark('#F4F2EE', '#9CB0FF'), mid: wordmark('#5574FF', '#2
 
 // ---------- what the report knows about an item, in the same words ----------
 const ORDER = { info: 0, notable: 1, review: 2, hold: 3 };
-const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build' };
+const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime' };
 const ST = { hold: 'Held', glance: 'Worth a glance', cleared: 'Cleared by you', notable: 'Noted', quiet: 'Fine' };
 const stateOf = i => i.approved && ORDER[i.level] >= 2 ? 'cleared' : i.level === 'hold' ? 'hold' : i.level === 'review' ? 'glance' : i.level === 'notable' ? 'notable' : 'quiet';
 const PIP = { hold: '◆', glance: '●', cleared: '✓', notable: '○', quiet: '·' };
@@ -471,6 +471,7 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
     const mc = it.findings.map(f => f.matches_claim).filter(x => x && x !== 'unknown'), rel = mc.includes('no') ? 'no' : mc.length && mc.every(x => x === 'yes') ? 'yes' : '';
     push([['What it says it does', { fg: N.ink2, a: BOLD }], ...(rel ? [[rel === 'no' ? '   ≠ not what its code does' : '   = matches its code', { fg: rel === 'no' ? N.hold : N.clear, a: BOLD }]] : [])]);
     const claim = it.kind === 'app' ? 'Your own code. Here slowship looks for what you didn\'t mean to ship: keys, debug switches, source maps, open doors in Electron.'
+      : it.kind === 'runtime' ? 'What this project runs on. Storm watch checks it against known storms and the dates its fixes stop.'
       : (it.claim || 'No description, so there was nothing to compare its code against.').split('\n')[0];
     para(claim, { fg: N.ink, a: ITALIC }, 2);
     gap();
@@ -502,8 +503,10 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
         para(said.why, { fg: N.ink2, a: ITALIC }, 4);
       }
       if (WHY[f.kind] && ORDER[f.level] >= 2) para(WHY[f.kind], { fg: N.ink3 }, 2);
+      if (f.fix) para(`Fix: ${f.fix}`, { fg: N.clear }, 2);
       gap();
     }
+    if (it.blast) { para(it.blast.says, { fg: N.ink2 }, 2); gap(); }
     const ks = [...(it.keys || []).map(k => ({ how: 'code', ...k })), ...(it.given || []).map(k => ({ ...k, how: 'config' }))];
     if (ks.length) {
       push([['$ ', { fg: N.lamp, a: BOLD }], ['Can spend your money on', { fg: N.ink2, a: BOLD }]]);
