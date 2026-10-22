@@ -298,6 +298,10 @@ test('the nightly watch: quoted paths, a real time, and anything shell-like refu
   assert.ok(w.launcher.includes('"C:/Program Files/nodejs/node.exe" "C:/x/bin/slowship.js" "D:/my project" "--no-model" "--app" "D:/build" >> '), w.launcher);
   assert.match(w.task, /<StartBoundary>2026-01-01T03:00:00<\/StartBoundary>/);
   assert.match(w.task, /<StartWhenAvailable>true<\/StartWhenAvailable>/);
+  assert.match(w.task, /conhost\.exe<\/Command><Arguments>--headless cmd\.exe \/c &quot;D:[\\/]home[\\/]slowship-nightly\.cmd&quot;<\/Arguments>/, 'no window to close by accident');
+  const r = windowsTask('06:30', argv, 'D:/home', { SLOWSHIP_REA: 'D:/rea/scripts/rea.mjs' });
+  assert.ok(r.launcher.includes('set "SLOWSHIP_REA=D:/rea/scripts/rea.mjs"'), 'the nightly run knows where REA is');
+  assert.throws(() => windowsTask('06:30', argv, 'D:/home', { SLOWSHIP_REA: 'D:/x" & calc' }), /can't be scheduled safely/);
   assert.match(cronLine('23:15', ['/usr/bin/node', '/x/slowship.js', '/home/me/app'], '/home/me/.slowship'), /^15 23 \* \* \* SLOWSHIP_HOME='\/home\/me\/\.slowship' '\/usr\/bin\/node' /);
   assert.throws(() => windowsTask('3am', argv, 'D:/home'), /HH:MM/);
   assert.throws(() => windowsTask('03:00', [...argv, 'D:/a & calc'], 'D:/home'), /can't be scheduled safely/);
