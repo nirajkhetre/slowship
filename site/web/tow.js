@@ -111,12 +111,15 @@
   }
 
   // ---------- leaving ----------
-  // from lower down the page, it cuts to the top through the night first
-  async function dip() {
-    const d = document.createElement('div'); d.className = 'towdip'; document.body.append(d);
-    await frame(); d.classList.add('on'); await wait(280);
-    scrollTo({ top: 0, behavior: 'instant' }); dispatchEvent(new Event('scroll'));
-    await frame(); d.classList.remove('on'); await wait(300); d.remove();
+  // from lower down the page, it glides back up to the harbour first, quick in the middle and gentle at both ends
+  function glide() {
+    const from = scrollY, ms = Math.min(1300, 600 + from / 6), t0 = performance.now();
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - (2 - 2 * t) ** 3 / 2;
+    return new Promise(res => requestAnimationFrame(function step(now) {
+      const t = Math.min(1, (now - t0) / ms);
+      scrollTo({ top: from * (1 - ease(t)), behavior: 'instant' });
+      t < 1 ? requestAnimationFrame(step) : res();
+    }));
   }
   async function leave() {
     if (state !== 'docked') return;
@@ -124,7 +127,7 @@
     preload();
     document.querySelectorAll('dialog[open]').forEach(d => d.close());
     root.style.overflow = '';
-    if (scrollY > 40) await dip();
+    if (scrollY > 40) { await glide(); await frame(); await wait(220); }  // the hero settles in before the strings come
     stick.style.setProperty('--mx', 0); stick.style.setProperty('--my', 0);
     root.classList.add('towing');
     page.style.display = 'block';  // laid out now, off to the left, so the slide has nothing left to draw

@@ -237,5 +237,3 @@ html.towing .scene .far,html.towing #glints{opacity:0!important;transition:opaci
 html.towing #wake{opacity:.9}
 html.towing #wake path{stroke-dasharray:14 10;animation:wakeflow .5s linear infinite}
 @keyframes wakeflow{to{stroke-dashoffset:24}}
-.towdip{position:fixed;inset:0;z-index:70;background:#040B22;opacity:0;pointer-events:none;transition:opacity .28s}
-.towdip.on{opacity:1}
