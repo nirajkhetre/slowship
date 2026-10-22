@@ -12,7 +12,7 @@
 
 dialog.play{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:16px;border:0;background:transparent;display:none;place-items:center;overflow:auto;color:var(--ink)}
 dialog.play[open]{display:grid}
-dialog.play::backdrop{background:rgb(4 11 34 / .55);-webkit-backdrop-filter:blur(6px) saturate(1.2);backdrop-filter:blur(6px) saturate(1.2)}
+dialog.play::backdrop{animation:bdin .5s var(--out);background:rgb(4 11 34 / .55);-webkit-backdrop-filter:blur(6px) saturate(1.2);backdrop-filter:blur(6px) saturate(1.2)}
 dialog.play.closing::backdrop{opacity:0;transition:opacity .3s}
 .pwin{position:relative;display:flex;flex-direction:column;width:min(1080px,100%);max-height:calc(100svh - 32px);border-radius:26px;background:var(--paper);border:2px solid var(--line);
   box-shadow:0 8px 0 var(--line),0 40px 120px -30px rgb(1 4 13 / .6);overflow:hidden;transform-origin:0 0}
@@ -177,3 +177,4 @@ details.pdet .pcode{margin:0 12px 12px}
 .mon-cap{margin:16px 0 0;font-size:14.5px;color:#DCE3F7;text-align:center}
 .mon-cap a{color:#fff;font-weight:700}
 @media (max-width:640px){.mon-bezel{padding:8px 8px 24px;border-radius:18px}.mon-screen{height:min(calc(100svh - 210px),640px)}.mon-x{top:-10px;right:-6px}.mon-base{width:180px}}
+@keyframes bdin{from{opacity:0}}

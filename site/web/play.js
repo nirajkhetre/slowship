@@ -43,22 +43,27 @@
     opening = true; from = (tile.dataset.playFrom && $(tile.dataset.playFrom)) || tile; now = p;
     try {
       try { await load(); } catch {}
+      if (p.before && !REDUCED) await p.before(from);
       $('#ptitle', dlg).textContent = p.t; $('#psub', dlg).innerHTML = p.s;
       win.classList.toggle('desk', !!p.desk);
       body.className = 'pbody' + (p.full ? ' full' : ''); body.innerHTML = '';
       dlg.showModal(); document.documentElement.style.overflow = 'hidden';
       cleanup = (await p.run(body)) ?? null;
       body.classList.add('pin');
-      if (!REDUCED) win.animate([{ transform: toCard(), opacity: p.zoom ? 1 : .3 }, { transform: 'none', opacity: 1 }], { duration: p.zoom ? 720 : 560, easing: 'cubic-bezier(.2,.9,.25,1)' });
+      if (!REDUCED) win.animate(p.zoom
+        // it flies out of the part it came from, overshoots a touch toward you, and settles
+        ? [{ transform: toCard(), opacity: 1 }, { transform: 'translateY(-1.5%) scale(1.025)', offset: .7 }, { transform: 'none' }]
+        : [{ transform: toCard(), opacity: .3 }, { transform: 'none', opacity: 1 }], { duration: p.zoom ? 900 : 560, easing: 'cubic-bezier(.2,.9,.25,1)' });
+      p.opened?.(from);
     } finally { opening = false; }
   }
   function close() {
     if (!dlg.open || shrinking) return;
-    const back = from;
-    if (REDUCED || !from) { shut(); back?.focus({ preventScroll: true }); return; }
+    const back = from, p = now;
+    if (REDUCED || !from) { shut(); p?.closed?.(back); back?.focus({ preventScroll: true }); return; }
     dlg.classList.add('closing');
-    const a = shrinking = win.animate([{ transform: 'none', opacity: 1 }, { transform: toCard(), opacity: 0 }], { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)' });
-    a.onfinish = () => { if (shrinking !== a) return; shut(); back?.focus({ preventScroll: true }); };
+    const a = shrinking = win.animate([{ transform: 'none', opacity: 1 }, { transform: toCard(), opacity: p?.zoom ? 1 : 0 }], { duration: p?.zoom ? 520 : 380, easing: 'cubic-bezier(.4,0,.2,1)' });
+    a.onfinish = () => { if (shrinking !== a) return; shut(); p?.closed?.(back); back?.focus({ preventScroll: true }); };
   }
   dlg.addEventListener('cancel', e => { e.preventDefault(); close(); });
   dlg.addEventListener('click', e => { if (e.target === dlg || e.target.closest('.pclose')) close(); });
@@ -326,9 +331,25 @@ fetch('https://tidy.invalid/latest')`;
   };
 
   // ---------- the report, and the terminal ----------
-  // the report grows out of the skipper's monitor into a desktop of its own
+  // the report grows out of the skipper's monitor into a desktop of its own. First the skipper swivels round to see
+  // what you're up to and waves; the monitor lifts off its stand and flies out; closing brings it back and the skipper
+  // turns back to its keys
+  const desk = el => el?.closest('.deskscene');
   PLAYS.report = {
     t: 'The morning report', s: 'The real report page, replaying one recorded watch.', desk: true, zoom: '.mon-screen',
+    async before(el) {
+      const sc = desk(el); if (!sc) return;
+      sc.classList.remove('back'); sc.classList.add('turning');
+      await wait(190); sc.classList.add('turned');
+      await wait(620); sc.classList.add('lift');
+      await wait(320);
+    },
+    opened(el) { desk(el)?.classList.add('away'); },
+    closed(el) {
+      const sc = desk(el); if (!sc) return;
+      sc.classList.remove('away', 'lift', 'turning'); sc.classList.add('back');
+      setTimeout(() => { sc.classList.remove('back'); void sc.offsetWidth; sc.classList.add('turning'); setTimeout(() => sc.classList.remove('turned'), 190); setTimeout(() => sc.classList.remove('turning'), 650); }, 750);
+    },
     run(b) {
       b.innerHTML = `<div class="monitor"><button class="pclose mon-x" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
         <div class="mon-bezel"><div class="mon-screen"><iframe src="demo/" title="The slowship morning report, live demo"></iframe></div><span class="mon-chin">${FACE}slowship</span></div>
