@@ -156,3 +156,38 @@
 @media (prefers-reduced-motion:reduce){.gate:not(.in) .box2{transform:none}.gate.in .box2,.gate.in.held .box2{animation:none}}
 .obj.ghost{visibility:hidden}
 #ytag{display:flex;flex-direction:column;gap:16px;flex:1}
+
+/* ---------- the report card: the skipper at its desk, the report open on the monitor ---------- */
+.deskscene{position:relative;margin:auto -26px 0;line-height:0}
+.deskscene>svg{display:block;width:100%;height:auto}
+/* the screen is a real button laid exactly over the monitor's glass (x 278, y 32, 300 × 188 of 640 × 400) */
+.screenbtn{position:absolute;left:43.4375%;top:8%;width:46.875%;height:47%;display:flex;flex-direction:column;padding:0;border:0;border-radius:5px;overflow:hidden;background:#F4F2EE;cursor:zoom-in;
+  transition:box-shadow .4s,transform .5s var(--spring)}
+.screenbtn .sbar{flex:none;display:block;padding:3px 8px;background:#DCE3F7;border-bottom:1.5px solid #0A1633;font:600 clamp(7px,.75vw,10px)/1.35 var(--mono);color:#3F4B68;text-align:left;white-space:nowrap}
+.screenbtn img{flex:1;min-height:0;width:100%;object-fit:cover;object-position:top left}
+.screenbtn::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgb(255 255 255 / .38) 48%,transparent 60%);transform:translateX(-110%);animation:glare 7s ease-in-out infinite;pointer-events:none}
+@keyframes glare{0%,72%{transform:translateX(-110%)}100%{transform:translateX(110%)}}
+.screenbtn:hover,.screenbtn:focus-visible{box-shadow:0 0 0 3px #9CB0FF,0 0 40px rgb(156 176 255 / .85);transform:scale(1.02)}
+.screenbtn .tap{position:absolute;left:50%;bottom:9%;translate:-50% 0;display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:#0A1633;color:#F6F4EF;
+  font:700 12.5px/1 var(--sans);white-space:nowrap;box-shadow:0 3px 0 #01040D;transition:transform .45s var(--spring)}
+.screenbtn .tap i{width:8px;height:8px;border-radius:50%;background:var(--glance);animation:trypulse 2s ease-in-out infinite}
+.screenbtn:hover .tap{transform:translateY(-4px) scale(1.04)}
+.t-report .try{cursor:pointer}
+.deskscene .glow{opacity:.18;animation:flick 5.5s infinite}
+@keyframes flick{0%,44%,100%{opacity:.18}46%{opacity:.09}48%{opacity:.24}50%{opacity:.16}}
+.deskscene .steam path{animation:steam 3.4s ease-in-out infinite}
+.deskscene .steam path+path{animation-delay:1.5s}
+@keyframes steam{0%{opacity:0;transform:translateY(6px)}40%{opacity:.9}100%{opacity:0;transform:translateY(-16px)}}
+.deskscene .arm-a{animation:typing .3s ease-in-out infinite alternate}
+.deskscene .arm-b{animation:typing .3s ease-in-out .15s infinite alternate}
+@keyframes typing{to{transform:translateY(-3px)}}
+.deskscene .skb{transform-box:fill-box;transform-origin:50% 100%;animation:skbob 3s ease-in-out infinite}
+@keyframes skbob{50%{transform:translateY(1.5px) rotate(-1deg)}}
+.deskscene .feet{transform-box:fill-box;transform-origin:50% 0;animation:feet 2.4s ease-in-out infinite}
+@keyframes feet{50%{transform:rotate(7deg)}}
+.deskscene .sblink{transform-box:fill-box;transform-origin:50% 50%;animation:sblink 5.2s infinite}
+@keyframes sblink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.deskscene .pw{animation:pwave 4s linear infinite}
+@keyframes pwave{to{transform:translateX(-32px)}}
+.deskscene .pboat{animation:pboat 9s ease-in-out infinite alternate}
+@keyframes pboat{to{transform:translateX(34px)}}

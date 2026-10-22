@@ -28,22 +28,28 @@
     <button class="pclose" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div class="pbody" id="pbody"></div></div>`;
   document.body.append(dlg);
   const win = $('.pwin', dlg), body = $('#pbody', dlg);
-  let from = null, cleanup = null, opening = false, shrinking = null;
-  const toCard = () => { const a = from.getBoundingClientRect(), b = win.getBoundingClientRect(); return `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`; };
+  let from = null, cleanup = null, opening = false, shrinking = null, now = null;
+  // the window's place and size as the card it came from; a window with a zoom part maps that part onto the card instead
+  const toCard = () => {
+    const a = from.getBoundingClientRect(), w = win.getBoundingClientRect(), z = (now?.zoom && win.querySelector(now.zoom)?.getBoundingClientRect()) || w;
+    const kx = a.width / z.width, ky = a.height / z.height;
+    return `translate(${a.left - w.left - (z.left - w.left) * kx}px, ${a.top - w.top - (z.top - w.top) * ky}px) scale(${kx}, ${ky})`;
+  };
   const shut = () => { shrinking = null; dlg.classList.remove('closing'); if (dlg.open) dlg.close(); cleanup?.(); cleanup = null; body.innerHTML = ''; document.documentElement.style.overflow = ''; };
   async function open(tile) {
     const p = PLAYS[tile.dataset.play]; if (!p || opening) return;
     if (shrinking) { const a = shrinking; shrinking = null; a.cancel(); shut(); }  // a window still shrinking away is simply gone
     if (dlg.open) return;
-    opening = true; from = tile;
+    opening = true; from = (tile.dataset.playFrom && $(tile.dataset.playFrom)) || tile; now = p;
     try {
       try { await load(); } catch {}
       $('#ptitle', dlg).textContent = p.t; $('#psub', dlg).innerHTML = p.s;
+      win.classList.toggle('desk', !!p.desk);
       body.className = 'pbody' + (p.full ? ' full' : ''); body.innerHTML = '';
       dlg.showModal(); document.documentElement.style.overflow = 'hidden';
       cleanup = (await p.run(body)) ?? null;
       body.classList.add('pin');
-      if (!REDUCED) win.animate([{ transform: toCard(), opacity: .3 }, { transform: 'none', opacity: 1 }], { duration: 560, easing: 'cubic-bezier(.2,.9,.25,1)' });
+      if (!REDUCED) win.animate([{ transform: toCard(), opacity: p.zoom ? 1 : .3 }, { transform: 'none', opacity: 1 }], { duration: p.zoom ? 720 : 560, easing: 'cubic-bezier(.2,.9,.25,1)' });
     } finally { opening = false; }
   }
   function close() {
@@ -55,8 +61,7 @@
     a.onfinish = () => { if (shrinking !== a) return; shut(); back?.focus({ preventScroll: true }); };
   }
   dlg.addEventListener('cancel', e => { e.preventDefault(); close(); });
-  dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
-  $('.pclose', dlg).addEventListener('click', close);
+  dlg.addEventListener('click', e => { if (e.target === dlg || e.target.closest('.pclose')) close(); });
   document.addEventListener('click', e => { const t = e.target.closest('[data-play]'); if (t && !dlg.contains(t)) open(t); });
   document.addEventListener('keydown', e => { const t = e.target.closest?.('[data-play]'); if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open(t); } });
   // fetch the words before anyone asks for them
@@ -321,9 +326,15 @@ fetch('https://tidy.invalid/latest')`;
   };
 
   // ---------- the report, and the terminal ----------
+  // the report grows out of the skipper's monitor into a desktop of its own
   PLAYS.report = {
-    t: 'The morning report', s: 'The real report page, replaying one recorded watch. Click anything. <a href="demo/">Open it full size</a>.', full: true,
-    run(b) { b.innerHTML = '<iframe class="frame-iframe" src="demo/" title="The slowship morning report, live demo"></iframe>'; },
+    t: 'The morning report', s: 'The real report page, replaying one recorded watch.', desk: true, zoom: '.mon-screen',
+    run(b) {
+      b.innerHTML = `<div class="monitor"><button class="pclose mon-x" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <div class="mon-bezel"><div class="mon-screen"><iframe src="demo/" title="The slowship morning report, live demo"></iframe></div><span class="mon-chin">${FACE}slowship</span></div>
+        <div class="mon-neck"></div><div class="mon-base"></div>
+        <p class="mon-cap">The real report page, replaying one recorded watch. Click anything. <a href="demo/">Open it full size</a></p></div>`;
+    },
   };
   PLAYS.term = {
     t: 'The terminal review', s: 'Real frames of <code>slowship review</code>, drawn by slowship itself. Your arrow keys, <kbd>?</kbd> and <kbd>q</kbd> work here.',
