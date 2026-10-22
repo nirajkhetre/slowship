@@ -11,14 +11,14 @@ import { load, save } from './state.js';
 import { worst } from './policy.js';
 import { MODEL } from './judge.js';
 
-// ---------- palette: the report's night-watch chart, for a canvas we own; mid-tones for the scrollback, which isn't ours
+// ---------- palette: the report's night watch, signal flags on navy, for a canvas we own; mid-tones for the scrollback, which isn't ours
 const N = {
-  bg: '#061118', sheet: '#0C1921', shoal: '#14222B', deep: '#1C2E38', rule: '#20323D', ink: '#E4EDF0', ink2: '#A4B4BB', ink3: '#6E808A',
-  hold: '#ED76B3', holdBg: '#3F1A2E', glance: '#F6B84D', glanceBg: '#35270F', clear: '#60C99A', clearBg: '#12291F', noted: '#7E929D', quiet: '#2B4250',
-  sea: '#1B4556', sea2: '#2F6F86', sea3: '#5FA8C4', foam: '#9FD3E6', lamp: '#F4D58A',
-  kw: '#7FB3C8', str: '#A8D5BA', num: '#E0B87A',
+  bg: '#070E22', sheet: '#0F1A36', shoal: '#172444', deep: '#213055', rule: '#2A3A63', ink: '#F3F5FB', ink2: '#AEB7CF', ink3: '#7C87A6',
+  hold: '#FF4D9D', holdBg: '#4A1131', glance: '#FFCF3D', glanceBg: '#3F300A', clear: '#2EE3A0', clearBg: '#0C3A2A', noted: '#5E6A8C', quiet: '#2D3A5C',
+  sea: '#122966', sea2: '#2B50FF', sea3: '#6683FF', foam: '#9CB0FF', lamp: '#FFD45C',
+  kw: '#8DA4FF', str: '#5CEFB9', num: '#FFD866',
 };
-const M = { hold: '#D6589A', glance: '#E39A2D', clear: '#2FA877', noted: '#7E929D', quiet: '#8FA3AD', sea: '#2F6F86', sea2: '#4F93AE', foam: '#7FC0D6' };
+const M = { hold: '#FF2E88', glance: '#FFC21A', clear: '#14D18F', noted: '#8B93AA', quiet: '#8D98BD', sea: '#2B50FF', sea2: '#5574FF', foam: '#9CB0FF' };
 
 // ---------- the mark: a soft blob with pill eyes, and a wordmark drawn letter by letter in half blocks ----------
 const MASCOT = [
@@ -35,7 +35,7 @@ const MASCOT = [
 ];
 const MINI = ['..oooooo..', '.obbbbbbo.', 'obffffffbo', 'obfeffefbo', 'obfeffefbo', '.oooooooo.'];
 const blink = g => g.map((r, y) => y === g.findIndex(row => row.includes('e')) ? r.replaceAll('e', 'f') : r);
-const MPAL = { o: '#2F6F86', b: '#7FB3C8', f: '#E8F2F4', e: '#0B1820', r: '#ED76B3', s: '#0B1820' };
+const MPAL = { o: '#2944D2', b: '#5574FF', f: '#F4F2EE', e: '#0A1633', r: '#FF7AB8', s: '#0A1633' };
 // x-height in rows 1-4, ascenders in 0, the descender in 5
 const GLYPH = {
   s: ['....', '.###', '##..', '..##', '###.', '....'],
@@ -56,7 +56,7 @@ function wordmark(from, to) {
   for (let k = 0; k < 30; k++) pal[letters[k]] = mix(from, to, k / 29);
   return { grid, pal, w };
 }
-const WM = { night: wordmark('#CFE6EE', '#5FA8C4'), mid: wordmark('#5FA8C4', '#2F6F86') };
+const WM = { night: wordmark('#F4F2EE', '#9CB0FF'), mid: wordmark('#5574FF', '#2944D2') };
 
 // ---------- what the report knows about an item, in the same words ----------
 const ORDER = { info: 0, notable: 1, review: 2, hold: 3 };
