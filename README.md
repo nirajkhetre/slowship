@@ -2,6 +2,12 @@
   <img src="docs/readme/hero.webp" width="100%" alt="slowship: a night harbour. A white ship carries containers in the verdict colours, magenta, yellow and mint, past a lighthouse, with the mochi captain on the bridge. Ship safe, slowly.">
 </p>
 
+<h3 align="center">Watch the 2-minute film, sound on</h3>
+
+https://github.com/user-attachments/assets/255fd4af-3d41-4074-810e-4778e57ba32d
+
+<p align="center">One night in the harbour: what your coding agent brings aboard, what slowship reads, and the real report in the morning. Also on <a href="https://youtu.be/aJQw7nJxdVI"><b>YouTube</b></a>.</p>
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/readme/pills-dark.webp">
@@ -35,10 +41,6 @@ It reads the code and never runs it. A small open model on your own laptop compa
 </p>
 
 Nothing is uploaded. The model runs on your machine through [Ollama](https://ollama.com), and the few things that do go over the network are all listed under [Safety](#safety).
-
-**The morning report in 30 seconds:** the verdict, the review, clearing one thing, the storms, and everything aboard.
-
-https://github.com/user-attachments/assets/e427cd4d-26c9-4dc3-a10b-5f99950fe17d
 
 ## Why now
 
