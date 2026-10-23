@@ -11,7 +11,7 @@ import { fingerprint, load, newSince, save } from './state.js';
 import { applyStorm } from './storm.js';
 
 // Bump when what gets read changes, so results cached by an older slowship are read again (approvals stay: same bytes).
-const RULES = 8;
+const RULES = 9;
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
 export async function checkItems(items, { model = true, onItem = () => {}, onStep = () => {} } = {}) {

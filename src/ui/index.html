@@ -1848,7 +1848,7 @@ KICON.autorun = svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path 
 // what a thing can touch, grouped the way a person thinks about it
 const TOUCH = [
   ['net', 'Network calls', ['net']],
-  ['run', 'Runs programs', ['exec']],
+  ['run', 'Runs programs', ['exec', 'exec-fixed']],
   ['files', 'Writes files', ['fs-write', 'persist-path']],
   ['key', 'Touches secrets', ['env-secret', 'secret-path', 'secret', 'secret-maybe', 'secret-public', 'env-file', 'dpapi']],
   ['code', 'Builds code at runtime', ['code', 'dynamic-load', 'obfuscated', 'hidden-chars']],
@@ -1873,6 +1873,7 @@ const WHY = {
   override: 'Telling an agent to ignore its other instructions is the classic prompt-injection move.',
   'electron-open': 'With Node.js on and isolation off, any page this window loads can run code on your users’ computers.',
   secret: 'A real-looking key in a build ships to every user. Revoke it, then move it behind your server.',
+  'exec-fixed': 'It runs one program whose command is written out in its own code, so what runs is right there to read. A command built while it runs could be anything, so that stays worth a glance.',
   autorun: 'Your coding agent runs a project’s hooks, and VS Code runs folder-open tasks, without you typing anything. The ChainDrop worm (August 2026) planted both so that opening a repo started it again. Clear it if you put it there: it asks again whenever it changes.',
   'autorun-payload': 'Something that runs on its own when the project opens, and hides its code or reaches for secrets, is how ChainDrop came back after the bad package was gone. slowship holds it whatever else is true.',
   'autorun-allowed': 'VS Code asks once before running a folder’s tasks on open. This setting switches the question off, for this folder.',

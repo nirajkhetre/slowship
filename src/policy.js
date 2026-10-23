@@ -9,6 +9,7 @@ const RISK = {
   // compiled files, from their build record (binary.js)
   'built-from': 0, 'swapped-dep': 1, 'dirty-build': 1, keys: 2, inject: 2, dpapi: 1, 'fuse-node': 2, 'fuse-asar': 1,
   code: 2, exec: 2, net: 2, 'install-script': 2,
+  'exec-fixed': 1,  // a program whose command is written out in the code (facts.js fixedCommand): noted, not queued
   // what opening a project runs on its own (agents.js autorunFacts): always worth a look, and again whenever it changes
   autorun: 2, 'stray-script': 1, 'autorun-allowed': 1,
   'fs-write': 1, 'env-secret': 1, 'secret-path': 1, 'persist-path': 1, 'dynamic-load': 1, imports: 0,
@@ -37,7 +38,7 @@ const COMBOS = [
     says: 'a window with Node.js on and isolation off: any page it loads can run code on your users\' computers' },
   { id: 'ipc-open', level: 3, within: 'scope', needs: [['ipc-unchecked'], ['ipc-sink']],
     says: 'a page in your app can call this IPC handler, nothing checks who sent the message, and it starts programs, runs code or opens a computed URL' },
-  { id: 'install-runs', level: 2, within: 'package', needs: [['install-script'], ['exec', 'net']],
+  { id: 'install-runs', level: 2, within: 'package', needs: [['install-script'], ['exec', 'exec-fixed', 'net']],
     says: 'runs code at install time that downloads or starts programs' },
 ];
 
@@ -110,6 +111,7 @@ const NAMES = {
   'env-secret': /\b(tokens?|auth\w*|credentials?|api[ -]?keys?|secrets?|oauth|login)\b/,
   'install-script': /\b(native|bindings?|addons?|prebuilt|prebuild|postinstall|node-gyp|napi|binar(y|ies))\b/,
 };
+NAMES['exec-fixed'] = NAMES.exec;  // a fixed command is still running a program
 /** Labels for the facts whose capability the manifest names: { id: { label: 'expected', by: 'description', word } }. */
 export function named(short, manifest) {
   const kw = Array.isArray(manifest?.keywords) ? manifest.keywords.filter(k => typeof k === 'string') : [];

@@ -81,7 +81,7 @@ export function prefs({ when, manual } = {}) {
 const ORDER = { info: 0, notable: 1, review: 2, hold: 3 };
 // a single fact's own detail can carry text a package wrote (a script, a URL), so a single fact is named by its kind
 const PHRASE = {
-  net: 'makes network calls', exec: 'runs programs', code: 'builds code at runtime', 'fs-write': 'writes files', 'install-script': 'runs code at install',
+  net: 'makes network calls', exec: 'runs programs', 'exec-fixed': 'runs a fixed program', code: 'builds code at runtime', 'fs-write': 'writes files', 'install-script': 'runs code at install',
   'env-secret': 'reads a secret from the environment', 'secret-path': 'touches credential files', 'persist-path': 'touches autostart places',
   'dynamic-load': 'loads code by a computed name', obfuscated: 'carries an encoded blob', 'hidden-chars': 'has hidden characters',
   conceal: 'tells your agent to keep something from you', override: 'tells your agent to ignore its other instructions',

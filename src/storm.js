@@ -273,13 +273,13 @@ export function judgeRuntime(d) {
 }
 
 // ---------- what a takeover would get ----------
-const TOUCH = [['net', 'the network'], ['exec', 'programs'], ['fs-write', 'files'], ['secret-path', 'credential files'], ['persist-path', 'autostart places'], ['code', 'code it builds at runtime'], ['ipc-unchecked', 'calls from your pages']];
+const TOUCH = [['net', 'the network'], ['exec', 'programs'], ['exec-fixed', 'programs'], ['fs-write', 'files'], ['secret-path', 'credential files'], ['persist-path', 'autostart places'], ['code', 'code it builds at runtime'], ['ipc-unchecked', 'calls from your pages']];
 /** Keys a set of items' code reads, by name (never values). */
 const keysOf = items => [...new Set(items.flatMap(i => [...(i.keys ?? []), ...keysFrom(i.facts ?? [])].map(k => k.name)))];
 /** For an item caught in a storm: what it already touches itself, and what a takeover inherits from the process it runs in. */
 export function blastOf(item, inherited = []) {
   const caps = new Set([...(item.caps ?? []), ...(item.facts ?? []).map(f => f.cap)]);
-  const touches = TOUCH.filter(([c]) => caps.has(c)).map(([, w]) => w), own = keysOf([item]);
+  const touches = [...new Set(TOUCH.filter(([c]) => caps.has(c)).map(([, w]) => w))], own = keysOf([item]);
   const keys = [...new Set([...own, ...inherited])];
   const k = keys.length ? `${keys.length} key${keys.length > 1 ? 's' : ''} (${keys.slice(0, 3).join(', ')}${keys.length > 3 ? ', …' : ''})` : 'no keys slowship could see';
   const says = item.kind === 'runtime' ? `A takeover runs as your app: it gets ${k}, and everything the app can reach`

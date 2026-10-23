@@ -14,7 +14,7 @@ own scan path (`scan.checkItems`), which only reads files as text.
 | Skills (MalSkillBench, 100 malicious + 100 benign): **hold** | precision 85.7%, recall 12.0%, 2 false holds | precision 81.3%, recall 13.0%, 3 false holds (both runs) |
 | Skills: **hold or review** | precision 75.7%, recall 53.0%, 17 false alarms | precision 80.0–80.5%, recall 33.0–36.0%, 8–9 false alarms (two runs) |
 | npm packages, malicious | **not measured** (no download approved; see section 2) | not measured |
-| npm packages, 174 installed, assumed benign | 0 holds, 13 reviews (7.5%); 18 (10.3%) before the description rule | 0 holds, 3 reviews (1.7%) |
+| npm packages, 174 installed, assumed benign | 0 holds, 12 reviews (6.9%); 18 (10.3%) before the description and fixed-command rules | 0 holds, 3 reviews (1.7%) |
 | Full run of D:/sloth-test (273 items), first time | 29.0 s | 319.9 s |
 | Same run again, nothing changed | 1.8 s | 2.1 s |
 
@@ -40,7 +40,7 @@ sit in (a Wilson interval, printed by `eval/run.mjs`; worked out on 22 Oct from 
 | holds that were real malware | 12 of 14, so 60–96% | 13 of 16, so 57–93% |
 | malicious skills held or flagged for review | 53 of 100, so 43–62% | 36 and 33 of 100, so 27–46% and 25–43% |
 | benign skills flagged (false alarms) | 17 of 100, so 11–26% | 9 and 8 of 100, so 5–16% and 4–15% |
-| benign npm packages flagged | 13 of 174, so 4–12% (18, so 7–16%, before the description rule) | 3 of 174, so 1–5% |
+| benign npm packages flagged | 12 of 174, so 4–12% (18, so 7–16%, before the description and fixed-command rules) | 3 of 174, so 1–5% |
 
 The ranges overlap, but that alone doesn't settle anything here, because both columns score the *same* 200 skills. So
 `eval/run.mjs compare` lines the two runs up skill by skill and counts which way each changed verdict went:
@@ -215,9 +215,12 @@ frida, ws), which makes them a hard benign set.
 |---|---|---|---|---|---|
 | rules only (before the description rule, Oct 21) | 0 | 18 | 12 | 144 | 18 / 174 = 10.3% |
 | rules only (with it, Oct 23) | 0 | 13 | 14 | 147 | 13 / 174 = 7.5% |
+| rules only (and fixed commands, Oct 23) | 0 | 12 | 15 | 147 | 12 / 174 = 6.9% |
 | rules + model | 0 | 3 | 16 | 155 | 3 / 174 = 1.7% |
 
 The description rule (Oct 23): without the model, a capability a package names in its own description or keywords counts as expected, one step down, the way the model would label it; combinations are never lowered. It took 5 of the 18 off the list (commander, cross-spawn, real-require, tunnel-agent, ws). Most of the 13 left run a fixed command (`ldd --version`) or build validators with `new Function` (ajv and the libraries built on it), and their descriptions don't say so. Skills have no manifest, so the skill numbers above are unchanged.
+
+The fixed-command rule (Oct 23): a program run with a command written out in the code (a string, a const holding one, or a file in the package's own folder) is noted, not queued, unless the command downloads, pipes into a shell, installs, or fetches and runs a package (`npx`, `deno run`). It took detect-libc off this list (13 to 12), and on a real Next.js app (trellient, 428 packages) @tailwindcss/oxide and detect-libc (12 to 10). sharp and update-browserslist-db stay: each also builds a command at run time.
 
 With the model, the three reviews are:
 

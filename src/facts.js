@@ -59,6 +59,27 @@ function parse(src) {
 
 const str = n => n && (n.type === 'Literal' && typeof n.value === 'string' ? n.value
   : n.type === 'TemplateLiteral' ? n.quasis.map(q => q.value.cooked ?? '').join('${}') : null);
+const lit = n => str(n) != null && !(n.type === 'TemplateLiteral' && n.expressions.length);  // text written out whole
+
+// A program run with a command written out in the code is one you can read; one built while it runs could be anything.
+// Fixed means: the command (and every argument) is literal text, a const holding it, or a file in the package's own
+// folder (path.join(__dirname, 'x')). A fixed command that downloads, pipes into a shell or installs stays a full flag.
+const RISKY_CMD = /\b(curl|wget|Invoke-WebRequest|iwr|Invoke-Expression|iex|Invoke-RestMethod|bitsadmin|certutil|mshta|rundll32|regsvr32|base64|nc|ncat|netcat|ssh|scp|osascript)\b|https?:\/\/|\|\s*(sh|bash|zsh|iex|pwsh|powershell|cmd|python3?|node|perl)\b|\b(sh|bash|zsh|cmd(\.exe)?|powershell|pwsh|python3?|node|perl|ruby)\s+(-c|\/c|-e|-Command|-EncodedCommand)\b|\b(npm|pnpm|yarn|bun|pip3?|gem)\s+(i|install|add|dlx|x|exec)\b|\b(npx|bunx|pnpx|uvx|pipx)\b|\bdeno\s+(run|install)\b/i;  // fetch-and-run tools
+function fixedCommand(node, fn, consts) {
+  const text = n => lit(n) ? str(n) : n?.type === 'Identifier' && consts.get(n.name)?.text != null ? consts.get(n.name).text : null;
+  const own = n => text(n) != null || (n?.type === 'Identifier' && /^__(dirname|filename)$/.test(n.name))
+    || (n?.type === 'MemberExpression' && n.object.type === 'Identifier' && n.object.name === 'process' && n.property.name === 'execPath')
+    || (n?.type === 'CallExpression' && n.callee.type === 'MemberExpression' && /^(join|resolve)$/.test(n.callee.property.name) && n.arguments.every(own));
+  const [cmd, rest] = node.arguments;
+  if (!own(cmd)) return null;
+  const parts = [text(cmd) ?? 'a file in its own folder'];
+  if (!/^exec(Sync)?$/.test(fn) && rest) {  // execFile / spawn / fork: an argument list, or the options
+    if (rest.type === 'ArrayExpression') { if (!rest.elements.every(e => text(e) != null)) return null; parts.push(...rest.elements.map(text)); }
+    else if (!(rest.type === 'ObjectExpression' || /Function/.test(rest.type) || (rest.type === 'Identifier' && consts.get(rest.name)?.object))) return null;
+  }
+  const line = parts.join(' ');
+  return RISKY_CMD.test(line) ? null : line;
+}
 const reqName = n => n?.type === 'CallExpression' && n.callee.type === 'Identifier' && n.callee.name === 'require' ? str(n.arguments[0]) : null;
 const bare = m => m?.replace(/^node:/, '');
 
@@ -75,6 +96,8 @@ export function fileFacts(src, file) {
   let parsed;
   try { parsed = parse(src); } catch { return { facts: out, error: 'unparseable' }; }
   const alias = new Map();  // a Map, not {}: code may call functions named constructor or toString
+  const consts = new Map();  // const name = 'text' / { … }: enough to see a command or its options are fixed
+  // ponytail: one map for the whole file, so a shadowing const in another function can mislead it; scope it if that bites
   const bind = (id, mod, member) => { if (id?.type === 'Identifier') alias.set(id.name, member ? `${mod}.${member}` : mod); };
   const importOf = (mod, node, how) => {
     const m = bare(mod);
@@ -97,6 +120,8 @@ export function fileFacts(src, file) {
         break;
       }
       case 'VariableDeclarator': {
+        if (node.id.type === 'Identifier' && ancestors.at(-2)?.kind === 'const')
+          lit(node.init) ? consts.set(node.id.name, { text: str(node.init) }) : node.init?.type === 'ObjectExpression' && consts.set(node.id.name, { object: true });
         const m = bare(reqName(node.init) ?? (node.init?.type === 'MemberExpression' ? reqName(node.init.object) : null));
         if (!m) break;
         if (node.id.type === 'ObjectPattern') for (const p of node.id.properties) p.key && bind(p.value, m, p.key.name ?? p.key.value);
@@ -116,7 +141,10 @@ export function fileFacts(src, file) {
             : c.type === 'MemberExpression' && !c.computed && reqName(c.object) ? `${bare(reqName(c.object))}.${c.property.name}` : null;
         if (target) {
           const [mod, fn] = target.split('.');
-          if (mod === 'child_process' && EXEC.test(fn)) add('exec', `${fn}() runs a program`, node);
+          if (mod === 'child_process' && EXEC.test(fn)) {
+            const fixed = fixedCommand(node, fn, consts);
+            fixed != null ? add('exec-fixed', `${fn}() runs one fixed command: ${fixed.slice(0, 80)}`, node) : add('exec', `${fn}() runs a program`, node);
+          }
           else if ((mod === 'fs' || mod === 'fs/promises') && FS_READ.test(fn)) add('fs-read', `${fn}()`, node);
           else if ((mod === 'fs' || mod === 'fs/promises') && FS_WRITE.test(fn)) add('fs-write', `${fn}()`, node);
           else if (['http', 'https', 'http2', 'net', 'tls', 'dgram', 'dns'].includes(mod) && NET_CALL.test(fn)) add('net', `${mod}.${fn}()`, node);
