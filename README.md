@@ -36,14 +36,9 @@ It reads the code and never runs it. A small open model on your own laptop compa
 
 Nothing is uploaded. The model runs on your machine through [Ollama](https://ollama.com), and the few things that do go over the network are all listed under [Safety](#safety).
 
-<!-- video: tour (slowship-tour.mp4) -->
+**The morning report in 30 seconds:** the verdict, the review, clearing one thing, the storms, and everything aboard.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/report-verdict-dark.webp">
-    <img src="docs/readme/report-verdict.webp" width="100%" alt="The morning report: Held in port. 6 things do more than they say. The project drawn as a ship in harbour with one container per thing aboard, 189 things aboard, 6 held.">
-  </picture>
-</p>
+https://github.com/user-attachments/assets/e427cd4d-26c9-4dc3-a10b-5f99950fe17d
 
 ## Why now
 
@@ -189,6 +184,13 @@ There is no tool to clear anything, on purpose. The agent is reading text a pack
 `slowship ui` serves the report on `127.0.0.1` only.
 
 <p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/report-verdict-dark.webp">
+    <img src="docs/readme/report-verdict.webp" width="100%" alt="The morning report: Held in port. 6 things do more than they say. The project drawn as a ship in harbour with one container per thing aboard, 189 things aboard, 6 held.">
+  </picture>
+</p>
+
+<p align="center">
   <img src="docs/readme/report-review.webp" width="49%" alt="Before you ship: the review queue on the left, held items first, and the inspector on the right with the x-ray of what the item can touch.">
   <img src="docs/readme/report-aboard.webp" width="49%" alt="Everything aboard: every item grouped by what was found, with filters by kind and by what the code can touch.">
 </p>
@@ -210,6 +212,15 @@ Colours come from signal flags and shipping containers: hot magenta marks what's
 Run `slowship` in a terminal and it draws instead of printing (no dependencies, true colour where the terminal has it): the mochi captain, a live watch where a ship crosses a container for each thing aboard, a verdict card, and a full-screen review with tabs and an inspector. `c` clears (it slides away; `u` brings it back), `/` searches, `o` opens the browser report, `?` shows every key, and the mouse works too. Below 110 columns the inspector opens over the list; `q` quits, and the terminal is always put back as it was.
 
 Piped, in CI, overnight, with `NO_COLOR` or `--plain`, it prints plain text, and the exit code is the same. `--no-motion` keeps everything still.
+
+<details>
+<summary><b>The terminal review, as a film</b> (18 seconds)</summary>
+
+<br>
+
+https://github.com/user-attachments/assets/7d1cfe61-606b-43f7-b0d0-37dacb311b61
+
+</details>
 
 <details>
 <summary><b>The verdict card</b></summary>
