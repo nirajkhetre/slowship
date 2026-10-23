@@ -2909,9 +2909,9 @@ const queueOrder = (a, b) => ORDER[b.level] - ORDER[a.level] || label(a).localeC
 function review() {
   const open = G.filter(i => !i.approved && needs(i)).sort(queueOrder), all = G.filter(needs).length, done = all - open.length;
   const auto = open.filter(i => i.kind === 'autorun').length, storm = open.filter(i => i.kind !== 'autorun' && i.findings.filter(needs).every(f => STORMY.has(f.kind))).length, code = open.length - storm - auto;
-  const parts = [code && `${code === 1 ? '1 does' : `${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say`, auto && 'opening this project starts something on its own', storm && `${storm} ${storm === 1 ? 'is' : 'are'} in a known storm`].filter(Boolean);
+  const parts = [code && `${code === 1 ? '1 does' : `${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say`, storm && `${storm} ${storm === 1 ? 'is' : 'are'} in a known storm`, auto && 'opening this project starts something on its own'].filter(Boolean);
   $('#needlede').textContent = !open.length ? 'Nothing needs you.'
-    : parts.length > 1 ? `${cap1(parts.slice(0, -1).join(', '))} and ${parts.at(-1)}. Look at each one; clear what you know or accept.`
+    : parts.length > 1 ? `${cap1(parts.slice(0, -1).join(', '))}${parts.length > 2 ? ',' : ''} and ${parts.at(-1)}. Look at each one; clear what you know or accept.`
     : code ? `${code === 1 ? 'This does' : `These ${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say. Look at each one. If you know why it’s there, clear it.`
     : auto ? 'Opening this project starts something on its own. Look at what it runs; clear it if you put it there.'
     : `${storm === 1 ? 'This is' : `These ${storm} are`} in a known storm. Each comes with its fix; clear what you accept for now.`;

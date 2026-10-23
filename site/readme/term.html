@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>slowship terminal</title>
+<!-- one of slowship's own terminal pictures (site/shots.mjs term), in the site's terminal window: ?f=<path under site/>&cmd=<what was typed> -->
+<link rel="stylesheet" href="../dist/site.css">
+<style>
+  html, body { background: transparent !important; margin: 0; }
+  #shot { width: fit-content; margin: 12px 12px 22px; }
+  .term { box-shadow: 0 8px 0 #01040D; border-radius: 20px; container-type: normal; }  /* the window fits its picture */
+  .term .tbar { font-size: 14px; padding: 12px 18px; }
+  .term pre.tpic { font-size: 12.8px; padding: 16px 18px 18px; }
+</style></head>
+<body>
+<div id="shot"><div class="term"><div class="tbar"><b id="cmd"></b></div><div id="pic"></div></div></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  cmd.textContent = q.get('cmd') || 'slowship';
+  fetch(`../${q.get('f')}.html`).then(r => r.text()).then(t => { pic.innerHTML = t; document.body.dataset.ready = '1'; });
+</script>
+</body></html>

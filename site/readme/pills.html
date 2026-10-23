@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>slowship promises</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .p { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; width: 1200px; padding: 4px 0; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; font: 700 15px/1 var(--data); color: var(--ink); background: var(--sheet); border: 2.5px solid var(--line); border-radius: 999px; box-shadow: 0 4px 0 var(--shadow); padding: 11px 16px 11px 12px; }
+  .pill svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .pill i { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; background: var(--c); color: #0A1633; flex: none; }
+  .pill i svg { width: 15px; height: 15px; }
+</style></head>
+<body>
+<div id="shot">
+  <div class="p">
+    <span class="pill" style="--c:#14D18F"><i><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></i>Reads code, never runs it</span>
+    <span class="pill" style="--c:#FFC21A"><i><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></i>Stays on your laptop</span>
+    <span class="pill" style="--c:#6F8BFF"><i><svg viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><path d="M10 3.5v3M14 3.5v3M10 17.5v3M14 17.5v3M3.5 10h3M3.5 14h3M17.5 10h3M17.5 14h3"/></svg></i>Small open model, local</span>
+    <span class="pill" style="--c:#FF2E88"><i><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></i>Only code can hold</span>
+    <span class="pill" style="--c:#ECE9E2"><i><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></i>MIT · Node 22.19+</span>
+  </div>
+</div>
+</body></html>

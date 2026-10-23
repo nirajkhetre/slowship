@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>slowship hero</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* the night harbour is the same in light and dark: it's a picture of night */
+  .hero { width: 1200px; height: 500px; background: radial-gradient(120% 90% at 8% 0%, #1D3A8F 0%, #0B1F4D 46%, #081639 100%); border-color: #0A1633; }
+  @media (prefers-color-scheme: dark) { .hero { border-color: #33467E; } }
+  .hero .chart { opacity: .9; background-image: linear-gradient(to right, rgb(244 242 238 / .045) 1px, transparent 1px), linear-gradient(to bottom, rgb(244 242 238 / .045) 1px, transparent 1px); }
+  .copy { position: absolute; left: 64px; top: 58px; width: 600px; color: #F4F2EE; z-index: 3; }
+  .word { font: 800 138px/.9 var(--poster); letter-spacing: -.02em; margin: 0; color: #F4F2EE; text-shadow: 6px 4px 0 #6F8BFF; }
+  .line { font: 800 44px/1 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; color: #FFC21A; margin: 20px 0 0; }
+  .lede { font: 400 21px/1.42 var(--body); color: #C9D2EA; margin: 16px 0 0; max-width: 540px; }
+  .lede b { color: #F4F2EE; font-weight: 700; }
+  .tags { display: flex; gap: 12px; margin-top: 24px; }
+  .tags .tag { font-size: 13px; padding: 8px 12px; border-color: #0A1633; box-shadow: 0 3px 0 #050C22; white-space: nowrap; }
+  svg.layer { position: absolute; left: 0; top: 0; width: 1200px; height: 500px; overflow: hidden; }
+  svg.scene { position: absolute; right: 0; top: 0; width: 600px; height: 500px; overflow: visible; }
+
+  @keyframes bob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(5px) rotate(-1.2deg); } }
+  @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-90px); } }
+  @keyframes drift2 { from { transform: translateX(-60px); } to { transform: translateX(0); } }
+  @keyframes drift3 { from { transform: translateX(0); } to { transform: translateX(-45px); } }
+  @keyframes sweep { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(9deg); } }
+  @keyframes scan { 0% { transform: translateX(0); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateX(262px); opacity: 0; } }
+  @keyframes twinkle { 0%, 100% { opacity: .9; } 50% { opacity: .25; } }
+  @keyframes blink { 0%, 86%, 94%, 100% { transform: scaleY(1); } 90% { transform: scaleY(.1); } }
+  @keyframes wake { 0% { transform: translateX(0); opacity: .8; } 100% { transform: translateX(-46px); opacity: 0; } }
+  .ship { transform-box: fill-box; transform-origin: 50% 80%; animation: bob 4s ease-in-out infinite; }
+  .w1 { animation: drift 4s linear infinite; } .w2 { animation: drift2 4s linear infinite; } .w3 { animation: drift3 2s linear infinite; }
+  .beam { transform-origin: 548px 364px; animation: sweep 4s ease-in-out infinite; }
+  .scanbar { animation: scan 4s ease-in-out infinite; }
+  .star { animation: twinkle 4s ease-in-out infinite; }
+  .star:nth-child(3n) { animation-delay: -1.3s; } .star:nth-child(3n+1) { animation-delay: -2.6s; }
+  .blink { transform-box: fill-box; transform-origin: 50% 50%; animation: blink 4s linear infinite; }
+  .wk { animation: wake 2s linear infinite; } .wk:nth-child(2) { animation-delay: -1s; }
+  /* the skipper's face: pill eyes and a smile */
+  .sk .mood { display: none; } .sk .e-pill, .sk .m-smile { display: inline; } .sk .fl { fill: #2B50FF; }
+</style></head>
+<body>
+<div id="shot">
+  <div class="plate hero">
+    <div class="chart"></div>
+    <!-- the water behind the ship, the whole width of the harbour -->
+    <svg class="layer" viewBox="0 0 1200 500" aria-hidden="true"><g class="w2"><path id="seaB" fill="#13306F"/></g></svg>
+    <svg class="scene" viewBox="0 0 600 500" aria-hidden="true">
+      <defs>
+        <linearGradient id="beamG" x1="1" x2="0"><stop offset="0" stop-color="#FFE6A6" stop-opacity=".5"/><stop offset="1" stop-color="#FFE6A6" stop-opacity="0"/></linearGradient>
+        <linearGradient id="scanG" x1="0" x2="1"><stop offset="0" stop-color="#FFF4D6" stop-opacity="0"/><stop offset=".5" stop-color="#FFF4D6" stop-opacity=".85"/><stop offset="1" stop-color="#FFF4D6" stop-opacity="0"/></linearGradient>
+        <clipPath id="cargo"><rect x="150" y="254" width="262" height="62"/></clipPath>
+      </defs>
+      <g id="stars"></g>
+      <path d="M480 74a20 20 0 1 0 17 30a17 17 0 1 1 -17 -30z" fill="#F4F2EE" opacity=".9"/>
+      <!-- the lighthouse on its rocks, its beam sweeping across the harbour -->
+      <g class="beam" opacity=".45"><path d="M548 362 L40 250 L40 470 Z" fill="url(#beamG)"/></g>
+      <g transform="translate(0 46)">
+        <path d="M512 404 q14 -22 34 -18 q22 -8 40 10 l14 12 v20 h-92z" fill="#0A1633" stroke="#F4F2EE" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M536 396 l6 -70 h14 l6 70z" fill="#F4F2EE" stroke="#0A1633" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M538 372 h22 M540 350 h18" stroke="#FF2E88" stroke-width="7"/>
+        <rect x="536" y="306" width="26" height="20" rx="3" fill="#FFC21A" stroke="#0A1633" stroke-width="2.5"/>
+        <path d="M532 306 h34 l-17 -14z" fill="#0A1633" stroke="#F4F2EE" stroke-width="2" stroke-linejoin="round"/>
+      </g>
+      <!-- the ship: a sailcloth hull with a cobalt boot, containers in the verdict colours, the skipper on the bridge -->
+      <g transform="translate(0 66)"><g class="ship">
+        <g class="wakes"><path class="wk" d="M118 392 h-30" stroke="#C9D2EA" stroke-width="3" stroke-linecap="round"/><path class="wk" d="M112 404 h-44" stroke="#C9D2EA" stroke-width="3" stroke-linecap="round"/></g>
+        <rect x="372" y="222" width="66" height="96" rx="6" fill="#F4F2EE" stroke="#0A1633" stroke-width="3"/>
+        <rect x="384" y="236" width="16" height="12" rx="2" fill="#FFC21A" stroke="#0A1633" stroke-width="2.5"/><rect x="410" y="236" width="16" height="12" rx="2" fill="#FFC21A" stroke="#0A1633" stroke-width="2.5"/>
+        <g clip-path="url(#cargo)">
+          <g id="boxes"></g>
+          <rect class="scanbar" x="128" y="254" width="40" height="62" fill="url(#scanG)"/>
+        </g>
+        <path d="M120 318 H466 L440 396 Q436 404 426 404 H156 Q146 404 142 396 Z" fill="#F4F2EE"/>
+        <path d="M133 366 H452 L446 384 H139 Z" fill="#2B50FF"/>
+        <path d="M120 318 H466 L440 396 Q436 404 426 404 H156 Q146 404 142 396 Z" fill="none" stroke="#0A1633" stroke-width="3.5" stroke-linejoin="round"/>
+        <circle cx="180" cy="342" r="6" fill="#0A1633"/><circle cx="206" cy="342" r="6" fill="#0A1633"/>
+        <svg class="sk skipper" x="350" y="124" width="104" height="99" viewBox="0 0 200 190"></svg>
+      </g></g>
+    </svg>
+    <!-- the water in front, lapping at the hull -->
+    <svg class="layer" viewBox="0 0 1200 500" aria-hidden="true"><g class="w1"><path id="seaA" fill="#0B1F4D" stroke="#2B50FF" stroke-width="2" stroke-opacity=".55"/></g><g class="w3"><path id="seaC" fill="#081639"/></g></svg>
+    <div class="copy">
+      <h1 class="word">slowship</h1>
+      <p class="line">Ship safe, slowly.</p>
+      <p class="lede">Reads every package, agent skill, MCP server and build your project brings aboard, and <b>never runs any of it</b>. One verdict in the morning, with the line of code behind it.</p>
+      <div class="tags"><span class="tag hold"><i></i>Held in port</span><span class="tag glance"><i></i>Ready after a glance</span><span class="tag clear"><i></i>Cleared to sail</span></div>
+    </div>
+  </div>
+</div>
+<script>
+  // waves whose length divides the drift exactly, so the loop has no seam
+  const wave = (y, amp, len) => { let d = `M-200 ${y}`; for (let x = -200; x < 1400; x += len) d += ` q${len / 4} ${-amp} ${len / 2} 0 t${len / 2} 0`; return d + ' V520 H-200 Z'; };
+  seaB.setAttribute('d', wave(456, 7, 60)); seaA.setAttribute('d', wave(466, 9, 90)); seaC.setAttribute('d', wave(486, 5, 45));
+  stars.innerHTML = [[40, 60], [96, 112], [168, 44], [232, 92], [300, 36], [356, 128], [424, 58], [60, 170], [270, 160], [520, 150], [588, 40], [140, 200]]
+    .map(([x, y], n) => `<circle class="star" cx="${x}" cy="${y}" r="${n % 3 ? 1.3 : 2}" fill="#F4F2EE"/>`).join('');
+  // eight containers in two stacked rows, corrugated doors
+  const C = ['#14D18F', '#FFC21A', '#2B50FF', '#FF2E88', '#14D18F', '#F4F2EE', '#FFC21A', '#2B50FF'];
+  boxes.innerHTML = C.map((c, k) => { const x = 150 + (k % 4) * 52, y = k < 4 ? 286 : 256, w = 50;
+    return `<g><rect x="${x}" y="${y}" width="${w}" height="30" rx="2" fill="${c}" stroke="#0A1633" stroke-width="2.5"/>${[1, 2, 3, 4].map(i => `<path d="M${x + i * 10} ${y + 6}v18" stroke="#0A1633" stroke-opacity=".35" stroke-width="1.5"/>`).join('')}</g>`; }).join('');
+</script>
+<script src="skipper.js"></script>
+</body></html>

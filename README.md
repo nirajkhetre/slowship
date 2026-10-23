@@ -1,24 +1,59 @@
-# slowship
+<p align="center">
+  <img src="docs/readme/hero.webp" width="100%" alt="slowship: a night harbour. A white ship carries containers in the verdict colours, magenta, yellow and mint, past a lighthouse, with the mochi captain on the bridge. Ship safe, slowly.">
+</p>
 
-**Ship safe, slowly.** A local, overnight check of everything your project brings aboard: its npm packages, your AI agent's skills and MCP servers, and your own build. For each one it asks a single question:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/pills-dark.webp">
+    <img src="docs/readme/pills.webp" width="92%" alt="Reads code, never runs it. Stays on your laptop. Small open model, local. Only code can hold. MIT, Node 22.19 or newer.">
+  </picture>
+</p>
 
-> **Does this do what it says it does?**
-
-It reads the code (it never runs it), lets a small open model on your own laptop compare what the code does with what the description claims, and leaves you one verdict in the morning: **cleared to sail**, **ready after a glance**, or **held in port**, with the exact line of code behind every finding.
-
-Nothing is uploaded. The model runs on your machine through [Ollama](https://ollama.com). The one exception is optional and off until you connect it: a morning ping to your own Discord channel or Telegram chat, with the verdict and nothing else (see below).
+<p align="center">
+  <a href="#quick-start"><b>Quick start</b></a> ·
+  <a href="#what-it-reads">What it reads</a> ·
+  <a href="#runs-on-open-the-chaindrop-check">The ChainDrop check</a> ·
+  <a href="#storm-watch">Storm watch</a> ·
+  <a href="#how-it-decides">How it decides</a> ·
+  <a href="#for-your-coding-agent">For your agent</a> ·
+  <a href="#measured-so-far">Measured</a>
+</p>
 
 ---
 
-## Why
+**slowship** is a local, overnight check of everything your project brings aboard: its packages in six languages, your coding agent's skills and MCP servers, what opening the project runs, what it runs on, and your own build. Of each one it asks a single question:
 
-Most of us never read our dependencies, and almost nobody reads the skills and MCP servers their coding agent runs. Those are now a real supply chain:
+> **Does this do what it says it does?**
 
-- [Snyk's ToxicSkills study](https://snyk.io) found 13.4% of 3,984 agent skills had critical issues and 76 were confirmed malicious.
-- Koi Security found 341 malicious skills out of 2,857 on ClawHub (Feb 2026).
-- npm keeps getting hit by worms that publish hundreds of malicious versions in a day.
+It reads the code and never runs it. A small open model on your own laptop compares what the code does with what the description claims, and in the morning you get one verdict, with the exact line of code behind every finding.
 
-Scanners exist, but most either send your code to a cloud, start the very servers they're checking, or cry wolf until you stop reading them. slowship is built the other way round: **local, read-only, and quiet**. It says little, and shows its evidence when it does.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/verdicts-dark.webp">
+    <img src="docs/readme/verdicts.webp" width="100%" alt="One verdict, every morning. Held in port: code does more than it says, in a way only code can prove. Ready after a glance: worth a look, with the line of code and the fix. Cleared to sail: nothing needs you.">
+  </picture>
+</p>
+
+Nothing is uploaded. The model runs on your machine through [Ollama](https://ollama.com), and the few things that do go over the network are all listed under [Safety](#safety).
+
+<!-- video: tour (slowship-tour.mp4) -->
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/report-verdict-dark.webp">
+    <img src="docs/readme/report-verdict.webp" width="100%" alt="The morning report: Held in port. 6 things do more than they say. The project drawn as a ship in harbour with one container per thing aboard, 189 things aboard, 6 held.">
+  </picture>
+</p>
+
+## Why now
+
+Your coding agent installs packages, skills and MCP servers for you, usually without reading them, and the attacks have moved to exactly that spot:
+
+- **Worms aim at developers' machines and their agents.** In August 2026, ChainDrop, a Mini Shai-Hulud variant, spread through more than 400 npm packages, stole npm, GitHub and cloud credentials, and planted `.claude/settings.json` and `.vscode/tasks.json` files in the repositories it reached, so that opening the project in a coding agent or VS Code restarted it ([Microsoft](https://www.microsoft.com/en-us/security/blog/2026/08/04/chaindrop-supply-chain-compromise-anatomy-self-propagating-worm/)).
+- **Agents install packages that don't exist yet.** A package name AI made up, `react-codeshift`, spread to 237 repositories through AI-written agent skills, and the Cloud Security Alliance now says agents with package managers must not install anything without human review ([CSA](https://labs.cloudsecurityalliance.org/research/csa-research-note-slopsquatting-ai-supply-chain-20260419-csa/)).
+- **npm 12 stopped running install scripts by default** ([The Hacker News](https://thehackernews.com/2026/07/npm-12-disables-install-scripts-by.html)). That closes one door, leaves the code that runs when a package is imported, and asks every team which packages may run scripts. slowship reads them first.
+
+Scanners exist, but most send your code to a cloud, start the very servers they check, or cry wolf until nobody reads them. slowship is built the other way round: **local, read-only, and quiet**. It says little, and shows its evidence when it does.
 
 ## Quick start
 
@@ -32,10 +67,10 @@ cd slowship && npm install && npm link
 Then, in the project you're about to ship:
 
 ```bash
-slowship                      # read the packages, skills and MCP servers, then review them right there
+slowship                      # read everything aboard, then review it right there
 slowship --app dist/          # also check your own build before it ships
-slowship review               # review the last watch again, in the terminal
-slowship ui                   # open the morning report in the browser
+slowship storm --sync         # on a day like PHP2Shell: are you in it, and what's the fix
+slowship ui                   # the morning report, in the browser
 slowship schedule             # do all of this every night, by itself
 ```
 
@@ -43,24 +78,53 @@ To get the model: `ollama pull gemma4:e2b`. Choose another with `SLOWSHIP_MODEL`
 
 ## What it reads
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/aboard-dark.webp">
+    <img src="docs/readme/aboard.webp" width="100%" alt="Everything aboard, read in one pass: packages, agent skills, MCP servers, your build, what runs on open, and runtimes and advisories.">
+  </picture>
+</p>
+
 | What | Where it looks |
 |---|---|
 | **Packages** | what's installed, by your lockfile (`package-lock.json`, or pnpm's own store with `pnpm-lock.yaml`), so it reads what you'll actually ship. For Storm watch, also the lockfiles of Python, Go, PHP, Ruby and Rust projects, and Yarn |
-| **Agent skills** | the skill folders that coding agents use, in your home folder and in the project (for example `~/.agents/skills` and `~/.codex/skills`), plugin folders included |
-| **MCP servers** | the MCP configs of the popular coding agents and editors (Cursor, VS Code, Codex and others). `npx` servers are downloaded into a quarantine folder with scripts disabled and read there; compiled servers are read as far as their build record (see below). None are ever started |
-| **What opening the project runs** | the hooks your coding agent runs for this project (`.claude/settings.json`), VS Code tasks set to run when the folder opens (`.vscode/tasks.json`), and the scripts they start. That's what the ChainDrop worm planted in the repos it reached in August 2026, so that opening a project started it again after the bad package was gone. A hook or task whose script hides its code or reaches for secrets is held; any other is worth a glance, and asks again whenever it changes. A package whose code writes those files is held too. On REA's 174 dependencies and two real pnpm apps (871 packages), no package's code names those files, so this adds no noise there |
-| **Compiled files** (with [REA](https://github.com/morluto/rea)) | Go and Rust programs and .NET assemblies, whether a compiled MCP server or a `.node`, `.exe` or `.dll` inside a package: what they were built from (modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes) and, for .NET, the native functions they declare (starting programs, raw network, keystroke hooks, writing into other programs, decrypting what Windows protects for the user) plus, method by method, the framework calls each method makes and the strings it loads. So a .NET method that decodes base64 and loads it as code, or names the browser's password file and posts, is held just like the same JavaScript function |
-| **Your build** (`--app`) | secrets that slipped in (redacted in every output), shipped `.env` files and source maps, Electron switches like `nodeIntegration` or `contextIsolation: false`, DevTools left on, and, if REA is installed, a map of every IPC handler: which page function (`window.api.x`) reaches it, whether it checks who sent the message, and what it does. A packaged Electron executable gets its fuses read: whether it still lets anyone run it as plain Node.js, inject code through `NODE_OPTIONS`, attach a debugger with `--inspect`, or change its code after signing |
+| **Agent skills** | the skill folders coding agents use, in your home folder and in the project (for example `~/.agents/skills` and `~/.codex/skills`), plugin folders included. Instructions and scripts are both read, because a skill can attack through either |
+| **MCP servers** | the MCP settings of the popular coding agents and editors (Cursor, VS Code, Codex and others). `npx` servers are downloaded into a quarantine folder with scripts off and read there; compiled servers are read as far as their build record. None is ever started |
+| **What opening the project runs** | your coding agent's hooks for this project, VS Code tasks set to run when the folder opens, and the scripts they start ([below](#runs-on-open-the-chaindrop-check)) |
+| **Runtimes and advisories** | what the project runs on, when its fixes stop, and public advisories in six languages ([Storm watch](#storm-watch)) |
+| **Your build** (`--app`) | secrets that slipped in (redacted in every output), shipped `.env` files and source maps, Electron switches like `nodeIntegration` or `contextIsolation: false`, DevTools left on, and, if [REA](https://github.com/morluto/rea) is installed, a map of every IPC handler: which page function reaches it, whether it checks who sent the message, and what it does. A packaged Electron app gets its fuses read |
+| **Compiled files** (with REA) | Go and Rust programs and .NET assemblies, inside a package or as a compiled MCP server: what they were built from and, for .NET, the native functions they declare and, method by method, the framework calls each makes. A .NET method that decodes base64 and loads it as code is held just like the same JavaScript |
+
+## Runs on open: the ChainDrop check
+
+<p align="center">
+  <img src="docs/readme/report-code.webp" width="100%" alt="The report holding what opening the project runs: a hook and a folder-open task each start a setup.mjs, and the one in .claude decodes hidden data and runs it as code in the same function, at line 6.">
+</p>
+
+ChainDrop came back after the bad package was gone, because opening the repository started it again. slowship reads exactly what opening a project runs without asking:
+
+- **Your coding agent's hooks** for the project (`.claude/settings.json` and its `.local` twin): every command, at its line, in plain words, like "runs `node .claude/setup.mjs` when your coding agent starts a session here".
+- **VS Code tasks set to run when the folder opens** (`.vscode/tasks.json`), and the setting that lets them run without asking.
+- **The scripts those commands start**, read as code, and any script sitting in those settings folders that nothing runs.
+
+Each hook or task is worth a glance, and it asks again whenever it changes, so a hook swapped in later can't slip by. **A hook or task whose script hides its code, builds code at runtime or reaches for secrets is held**, and a harmless formatter hook beside it stays a glance, because each command is tied to the script it starts. A package whose code writes those files is held too. On REA's 174 dependencies and two real pnpm apps (871 packages), no package's code names those files, so this adds no noise there.
 
 ## Storm watch
 
-Some of the worst days aren't a bad package. They're a hole in what everything runs on, like PHP2Shell (CVE-2026-109618 and CVE-2026-109619, fixed on 21 October 2026), where any PHP site could be taken over with no bug in its own code. Storm watch answers three questions about your project on a day like that:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/report-storms-dark.webp">
+    <img src="docs/readme/report-storms.webp" width="100%" alt="The Storms tab: 262,388 public advisories matched on this computer. php:8.3-fpm is in PHP2Shell's path, with the fix: move to php:8.3.36-fpm, rebuild, restart every PHP worker. node:20-alpine gets no fixes since 2026-04-30. guzzlehttp/guzzle 7.4.0 has 14 known vulnerabilities, all fixed in 7.15.2.">
+  </picture>
+</p>
 
-- **Is it in this storm?** It finds what the project runs on: Dockerfile `FROM` lines, `.nvmrc`, `.tool-versions`, `engines`, `composer.json`, `go.mod`, the Gemfile, CI versions and more. Each is checked against the runtime storms slowship knows about and against the date that runtime's fixes stop (from [endoflife.date](https://endoflife.date)). A floating tag like `php:8.3-fpm` is flagged as "check your build", because it only gets the fix when you pull and rebuild.
-- **Is anything aboard already named in an advisory?** Every package your lockfiles pin is matched against the public advisories in [OSV](https://osv.dev), malware reports included, in six languages (see below). Each language's own version rules are used, so Python's `1.0rc1` comes before `1.0` and Ruby's `1.0.0.rc1` before `1.0.0`.
+Some of the worst days aren't a bad package. They're a hole in what everything runs on, like PHP2Shell (CVE-2026-109618 and CVE-2026-109619, fixed on 21 October 2026), where any PHP site could be taken over with no bug in its own code. On a day like that, Storm watch answers three questions:
+
+- **Is it in this storm?** It finds what the project runs on (Dockerfile `FROM` lines, `.nvmrc`, `.tool-versions`, `engines`, `composer.json`, `go.mod`, the Gemfile, CI versions) and checks each against the runtime storms on file and the date its fixes stop (from [endoflife.date](https://endoflife.date)). A floating tag like `php:8.3-fpm` is "check your build": it only gets the fix when you pull and rebuild.
+- **Is anything aboard named in an advisory?** Every package your lockfiles pin is matched against the public advisories in [OSV](https://osv.dev), malware reports included, with each language's own version rules (Python's `1.0rc1` comes before `1.0`, Ruby's `1.0.0.rc1` before `1.0.0`).
 - **What would a takeover get?** Each finding says which keys that part of the project can read, so you know what to rotate first.
 
-Every finding comes with the fix: the exact version to move to, plus what people forget, like rebuilding the image and restarting every PHP worker. Distros that ship a fix without changing the version number are named, so you know to check the package changelog.
+Every finding comes with the fix: the exact version to move to, plus what people forget, like rebuilding the image and restarting every PHP worker.
 
 | Language | Lockfiles read | OSV advisories (22 Oct 2026) | Download, once |
 |---|---|---|---|
@@ -71,9 +135,16 @@ Every finding comes with the fix: the exact version to move to, plus what people
 | Ruby | `Gemfile.lock` | 5,397 | 5 MB |
 | Rust | `Cargo.lock` | 2,836 | 4 MB |
 
-Lockfiles are found up to two folders down, so a `backend/` and a `web/` in one repository both count. A `requirements.txt` line with a range (`flask>=2.0`) doesn't say what gets installed, so it isn't matched; Storm watch names those instead of passing them as clean. Packages from lockfiles are matched by name and version only: their code isn't read (npm packages that are installed still are).
+<details>
+<summary><b>How the advisories stay on your computer, and what was measured</b></summary>
 
-The advisories are downloaded whole (`slowship storm --sync`, once, and only for the languages the project uses) and matched on this computer, so the list of what your project uses never leaves it. After that, only what changed is fetched, at most once every 20 hours. Measured on 22 October 2026:
+<br>
+
+The advisories are downloaded whole (`slowship storm --sync`, once, and only for the languages the project uses) and matched on this computer, so the list of what your project uses never leaves it. After that, only what changed is fetched, at most once every 20 hours.
+
+Lockfiles are found up to two folders down, so a `backend/` and a `web/` in one repository both count. A `requirements.txt` line with a range (`flask>=2.0`) doesn't say what gets installed, so it isn't matched; Storm watch names those instead of passing them as clean. Packages from lockfiles are matched by name and version only: their code isn't read (installed npm packages still are). Runtime storms are a short file in the repository (`src/storms.json`) that gets a new entry when a big one breaks.
+
+Measured on 22 October 2026:
 
 | | |
 |---|---|
@@ -85,72 +156,91 @@ The advisories are downloaded whole (`slowship storm --sync`, once, and only for
 | A real pnpm project, 508 packages | 6 with known advisories |
 | REA's 174 dependencies | 0 in a storm |
 
-Runtime storms are a short file in the repository (`src/storms.json`) that gets a new entry when a big one breaks.
+</details>
 
-## How it works
+## How it decides
 
-A funnel that goes from cheap to expensive, so a night's work stays small:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme/decides-dark.webp">
+    <img src="docs/readme/decides.webp" width="100%" alt="A funnel from cheap to expensive: find, fingerprint, read, combine, ask, decide. One real night: 275 things found, 23 same bytes read once, 202 settled by rules alone, 50 asked the model in 4 min 23 s, next night about 4 s. Severity stays in code.">
+  </picture>
+</p>
 
-1. **Inventory.** Find everything aboard, in one pass, with no setup.
-2. **Memory by content.** Every item is fingerprinted. Anything whose bytes haven't changed since last time is skipped, and anything you've cleared stays cleared until its code changes.
-3. **Facts from the syntax tree.** An AST pass finds what the code can actually do: network calls, running programs, writing files, reading secrets, building code at runtime, install scripts, hidden characters. Each fact keeps its file and line.
-4. **Combinations, in code.** Some pairs mean more than their parts: a credential file read next to a network call, decoding then running code in the same function, a skill that tells your agent to keep something from you, an IPC handler a page can reach that never checks the sender and starts programs or opens a computed URL. Only these can **hold** the ship.
-5. **Claim against behaviour, on your laptop.** For anything worth a second opinion, the local model gets the item's own description and the short fact list (marked as untrusted data) and says, fact by fact, whether the description calls for it. It must cite fact ids that exist. Without the model, a capability a package names in its own description or keywords ("spawn", "websocket") counts as expected instead, one step down. And a program run with a command written out in the code (`ldd --version`) is noted rather than queued, unless that command downloads, pipes into a shell or installs something; a command built while the code runs stays worth a glance. Together, rules only, they take REA's 174 dependencies from 18 glances to 12 and a real Next.js app (428 packages) from 13 to 10.
-6. **Severity stays in code.** The model can move a single fact one step up or down, never past "worth a glance". Only a combination found in code can hold the ship, and the model can never lower one, so a README that tells AI scanners to approve everything gets nowhere.
-7. **The morning report.** One verdict, a short queue of what to look at, the real code around each finding, and an honest map of what couldn't be read.
+1. **Find.** Everything aboard, in one pass, with no setup.
+2. **Fingerprint.** Anything whose bytes haven't changed since last time is skipped, and anything you've cleared stays cleared until its code changes.
+3. **Read.** An AST pass finds what the code can actually do: network calls, running programs, writing files, reading secrets, building code at runtime, install scripts, hidden characters. Each fact keeps its file and line.
+4. **Combine.** Some pairs mean more than their parts: a credential file read next to a network call, decoding then running code in the same function, a skill that tells your agent to keep something from you, a hook that starts a script hiding its code. Only these can **hold** the ship.
+5. **Ask.** For anything worth a second opinion, the local model gets the item's own description and the short fact list (marked as untrusted data) and says, fact by fact, whether the description calls for it, citing fact ids that exist. Without the model, a capability a package names in its own description or keywords ("spawn", "websocket") counts as expected instead, and a program run with a command written out in the code (`ldd --version`) is noted rather than queued, unless that command downloads, pipes into a shell or installs something. Rules only, those two take REA's 174 dependencies from 18 glances to 12, and a real Next.js app (428 packages) from 13 to 10.
+6. **Decide.** The model can move a single fact one step, never past "worth a glance". Only a combination found in code can hold the ship, and the model can never lower one, so a README that tells AI scanners to approve everything gets nowhere.
 
-## In your terminal
+## For your coding agent
 
-Run `slowship` in a terminal and it draws instead of printing (no dependencies, true colour where the terminal has it):
-
-- **The mark.** The mochi captain (pill eyes, a captain's cap, a hard sticker shadow) beside a wordmark drawn letter by letter in half blocks.
-- **The watch, live.** A ship crosses a row of containers, one per thing aboard, each turning the colour of what was found; its flag flies the worst colour so far. Under it the water moves. The step it's on (find, fingerprint, read, model, verdict) is lit, with counts of what's held, worth a glance and read from memory.
-- **The verdict.** A card with the headline, a wave under its accent, the whole manifest as coloured containers, and one key to press: review here, open the browser report, or done.
-- **The review, full screen.** Four tabs (Review, Aboard, Keys, Blind spots), a list of cards with a rail in each one's colour, and an inspector beside it: what it says, what its code does with the real lines around each finding (the flagged one lit), the model's note, the IPC map, what compiled files are built from, and the keys it holds. `c` clears an item (it slides away; `u` brings it back), `/` searches, `f` filters by kind, `o` opens the browser report, `r` watches again, `?` shows every key. The mouse works too: click to pick, wheel to scroll. When the last one is cleared, she sails.
-- **Kind to small and odd terminals.** Below 110 columns the inspector opens over the list; below 60×16 it asks for room. Esc only ever steps back; `q` quits, and the terminal is always put back as it was.
-
-Piped, in CI, overnight, with `NO_COLOR` or with `--plain`, it prints plain text exactly as before, and the exit code is the same. `--no-motion` (or `SLOWSHIP_NO_MOTION`) keeps everything still.
-
-## Morning ping (optional)
-
-The overnight watch can send its verdict to where you'll see it when you wake: a Discord channel or a Telegram chat. It's off until you connect one, and only a summary ever leaves this computer: the verdict, the counts, the names of what needs you and slowship's own words for why. Never code, file paths, key names or any text a scanned package wrote. Discord mentions are switched off, so a package called `@everyone` pings nobody.
-
-- **Discord:** a webhook you make in a channel's settings (Integrations, Webhooks, New Webhook, Copy Webhook URL). No bot to run.
-- **Telegram:** a bot you make with @BotFather. Paste its token, press Start in its chat, and slowship finds where to write.
-
-Set it up in the browser report (Settings, Morning ping): each step has a short animated film of exactly what to click, the one thing to paste, and a test you can send. Or in the terminal, with `slowship discord` or `slowship telegram`, or `/discord` and `/telegram` inside `slowship review`. The webhook or token stays in a file only you can read (`notify.json` in slowship's folder); pages and the terminal only ever see a hint.
-
-It sends after each nightly watch. You can make it send only when something needs you, and also after watches you start; `slowship notify` shows what's connected, `slowship notify test` sends one, `slowship notify off` stops it.
-
-## For your coding agent (optional)
-
-Your coding agent installs packages, skills and MCP servers for you now, usually without reading them. slowship can be what it asks first. `slowship connect` prints the exact line to add slowship to your agent as a local MCP server (`slowship mcp`), with your agent's own command or in any editor's MCP settings. It also puts a short skill where your agents keep theirs, saying when to ask and what a hold means. The agent gets three tools:
+Your agent can ask slowship before anything comes aboard. `slowship connect` prints the exact line to add slowship to your agent as a local MCP server (`slowship mcp`), with your agent's own command or in any editor's MCP settings, and puts a short skill where your agents keep theirs, saying when to ask and what a hold means. The agent gets three tools:
 
 - **check**, before something comes aboard. Give it an npm package, and slowship installs it into a quarantine folder with every script off and reads it with its whole dependency tree: exactly what `npm install` would bring. Or give it a downloaded skill, plugin or MCP server folder.
-- **watch**, before shipping. It's the same watch as `slowship`, read from memory when nothing has changed (2.4 s on the project measured below). The run lands in `slowship review` and `slowship ui`, for you.
-- **storm**, on a day like PHP2Shell. It runs Storm watch and gives back each finding with its fix, so the agent can make the change and you only have to look.
+- **watch**, before shipping. The same watch as `slowship`, read from memory when nothing has changed (2.4 s on the project measured below).
+- **storm**, on a day like PHP2Shell. Each finding with its fix, so the agent can make the change and you only have to look.
 
-There is no tool to clear anything, on purpose. The agent is reading text a package wrote, and that text can be written to talk it into things. It's the same reason the model can't lower a hold: clearing stays with you. Answers use slowship's own words and the file and line to open, never the scanned code itself, and they say plainly that names and paths are data.
-
-It talks over stdin and stdout, with no network port. The only download is the package you asked it to check, from npm. The model is off by default for these calls, because some agents give a tool a minute at most. Answers the nightly watch already got from the model are reused either way.
+There is no tool to clear anything, on purpose. The agent is reading text a package wrote, and that text can be written to talk it into things. Clearing stays with you. Answers use slowship's own words and the file and line to open, never the scanned code. It talks over stdin and stdout, with no network port.
 
 ## The morning report
 
 `slowship ui` serves the report on `127.0.0.1` only.
 
-- **The verdict.** *Held in port*, *ready after a glance* or *cleared to sail*, with one button for what to do next. Your project is drawn as a ship in harbour, with one container per thing aboard. It stays moored while something is held, and sails out once everything is clear.
-- **What it read.** Where everything came from: the project's lockfile, plus the skill folders and editor settings your AI agents use on this computer, plus your build.
-- **A review list with an inspector.** For each finding, it shows what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. For your build there is a map of how pages reach the main process, drawn as lock gates: a handler that checks its sender shuts its gate, one that doesn't lets the current run through. Compiled files get a manifest of what they were built from. Clear it and a ship takes it aboard, a painter rolls it green, and the next one comes up. Undo rewinds the scene and puts it back in the list.
-- **A command bar.** One box at the top, `Ctrl K` or `⌘K` from anywhere: search everything aboard (what needs you comes first) or type what you want to do, like "run", "settings" or "connect your agent". The skipper sits beside it with the verdict on its face and a count of what's waiting.
-- **A project switcher and Settings.** Switch to a recent project, or browse to any folder on this computer. Settings hold the nightly watch, what to read, your build folder, the model and the theme, and save as you change them.
-- **Who can spend your money.** A ledger of every key to an outside account that your agent's skills and MCP servers read in their code, name in their instructions, or are handed in an editor's MCP config, by account (OpenAI, GitHub, ElevenLabs…), with the tools that hold each one. Agents with paid keys can run up a bill on their own. Only key names are read, never their values.
-- **Everything aboard, Blind spots, How it works.** Each is a tab under the verdict, so nothing is a long scroll away. You can filter by kind or by what the code can touch, see an honest list of what couldn't be read, and watch a live run: the ship docks, a gantry scans each thing aboard, and every step from fingerprint to verdict lights up as it happens.
+<p align="center">
+  <img src="docs/readme/report-review.webp" width="49%" alt="Before you ship: the review queue on the left, held items first, and the inspector on the right with the x-ray of what the item can touch.">
+  <img src="docs/readme/report-aboard.webp" width="49%" alt="Everything aboard: every item grouped by what was found, with filters by kind and by what the code can touch.">
+</p>
 
-Colours come from signal flags and shipping containers: hot magenta marks what's held (no red anywhere), signal yellow what's worth a glance, mint what's cleared, and cobalt is slowship itself, all on sailcloth with navy ink. Everything you can press has an ink outline and sits on a hard shadow, like a hull on its waterline, and the verdict sits on a navy sea that meets the page in a moving wave. Behind the report is a live sea chart of the watch: every open finding is a shoal on it, and it sinks once you clear it. Come near one to read its name, click it to open it. A `?` next to any part explains it, and a short tour runs on your first visit.
+- **The verdict.** *Held in port*, *ready after a glance* or *cleared to sail*, with one button for what to do next. Your project is a ship in harbour, one container per thing aboard: moored while something is held, sailing out once everything is clear.
+- **A review list with an inspector.** For each finding: what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. Your build gets a map of how pages reach the main process, drawn as lock gates. Clear something and a ship takes it aboard, a painter rolls it green, and the next one comes up; undo rewinds the scene.
+- **Storms, Everything aboard, Blind spots, How it works.** Each is a tab under the verdict: storms with their fixes, every item by what it can touch, an honest list of what couldn't be read, and a live run you can watch.
+- **A command bar.** `Ctrl K` or `⌘K` from anywhere: search everything aboard, or type what you want to do, like "run", "settings" or "connect your agent".
+- **Who can spend your money.** Every key to an outside account that your agent's skills and MCP servers read, are told to use, or are handed in an MCP config, by account, with the tools that hold each one. Only key names are read, never their values.
+
+Colours come from signal flags and shipping containers: hot magenta marks what's held (no red anywhere), signal yellow what's worth a glance, mint what's cleared, and cobalt is slowship itself, on sailcloth with navy ink. Everything you can press has an ink outline and sits on a hard shadow, like a hull on its waterline.
+
+## In your terminal
+
+<p align="center">
+  <img src="docs/readme/terminal.webp" width="100%" alt="slowship review in a terminal: the list of what needs a look with a coloured rail per item, the inspector beside it, moving down the list and across the tabs, the keys overlay, and what quitting leaves behind.">
+</p>
+
+Run `slowship` in a terminal and it draws instead of printing (no dependencies, true colour where the terminal has it): the mochi captain, a live watch where a ship crosses a container for each thing aboard, a verdict card, and a full-screen review with tabs and an inspector. `c` clears (it slides away; `u` brings it back), `/` searches, `o` opens the browser report, `?` shows every key, and the mouse works too. Below 110 columns the inspector opens over the list; `q` quits, and the terminal is always put back as it was.
+
+Piped, in CI, overnight, with `NO_COLOR` or `--plain`, it prints plain text, and the exit code is the same. `--no-motion` keeps everything still.
+
+<details>
+<summary><b>The verdict card</b></summary>
+
+<br>
+
+<p align="center"><img src="docs/readme/terminal-card.webp" width="100%" alt="The terminal verdict card: Held in port, 189 aboard, 6 held, 10 to glance, 33 judged by gemma4, and where everything was read from."></p>
+
+</details>
+
+## Morning ping
+
+The overnight watch can send its verdict to a Discord channel or a Telegram chat. It's off until you connect one, and only a summary ever leaves: the verdict, the counts, the names of what needs you and slowship's own words for why. Never code, file paths, key names or any text a scanned package wrote, and Discord mentions are switched off, so a package called `@everyone` pings nobody.
+
+<details>
+<summary><b>Setting it up</b></summary>
+
+<br>
+
+<p align="center"><img src="site/web/img/report-ping.webp" width="80%" alt="Connecting the morning ping: a short animated film of exactly what to click, the one thing to paste, and a test to send."></p>
+
+- **Discord:** a webhook you make in a channel's settings (Integrations, Webhooks, New Webhook, Copy Webhook URL). No bot to run.
+- **Telegram:** a bot you make with @BotFather. Paste its token, press Start in its chat, and slowship finds where to write.
+
+Set it up in the browser report (Settings, Morning ping), where each step has a short film of what to click, or in the terminal with `slowship discord` or `slowship telegram`. The webhook or token stays in a file only you can read; pages and the terminal only ever see a hint. `slowship notify` shows what's connected, `slowship notify test` sends one, `slowship notify off` stops it.
+
+</details>
 
 ## Measured so far
 
-These are measured on one real project folder: the 174 dependencies of REA's own npm package, plus 77 installed skills, 1 MCP server and a deliberately risky test build. Laptop with a 6 GB GPU, `gemma4:e2b`.
+On one real project folder: the 174 dependencies of REA's own npm package, plus 77 installed skills, 1 MCP server and a deliberately risky test build. Laptop with a 6 GB GPU, `gemma4:e2b`.
 
 | | |
 |---|---|
@@ -160,13 +250,26 @@ These are measured on one real project folder: the 174 dependencies of REA's own
 | Sent to the local model | 50, in 4 min 23 s of model time |
 | Re-run with nothing changed | about 4 s |
 | Code that runs, actually read | 3,827 of 3,829 files (99.95%); 454 test and example files left out on purpose |
-| Compiled files read by REA | 4, about 2 to 4 s each: the MCP server (Rust, built without a crate list) and 3 native addons with no Go, Rust or .NET record |
-| Who can spend your money | 9 of the agent's tools hold 18 keys to 13 outside accounts: 3 read 10 keys in their own code (one media skill alone reads keys for 6: Gemini, Google, Google Cloud, HeyGen, Hyperframes and ElevenLabs), the rest are named in their instructions |
-| Verdict | held: the test build (an inert fixture with a fake key, risky Electron settings and an IPC handler that opens any URL). 10 more worth a glance, 0 holds among real packages and skills |
+| Compiled files read by REA | 4, about 2 to 4 s each |
+| Who can spend your money | 9 of the agent's tools hold 18 keys to 13 outside accounts |
+| Verdict | held: the test build. 10 more worth a glance, 0 holds among real packages and skills |
 
-The model isn't repeatable bit for bit: between this run and the one before it, it moved 4 package verdicts by one step. Rules-only verdicts didn't change at all ([eval/EVAL.md](eval/EVAL.md) has more on this).
+### Against known malware
 
-Reading compiled programs installed on the same laptop (REA 6.7.0, nothing started):
+On 200 agent skills from [MalSkillBench](https://github.com/lxyeternal/MalSkillBench) (100 malicious, 100 benign, a fixed and reproducible subset). The full write-up, every miss explained and how to rerun it: [eval/EVAL.md](eval/EVAL.md).
+
+| | rules only | rules + gemma4:e2b |
+|---|---|---|
+| **Held** | 12 of 100 malicious skills (95% range 7–20%), 2 of 100 benign | 13 malicious (8–21%), 3 benign |
+| **Held or worth a glance** | 53 malicious (43–62%), 17 benign (11–26%) | 33–36 malicious (25–43% to 27–46%), 8–9 benign (4–15% to 5–16%), two runs |
+| Benign npm packages flagged (REA's 174 dependencies) | 0 held, 12 worth a glance (4–12%) | 0 held, 3 worth a glance (1–5%) |
+
+Put plainly: a hold is usually right (12 of 14, so 60–96%), but it catches about one malicious skill in eight. Most misses are attacks written as plain English in SKILL.md, or code inside a markdown code block, which slowship doesn't read as code yet. The model cuts false alarms by half or more, and it also lets more attacks through, because those attacks come with a description written to make them look expected. Malicious npm packages haven't been measured yet.
+
+<details>
+<summary><b>Compiled programs read on the same laptop</b> (REA 6.7.0, nothing started)</summary>
+
+<br>
 
 | File | What its build record says | Time |
 |---|---|---|
@@ -175,49 +278,35 @@ Reading compiled programs installed on the same laptop (REA 6.7.0, nothing start
 | PowerShell's `System.Management.Automation.dll` | .NET, 62 references, 192 native imports, two flagged: `CreateProcess` and `CryptUnprotectData` | 5.6 s |
 | a C++ `.node` addon (node-pty) | no record: named, not read | 3.8 s |
 | VS Code's `Code.exe` (a packaged Electron app) | fuses as shipped: run as Node, `NODE_OPTIONS` and `--inspect` on, asar integrity off | 1.5 s |
-| slowship's inert `test/fixtures/dotnet-loader/Loader.cs`, compiled | held twice: decode-then-load in one method, "Login Data" then a POST in another. Its update check and `Assembly.Load(name)` are left alone | 6.1 s |
+| slowship's inert `test/fixtures/dotnet-loader/Loader.cs`, compiled | held twice: decode-then-load in one method, "Login Data" then a POST in another | 6.1 s |
 
-### Against known malware
+The model isn't repeatable bit for bit: between two runs it moved 4 package verdicts by one step. Rules-only verdicts didn't change at all.
 
-Measured on 200 agent skills from [MalSkillBench](https://github.com/lxyeternal/MalSkillBench) (100 malicious, 100 benign, a fixed and reproducible subset). The full write-up, every miss explained and how to rerun it are in [eval/EVAL.md](eval/EVAL.md).
-
-| | rules only | rules + gemma4:e2b |
-|---|---|---|
-| **Held** | 12 of 100 malicious skills (95% range 7–20%), 2 of 100 benign | 13 malicious (8–21%), 3 benign |
-| **Held or worth a glance** | 53 malicious (43–62%), 17 benign (11–26%) | 33–36 malicious (25–43% to 27–46%), 8–9 benign (4–15% to 5–16%), two runs |
-| Benign npm packages flagged (REA's 174 dependencies) | 0 held, 12 worth a glance (4–12%) | 0 held, 3 worth a glance (1–5%) |
-
-Each rate has a range it is 95% likely to sit in, because 100 samples can't pin it to the decimal. Both columns score the same 200 skills, so `node eval/run.mjs compare` also lines the runs up skill by skill: the model's changes go one way far too often to be luck (19–22 attacks let through against 2 newly caught; 9 false alarms removed against 0–1 added).
-
-Put plainly: a hold is usually right (12 of 14, so 60–96%), but it catches about one malicious skill in eight. Most misses are attacks written as plain English in SKILL.md, or code inside a markdown code block, and slowship doesn't read those as code yet. The model cuts false alarms by half or more, and it also lets more attacks through, because those attacks come with a description written to make them look expected. Malicious npm packages haven't been measured yet.
+</details>
 
 ## What it can't see
 
 slowship reads code; it never runs it. So:
 
 - Code fetched or built while a program runs is invisible. It reports the capability ("downloads and runs code") but not the payload.
-- Compiled code isn't decompiled. With REA installed, Go and Rust files are read as far as their build record: what they were built from, not what they do. .NET is read further, method by method, unless an assembly is too big for REA's member reader (PowerShell's 13 MB engine is). C and C++ leave no record, so those are only named.
-- REA's map of an Electron app is slow on very big builds: on VS Code's 6,187 files it got through 156 in 13 minutes. slowship gives it 5 minutes and says so when it gives up. A packaged app gets its fuses read, but its `app.asar` isn't mapped; point `--app` at the unpacked build for the IPC map.
-- In your build, only inline IPC handler bodies are searched for what they do; a handler that hands off to a function elsewhere isn't followed.
-- Python and shell inside skills are read line by line, not with a full parser. Treat quiet there as "nothing obvious".
-- TypeScript isn't read yet, and code inside markdown code blocks isn't read as code.
+- Compiled code isn't decompiled. Go and Rust files are read as far as their build record; .NET is read method by method; C and C++ leave no record, so those are only named.
+- Python and shell inside skills are read line by line, not with a full parser. TypeScript isn't read yet, and code inside markdown code blocks isn't read as code.
 - Instructions in SKILL.md are checked for four narrow things: hiding something from you, ignoring other instructions, downloading and running a script, and sending your data somewhere. Other prompt injection passes unnoticed.
-- A hook or task's script is read when its command names the file. One that runs a program by name (`npx something`) is named, not followed, and a payload that builds those file paths from pieces at run time isn't seen writing them.
-- Files over 2 MB (usually generated bundles) are skipped and named.
-- Storm watch knows a Python, Go, PHP, Ruby or Rust package only by its name and version in the lockfile. It says when a known advisory names that version, not whether your code reaches the vulnerable part. Maven, Gradle and NuGet aren't read yet.
+- A hook or task's script is read when its command names the file. One that runs a program by name (`npx something`) is named, not followed.
+- Storm watch knows a Python, Go, PHP, Ruby or Rust package only by its name and version. It says when a known advisory names that version, not whether your code reaches the vulnerable part. Maven, Gradle and NuGet aren't read yet.
+- Files over 2 MB (usually generated bundles) are skipped and named. In your build, only inline IPC handler bodies are searched.
 
 **No findings is not proof of nothing.** The report says so too.
 
 ## Safety
 
 - **It never executes scanned code.** No `require`, no install scripts, no starting MCP servers.
-- **REA runs only its static readers** (`analyze-javascript-application`, `inspect-go-binary`, `inspect-rust-binary`, `inspect-managed-artifact`, `inspect-managed-native-boundaries`, `inspect-managed-members`, `inspect-electron-fuses`), with fixed arguments, a timeout and a cap on output. None of them loads or starts the file it reads.
-- **No shell anywhere.** Programs are started with `execFile` and fixed arguments. Package names are validated before `npm pack`, and tarballs are unpacked by our own reader, which refuses paths that try to leave the quarantine folder.
-- **The report server answers only this machine.** It checks the `Host` header (no DNS rebinding) and the `Origin`, takes JSON only, and caps request bodies.
-- **Code context is safe to serve.** The code shown around a finding is read only from inside that item's own folder, and secrets are cut down before they reach the page.
-- **Your agent can look, never clear.** Its three tools read and report; clearing is only in `slowship review` and `slowship ui`.
-- **Nothing is uploaded.** The only network use is downloading `npx` MCP packages from npm so they can be read (`--offline` turns that off), a package your agent asks slowship to check, the public advisory files from `osv-vulnerabilities.storage.googleapis.com` (downloaded whole, so nothing about your project is sent), and the morning ping if you connect one: it talks only to `discord.com` and `api.telegram.org`, with the summary described above.
-- **Key names, never values.** The "who can spend your money" ledger keeps only the names of keys an MCP config hands a server (`env` and auth headers); their values are never read into the report.
+- **REA runs only its static readers**, with fixed arguments, a timeout and a cap on output. None of them loads or starts the file it reads.
+- **No shell anywhere.** Programs are started with `execFile` and fixed arguments. Package names are validated before `npm pack`, and tarballs are unpacked by slowship's own reader, which refuses paths that try to leave the quarantine folder.
+- **The report server answers only this machine.** It checks the `Host` header and the `Origin`, takes JSON only, and caps request bodies. Code shown around a finding is read only from inside that item's own folder, with secrets cut down.
+- **Your agent can look, never clear.** Clearing is only in `slowship review` and `slowship ui`.
+- **What goes over the network, and nothing else:** `npx` MCP packages from npm so they can be read (`--offline` turns that off), a package your agent asks slowship to check, the public advisory files from `osv-vulnerabilities.storage.googleapis.com` (downloaded whole, so nothing about your project is sent), and the morning ping if you connect one, only to `discord.com` and `api.telegram.org`.
+- **Key names, never values.** The money ledger keeps only the names of keys; their values are never read into the report.
 
 ## Command reference
 
@@ -239,14 +328,20 @@ The exit code is `2` when the verdict is "held", so it can gate CI. For `slowshi
 
 ```bash
 npm test
-node site/record.mjs <project>   # record one real watch for the web demo (public packages + the inert fixtures only)
+node site/record.mjs <project>   # record one real watch for the web demo (public packages and the inert fixtures only)
 node site/shots.mjs              # the site's pictures: terminal output as HTML, and screenshots of a running `slowship ui`
 node site/build.mjs              # build the site into site/dist: the landing page, the docs and the live demo
+node site/readme.mjs             # this README's pictures, from site/readme/*.html, the live demo and the terminal
 ```
 
-The website lives in `site/web`: the landing page (`index.html`), one file per docs page (`docs/`), and the pictures `shots.mjs` makes. The live demo at `demo/` is the real report page answered from the recording, so nothing in it touches a visitor's computer.
+<details>
+<summary><b>The 33 tests</b></summary>
 
-There are 33 tests: held fixtures, fixed commands told from ones built at run time (and from fixed ones that download or pipe into a shell), a capability a package names itself counted as expected while a description still can't talk down a credential stealer, a repo shaped like what ChainDrop leaves behind (its planted hook and folder-open task held, a plain formatter hook only a glance, a changed hook asking again), prompt injection that can't lower a hold, parser traps, pnpm's store read once per package from its real folders, links skipped (and a manifest that can't crash the watch), path traversal, secret redaction, server guards, the folder picker, schedule quoting, the IPC map, Go and .NET build records, .NET read method by method, Electron fuses (those four from recorded REA answers), the "who can spend your money" ledger, which must never keep a key's value, the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back, its `/` commands, and the morning ping, which must send only slowship's own words, only to Discord or Telegram, never ping anyone, and never show a page the webhook or the token, and the MCP server for your agent, which has no tool to clear anything, repeats only slowship's own words, and passes its own skill, and Storm watch, which must find what a project runs on, tell a PHP2Shell branch that's fixed from one that isn't, match advisories without the network, and read the lockfiles of six languages with each one's own version order. `node eval/run.mjs selftest` checks the eval's unzipper and its statistics. One of them checks that recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+<br>
+
+Held fixtures; fixed commands told from ones built at run time (and from fixed ones that download or pipe into a shell); a capability a package names itself counted as expected while a description still can't talk down a credential stealer; a repo shaped like what ChainDrop leaves behind (its planted hook and folder-open task held, a plain formatter hook only a glance, a changed hook asking again); prompt injection that can't lower a hold; parser traps; pnpm's store read once per package from its real folders, links skipped, and a manifest that can't crash the watch; path traversal; secret redaction; server guards; the folder picker; schedule quoting; the IPC map; Go and .NET build records; .NET read method by method; Electron fuses (those four from recorded REA answers); the money ledger, which must never keep a key's value; the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back; the morning ping, which must send only slowship's own words, only to Discord or Telegram, and never ping anyone; the MCP server, which has no tool to clear anything and repeats only slowship's own words; and Storm watch, which must find what a project runs on, tell a PHP2Shell branch that's fixed from one that isn't, match advisories without the network, and read the lockfiles of six languages with each one's own version order. One test checks a recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+
+</details>
 
 ## Credits
 
@@ -254,11 +349,11 @@ There are 33 tests: held fixtures, fixed commands told from ones built at run ti
 - [acorn](https://github.com/acornjs/acorn) (MIT) parses JavaScript.
 - [OSV](https://osv.dev) gathers the public advisories Storm watch matches against, and [endoflife.date](https://endoflife.date) says when each runtime's fixes stop.
 - [Ollama](https://ollama.com) and Google's Gemma 4 (under the Gemma terms) are the local model.
-- Fonts (SIL Open Font License): [Eczar](https://github.com/rosettatype/eczar) for the verdict, printed a little off register like a riso poster, [Fraunces](https://github.com/undercasetype/Fraunces) at its softest and heaviest for headings and big numbers, [Martian Mono](https://github.com/evilmartians/mono) for counts and labels, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else, drawn so that 0/O and 1/l/I can't be mistaken. They're bundled, so the report makes no outside requests.
+- Fonts (SIL Open Font License): [Eczar](https://github.com/rosettatype/eczar) for the verdict, printed a little off register like a riso poster, [Fraunces](https://github.com/undercasetype/Fraunces) at its softest and heaviest for headings, [Martian Mono](https://github.com/evilmartians/mono) for counts and labels, and [Atkinson Hyperlegible Next and Mono](https://www.brailleinstitute.org/freefont/) for everything else. They're bundled, so the report makes no outside requests.
 
 ## About this project
 
-This was built for the DEV Hacktoberfest 2026, week 3 challenge ("Slow and Steady"). The repository was started on 20 October 2026. Any commit after the deadline (25 October, 11:59 PM PDT) will be listed here.
+Built for the DEV Hacktoberfest 2026, week 3 challenge ("Slow and Steady"). The repository was started on 20 October 2026. Any commit after the deadline (25 October, 11:59 PM PDT) will be listed here.
 
 ## License
 

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>slowship frame</title>
+<!-- a screenshot of the report on a sailcloth plate, ink outline and hard shadow: ?src=<image>&w=<css width> -->
+<link rel="stylesheet" href="style.css">
+<style>
+  .f { width: fit-content; padding: 12px; background: var(--paper); border: 2.5px solid var(--line); border-radius: 26px; box-shadow: 0 8px 0 var(--shadow); }
+  .f img { display: block; width: var(--w, 1080px); border-radius: 15px; border: 2px solid var(--line); }
+</style></head>
+<body>
+<div id="shot"><div class="f"><img id="pic" alt=""></div></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  pic.style.setProperty('--w', `${q.get('w') || 1080}px`);
+  pic.onload = () => { document.body.dataset.ready = '1'; };
+  pic.src = q.get('src');
+</script>
+</body></html>

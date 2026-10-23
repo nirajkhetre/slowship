@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>slowship verdicts</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .v { width: 1200px; padding: 50px 52px 54px; }
+  .head { display: flex; justify-content: space-between; align-items: end; gap: 40px; position: relative; }
+  .head p { font: 400 19px/1.45 var(--body); color: var(--ink2); max-width: 470px; margin: 0; }
+  .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 36px; position: relative; }
+  .t { background: var(--sheet); border: 2.5px solid var(--line); border-radius: 20px; box-shadow: 0 6px 0 var(--shadow); padding: 24px 26px 26px; position: relative; overflow: hidden; }
+  .t::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 12px; background: var(--c); border-right: 2.5px solid var(--line); }
+  .t.hold { --c: var(--hold); } .t.glance { --c: var(--glance); } .t.clear { --c: var(--clear); }
+  .top { display: flex; align-items: center; gap: 16px; padding-left: 8px; }
+  /* the skipper peeks over the ticket's corner, so the verdict gets the whole width */
+  svg.skipper { position: absolute; right: 14px; top: 14px; width: 62px; height: 60px; padding: 3px 2px 1px; background: #F4F2EE; border: 2.5px solid var(--line); border-radius: 16px; box-shadow: 0 3px 0 var(--shadow); box-sizing: content-box; }
+  .top { min-height: 58px; }
+  .top .tag { white-space: nowrap; flex: none; font-size: 13px; padding: 8px 12px; gap: 8px; }
+  .t p { font: 400 17.5px/1.5 var(--body); color: var(--ink2); margin: 18px 0 0 8px; }
+  .t p b { color: var(--ink); }
+  .ship { font: 600 13px/1 var(--data); color: var(--ink3); margin: 18px 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  .ship::before { content: ""; width: 26px; height: 2.5px; background: var(--c); border-radius: 2px; }
+  .sk .mood { display: none; } .sk .fl { fill: var(--c); }
+  .hold .sk .e-pill, .hold .sk .m-o, .hold .sk .brows { display: inline; }
+  .glance .sk .e-pill, .glance .sk .m-flat { display: inline; }
+  .clear .sk .e-happy, .clear .sk .m-smile { display: inline; }
+</style></head>
+<body>
+<div id="shot">
+  <div class="plate v">
+    <div class="chart"></div>
+    <div class="head">
+      <h2 class="title">One verdict, every morning</h2>
+      <p>Only something found in the code can hold the ship. The local model can move a single fact by one step, and never lower a hold.</p>
+    </div>
+    <div class="row">
+      <div class="t hold"><div class="top"><svg class="sk skipper" viewBox="0 0 200 190"></svg><span class="tag hold"><i></i>Held in port</span></div>
+        <p><b>Code does more than it says</b>, in a way only code can prove: a credential file read beside a network call, hidden code run, a hook that starts a payload.</p>
+        <div class="ship">the ship stays moored</div></div>
+      <div class="t glance"><div class="top"><svg class="sk skipper" viewBox="0 0 200 190"></svg><span class="tag glance"><i></i>Ready after a glance</span></div>
+        <p><b>Worth a look</b>: it starts a program, reads a token, or a public advisory names its version. Each comes with the line of code, and the fix.</p>
+        <div class="ship">a quick look, then sail</div></div>
+      <div class="t clear"><div class="top"><svg class="sk skipper" viewBox="0 0 200 190"></svg><span class="tag clear"><i></i>Cleared to sail</span></div>
+        <p><b>Nothing needs you.</b> Clear a finding once and it stays cleared until the code behind it changes, so the morning stays quiet.</p>
+        <div class="ship">she sails out</div></div>
+    </div>
+  </div>
+</div>
+<script src="skipper.js"></script>
+</body></html>

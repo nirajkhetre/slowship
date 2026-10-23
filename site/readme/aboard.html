@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>slowship reads</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .a { width: 1200px; padding: 50px 52px 56px; }
+  .head { display: flex; justify-content: space-between; align-items: end; gap: 40px; position: relative; }
+  .head p { font: 400 19px/1.45 var(--body); color: var(--ink2); max-width: 430px; margin: 0; }
+  .yard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px 26px; margin-top: 36px; position: relative; }
+  .box { position: relative; background: var(--sheet); border: 2.5px solid var(--line); border-radius: 14px; box-shadow: 0 6px 0 var(--shadow); padding: 22px 22px 22px 74px; min-height: 196px; overflow: hidden;
+    background-image: repeating-linear-gradient(90deg, transparent 0 22px, color-mix(in srgb, var(--ink) 4%, transparent) 22px 24px); }
+  /* the door end: painted in the box's flag colour, with its locking bars */
+  .box::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 52px; background: var(--c); border-right: 2.5px solid var(--line);
+    background-image: linear-gradient(90deg, transparent 15px, #0A1633 15px 18px, transparent 18px 33px, #0A1633 33px 36px, transparent 36px); }
+  .box .ic { position: absolute; left: 11px; top: 18px; width: 30px; height: 30px; color: #0A1633; background: #F4F2EE; border: 2px solid #0A1633; border-radius: 9px; padding: 4px; box-sizing: content-box; }
+  h3 { font: 800 25px/1.1 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; margin: 0; }
+  .box p { font: 400 16.5px/1.48 var(--body); color: var(--ink2); margin: 10px 0 0; }
+  .where { font: 600 12.5px/1.3 var(--data); color: var(--ink3); margin-top: 14px; }
+  .b1 { --c: #2B50FF; } .b2 { --c: #14D18F; } .b3 { --c: #FFC21A; } .b4 { --c: #6F8BFF; } .b5 { --c: #FF2E88; } .b6 { --c: #ECE9E2; }
+  @media (prefers-color-scheme: dark) { .b6 { --c: #C9D2EA; } }
+  .new { display: inline-block; margin: -4px 0 10px; font: 700 11px/1 var(--data); color: #0A1633; background: var(--glance); border: 2px solid #0A1633; border-radius: 999px; padding: 5px 8px; }
+</style></head>
+<body>
+<div id="shot">
+  <div class="plate a">
+    <div class="chart"></div>
+    <div class="head">
+      <h2 class="title">Everything aboard,<br>read in one pass</h2>
+      <p>From your project and from this computer: what will ship, and what your coding agent runs. Nothing is run, and nothing leaves.</p>
+    </div>
+    <div class="yard">
+      <div class="box b1"><svg class="ic" viewBox="0 0 24 24"><path d="M3.5 8L12 4l8.5 4v8.5L12 20.5l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4M12 12v8.5M7.8 6l8.5 4"/></svg>
+        <h3>Packages</h3><p>Every installed package, file by file, from your lockfile: what you will actually ship.</p><div class="where">package-lock.json · pnpm's store</div></div>
+      <div class="box b2"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4h10a2 2 0 0 1 2 2v11a3 3 0 0 1-3 3H8"/><path d="M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 4 0v-1h8M9.5 8.5h6M9.5 11.5h6"/></svg>
+        <h3>Agent skills</h3><p>The instructions and scripts your coding agent follows, read as both, because a skill can attack through either.</p><div class="where">every agent's skill folders</div></div>
+      <div class="box b3"><svg class="ic" viewBox="0 0 24 24"><path d="M9 3.5v4.5M15 3.5v4.5M6.5 8h11v3a5.5 5.5 0 0 1-11 0z"/><path d="M12 16.5v4"/></svg>
+        <h3>MCP servers</h3><p>From every editor's MCP settings. Servers fetched with npx are read in a quarantine, and never started.</p><div class="where">Cursor · VS Code · Codex · …</div></div>
+      <div class="box b4"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M3 8h18M9 21h6M12 17v4"/><circle cx="12" cy="12.5" r="2"/></svg>
+        <h3>Your build</h3><p>Keys that slipped in, Electron switches left open, and a map of which page can call which IPC handler.</p><div class="where">slowship --app dist/</div></div>
+      <div class="box b5"><span class="new">ChainDrop</span><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9h17"/><path d="M10 12.5v4.5l4-2.25z"/></svg>
+        <h3>Runs on open</h3><p>Agent hooks and VS Code folder-open tasks, and the scripts they start: where a worm hid so a repo restarted it.</p><div class="where">.vscode/tasks.json · agent hooks</div></div>
+      <div class="box b6"><span class="new">Storm watch</span><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7 14V9h10v5M9.5 9V5.5h5V9"/><path d="M7.5 17h.01M11 17h5.5"/></svg>
+        <h3>Runtimes &amp; advisories</h3><p>What it runs on, when its fixes stop, and public advisories in six languages, matched on this computer.</p><div class="where">Dockerfile · lockfiles · OSV</div></div>
+    </div>
+  </div>
+</div>
+</body></html>

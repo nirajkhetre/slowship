@@ -1,0 +1,38 @@
+/* The README's pictures, in the report's own look: sailcloth and navy ink, signal-flag colours, outlined plates on a hard
+   shadow. Each page draws one picture inside #shot; site/readme.mjs photographs it in light and dark. */
+@font-face { font-family: Eczar; src: url(../../src/ui/fonts/Eczar.ttf); font-weight: 400 800; }
+@font-face { font-family: Fraunces; src: url(../../src/ui/fonts/Fraunces.woff2); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Martian Mono"; src: url(../../src/ui/fonts/MartianMono.woff2); font-weight: 100 800; }
+@font-face { font-family: Atkinson; src: url(../../src/ui/fonts/AtkinsonHyperlegibleNext.ttf); font-weight: 200 800; }
+
+:root {
+  --paper: #F4F2EE; --sheet: #FFFFFF; --shoal: #ECE9E2; --ink: #0A1633; --ink2: #3F4B68; --ink3: #6A7491;
+  --line: #0A1633; --shadow: #0A1633; --cobalt: #2B50FF; --navy: #0B1F4D;
+  --hold: #FF2E88; --hold-bg: #FFD9EA; --glance: #FFC21A; --glance-bg: #FFF0BF; --clear: #14D18F; --clear-bg: #CDF7E5;
+  --misreg: #6F8BFF;
+  --display: Fraunces, Georgia, serif; --poster: Eczar, Georgia, serif; --data: "Martian Mono", Consolas, monospace; --body: Atkinson, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #070E22; --sheet: #0F1A36; --shoal: #172444; --ink: #F3F5FB; --ink2: #AEB7CF; --ink3: #7C87A6;
+    --line: #33467E; --shadow: #01040D; --cobalt: #6683FF;
+    --hold: #FF4D9D; --hold-bg: #4A1131; --glance: #FFCF3D; --glance-bg: #3F300A; --clear: #2EE3A0; --clear-bg: #0C3A2A;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: transparent; }
+body { font-family: var(--body); color: var(--ink); -webkit-font-smoothing: antialiased; }
+#shot { position: relative; margin: 12px 12px 22px; }  /* room for the hard shadow */
+
+/* a plate: the outlined card every picture sits on */
+.plate { background: var(--paper); border: 2.5px solid var(--line); border-radius: 26px; box-shadow: 0 8px 0 var(--shadow); overflow: hidden; position: relative; }
+.chart { position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(to right, color-mix(in srgb, var(--ink) 7%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--ink) 7%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px; }
+.kicker { font: 600 13px/1 var(--data); letter-spacing: .02em; color: var(--ink3); }
+.title { font: 800 46px/1 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; letter-spacing: -.01em; margin: 0; }
+.tag { display: inline-flex; align-items: center; gap: 9px; font: 700 15px/1 var(--data); padding: 9px 14px; border: 2px solid var(--line); border-radius: 999px; box-shadow: 0 3px 0 var(--shadow); color: #0A1633; }
+.tag i { width: 10px; height: 10px; border-radius: 50%; background: #0A1633; display: block; }
+.tag.hold { background: var(--hold); } .tag.glance { background: var(--glance); } .tag.clear { background: var(--clear); }
+.ic { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+code, .mono { font-family: var(--data); }

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>slowship decides</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .d { width: 1200px; padding: 50px 52px 0; }
+  .head { display: flex; justify-content: space-between; align-items: end; gap: 40px; position: relative; }
+  .head p { font: 400 19px/1.45 var(--body); color: var(--ink2); max-width: 440px; margin: 0; }
+  .steps { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; margin-top: 44px; }
+  svg.rope { position: absolute; left: 40px; right: 40px; top: 44px; width: calc(100% - 80px); height: 30px; overflow: visible; }
+  .s { position: relative; background: var(--sheet); border: 2.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 0 var(--shadow); padding: 46px 16px 18px; min-height: 196px; }
+  .n { position: absolute; left: 50%; top: -22px; transform: translateX(-50%); width: 44px; height: 44px; border-radius: 50%; background: var(--c, #2B50FF); color: #fff; border: 2.5px solid var(--line); box-shadow: 0 3px 0 var(--shadow);
+    font: 700 17px/39px var(--data); text-align: center; }
+  .s h3 { font: 800 22px/1.1 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; margin: 0; text-align: center; }
+  .s p { font: 400 15px/1.45 var(--body); color: var(--ink2); margin: 10px 0 0; text-align: center; }
+  .s.hot { --c: var(--hold); } .s.hot .n { color: #0A1633; }
+  .s.model { --c: var(--glance); } .s.model .n { color: #0A1633; }
+  .night { position: relative; display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; margin: 34px 0 0; }
+  .night .lbl { font: 600 13px/1.3 var(--data); color: var(--ink3); margin-right: 4px; }
+  .chip { font: 700 14px/1 var(--data); padding: 9px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--shoal); color: var(--ink); }
+  .chip b { font-weight: 800; }
+  .band { margin: 34px -52px 0; padding: 22px 52px 26px; background: #0B1F4D; color: #F4F2EE; border-top: 2.5px solid var(--line); display: flex; gap: 18px; align-items: baseline; }
+  .band b { font: 800 24px/1.2 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; color: #FFC21A; white-space: nowrap; }
+  .band span { font: 400 17px/1.5 var(--body); color: #C9D2EA; }
+</style></head>
+<body>
+<div id="shot">
+  <div class="plate d">
+    <div class="chart"></div>
+    <div class="head">
+      <h2 class="title">A funnel from cheap<br>to expensive</h2>
+      <p>So a night's work stays small: most things settle on rules alone, and the model only sees what's worth a second opinion.</p>
+    </div>
+    <div class="steps">
+      <svg class="rope" viewBox="0 0 1000 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 15 q42 -14 84 0 t84 0 t84 0 t84 0 t84 0 t84 0 t84 0 t84 0 t84 0 t84 0 t84 0 t84 0" fill="none" stroke="var(--ink3)" stroke-width="2.5" stroke-dasharray="2 7" stroke-linecap="round"/></svg>
+      <div class="s"><div class="n">1</div><h3>Find</h3><p>Everything aboard, in one pass, with no setup.</p></div>
+      <div class="s"><div class="n">2</div><h3>Fingerprint</h3><p>Same bytes as last night? Skipped, and cleared stays cleared.</p></div>
+      <div class="s"><div class="n">3</div><h3>Read</h3><p>Facts from the syntax tree, each with its file and line.</p></div>
+      <div class="s hot"><div class="n">4</div><h3>Combine</h3><p>Pairs that mean more than their parts. Only these can hold.</p></div>
+      <div class="s model"><div class="n">5</div><h3>Ask</h3><p>A small open model, on your laptop: does the description call for this?</p></div>
+      <div class="s"><div class="n">6</div><h3>Decide</h3><p>Severity in plain code. One verdict, the evidence beside it.</p></div>
+    </div>
+    <div class="night">
+      <span class="lbl">one real night →</span>
+      <span class="chip"><b>275</b> things found</span>
+      <span class="chip"><b>23</b> same bytes, read once</span>
+      <span class="chip"><b>202</b> settled by rules alone</span>
+      <span class="chip"><b>50</b> asked the model, 4 min 23 s</span>
+      <span class="chip">next night: <b>about 4 s</b></span>
+    </div>
+    <div class="band"><b>Severity stays in code.</b><span>The model can move one fact by one step, and never lower a hold. A README that tells AI scanners to approve everything gets nowhere.</span></div>
+  </div>
+</div>
+</body></html>
