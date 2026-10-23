@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { condense, dirFacts } from './facts.js';
 import { available, judge, MODEL } from './judge.js';
-import { assess, combos, keysOf, risk, worst } from './policy.js';
+import { assess, combos, keysOf, named, risk, worst } from './policy.js';
 import { claimOf, npmPackages } from './inventory.js';
 import { findAutorun, findMcpServers, findSkills, keysFrom, resolveServer, serverBinaryFacts, skillFacts } from './agents.js';
 import { appFacts } from './app.js';
@@ -11,7 +11,7 @@ import { fingerprint, load, newSince, save } from './state.js';
 import { applyStorm } from './storm.js';
 
 // Bump when what gets read changes, so results cached by an older slowship are read again (approvals stay: same bytes).
-const RULES = 7;
+const RULES = 8;
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
 export async function checkItems(items, { model = true, onItem = () => {}, onStep = () => {} } = {}) {
@@ -32,6 +32,7 @@ export async function checkItems(items, { model = true, onItem = () => {}, onSte
         judged = await judge(it.name, it.claim, short);  // nothing worth judging → no model call at all
         if (judged) { labels = judged.labels; run.stats.judged++; run.stats.ms += judged.ms; run.stats.tokens += judged.tokens; ms = judged.ms; }
       } else run.stats.quiet++;
+      if (!judged && it.manifest) labels = named(short, it.manifest);  // no model: what the package names itself is expected
       const a = assess(short, found, labels);
       r = {
         key: it.key, kind: it.kind, name: it.name, level: a.level, findings: a.findings, coverage, map, rules: RULES,

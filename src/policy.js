@@ -98,6 +98,26 @@ export function assess(short, found, labels = {}) {
   return { level: LEVELS[findings[0]?.level ?? 0], findings: findings.map(f => ({ ...f, level: LEVELS[f.level] })) };
 }
 
+// Without the model, a capability the package names itself, in its description or keywords, counts as expected: the label
+// the model would give, so one step down. Combinations stay where code put them; no description can lower those.
+// Only words that name the capability: "image processing" isn't running processes, "API" isn't the network.
+const NAMES = {
+  exec: /\b(spawn\w*|exec\w*|child[_ ]?process(es)?|subprocess(es)?|shell|commands?|launch(es|er)?)\b/,
+  net: /\b(https?|fetch(es|er)?|requests?|download(s|er|ing)?|upload(s|er|ing)?|network(ing)?|sockets?|websockets?|servers?|proxy|urls?|remote|registry|telemetry|webhooks?|cdn)\b/,
+  code: /\b(compil(e|es|er|ing|ation)|eval(uat\w*)?|templat(e|es|ing)|transpil\w*|interpret(er|s)?|codegen|code generat\w*|jit|sandbox(es|ed)?|repl|scripting)\b/,
+  'dynamic-load': /\b(plugins?|loaders?|dynamic(ally)? (load|import)\w*)\b/,
+  'fs-write': /\b(files?|filesystem|fs|writes?|writer|disk|cache|saves?|copy|directory|directories|folders?|output)\b/,
+  'env-secret': /\b(tokens?|auth\w*|credentials?|api[ -]?keys?|secrets?|oauth|login)\b/,
+  'install-script': /\b(native|bindings?|addons?|prebuilt|prebuild|postinstall|node-gyp|napi|binar(y|ies))\b/,
+};
+/** Labels for the facts whose capability the manifest names: { id: { label: 'expected', by: 'description', word } }. */
+export function named(short, manifest) {
+  const kw = Array.isArray(manifest?.keywords) ? manifest.keywords.filter(k => typeof k === 'string') : [];
+  const text = [typeof manifest?.description === 'string' ? manifest.description : '', ...kw].join(' ').toLowerCase(), labels = {};
+  for (const f of short) { const m = NAMES[f.cap] && text.match(NAMES[f.cap]); if (m) labels[f.id] = { label: 'expected', by: 'description', word: m[0] }; }
+  return labels;
+}
+
 export const risk = f => RISK[f.cap] ?? 0;
 export const keysOf = found => new Set(found.flatMap(x => [...x.keys]));
 

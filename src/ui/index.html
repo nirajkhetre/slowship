@@ -2541,7 +2541,7 @@ function scannerHTML(i, rel) {
   const said = i.kind === 'app' ? 'your own build' : i.kind === 'autorun' ? 'runs when you open it' : i.claim ? `“${short(i.claim.split('\n')[0], 40)}”` : 'no description';
   const tagW = Math.min(340, 80 + said.length * 7.8);
   // the readout: what the analysis did on its way to this verdict
-  const combos = i.findings.filter(fd => fd.evidence.length > 1).length, notes = (i.facts || []).filter(x => x.label).length;
+  const combos = i.findings.filter(fd => fd.evidence.length > 1).length, notes = (i.facts || []).filter(x => x.why).length;
   const hud = `${pl((i.facts || []).length, 'fact')} → ${combos} combination${combos === 1 ? '' : 's'} → ${notes} model note${notes === 1 ? '' : 's'}`;
   const c = i.coverage || {}, cap = c.compiled ? 'Build record read, code not.' : c.files ? `${c.read} of ${c.files} file${c.files === 1 ? '' : 's'} read${c.files > 80 ? `, ${N} shown` : ''}. Nothing run.` : 'Read, never run.';
   const relG = rel === 'no' ? '<g class="xrel" transform="translate(384 102) scale(1.25)"><path pathLength="1" d="M10 16h20"/><path pathLength="1" d="M10 24h20" style="animation-delay:.42s"/><path pathLength="1" d="M26 8L14 32" style="animation-delay:.72s"/></g>'

