@@ -22,7 +22,8 @@ const NET_CALL = /^(request|get|connect|createConnection|lookup|resolve|send)$/;
 const SECRET_PATH = /(\.ssh[\\/]|\bid_rsa\b|\bid_ed25519\b|\.npmrc\b|\.pypirc\b|\.netrc\b|\.git-credentials\b|\.aws[\\/]credentials|\.docker[\\/]config\.json|\.kube[\\/]config|Login Data\b|Local State\b|\.bash_history\b|\.zsh_history\b|wallet\.dat\b|Keychains[\\/])/i;
 // Where code goes to start again on its own.
 // Dotfiles only when they look like paths (~/.profile), and case-sensitive: settings.Profile is not a shell profile.
-const PERSIST_PATH = /((?:^|[~\\/])\.(?:bashrc|zshrc|bash_profile|profile|zprofile)\b|[\\/]authorized_keys\b|LaunchAgents[\\/]|LaunchDaemons[\\/]|Start Menu[\\/]Programs[\\/]Startup|CurrentVersion\\Run\b)/;
+// Also what a coding agent or VS Code runs when a project opens: its hooks file, tasks.json, and scripts beside them (ChainDrop).
+export const PERSIST_PATH = /((?:^|[~\\/])\.(?:bashrc|zshrc|bash_profile|profile|zprofile)\b|[\\/]authorized_keys\b|LaunchAgents[\\/]|LaunchDaemons[\\/]|Start Menu[\\/]Programs[\\/]Startup|CurrentVersion\\Run\b|\.claude[\\/](?:settings(?:\.local)?\.json|[\w.-]+\.[cm]?js)\b|\.vscode[\\/](?:tasks\.json|[\w.-]+\.[cm]?js)\b)/;
 // Environment variable names that hold secrets (not npm_config_*, not *_PATH).
 const SECRET_ENV = /(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|PRIVATE_?KEY|CREDENTIAL|_AUTH\b|AUTH_?TOKEN)/i;
 // Bidirectional overrides and isolates ("Trojan Source"). Zero-width joiners are left alone: many scripts need them.

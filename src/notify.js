@@ -89,6 +89,7 @@ const PHRASE = {
   'electron-node': 'turns on Node.js in a window', 'electron-isolation-off': 'turns off context isolation', 'electron-websec-off': 'turns off web security',
   'ipc-unchecked': 'has an IPC handler that doesn\'t check its sender', 'fuse-node': 'ships with Electron fuses open', keys: 'can watch keystrokes',
   inject: 'writes into other programs\' memory', dpapi: 'decrypts what Windows protects', 'swapped-dep': 'was built with a swapped dependency',
+  autorun: 'runs a command on its own when the project opens', 'autorun-allowed': 'lets VS Code run tasks without asking', 'stray-script': 'keeps a script in a settings folder',
   storm: 'is caught in a known storm', malicious: 'is a known malicious package', eol: 'runs on something no one fixes any more', floating: 'gets fixes only when rebuilt',
 };
 // Storm watch writes these sentences itself, from advisory ids and version numbers: safe to say as they are

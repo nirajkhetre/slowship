@@ -9,12 +9,15 @@ const RISK = {
   // compiled files, from their build record (binary.js)
   'built-from': 0, 'swapped-dep': 1, 'dirty-build': 1, keys: 2, inject: 2, dpapi: 1, 'fuse-node': 2, 'fuse-asar': 1,
   code: 2, exec: 2, net: 2, 'install-script': 2,
+  // what opening a project runs on its own (agents.js autorunFacts): always worth a look, and again whenever it changes
+  autorun: 2, 'stray-script': 1, 'autorun-allowed': 1,
   'fs-write': 1, 'env-secret': 1, 'secret-path': 1, 'persist-path': 1, 'dynamic-load': 1, imports: 0,
   decode: 0, 'fs-read': 0, fs: 0, os: 0, env: 0, url: 0,
 };
 
 // Combinations that mean more than their parts. `within` says how close the parts must be: the same function
-// ('scope'), the same function or within 60 lines ('near'), or anywhere in the package. In a 40,000-line bundle
+// ('scope'), the same function or within 60 lines ('near'), one hook or task and the script it starts ('chain'),
+// or anywhere in the package. In a 40,000-line bundle
 // "same file" means nothing, so tightening this is what keeps big, legitimate bundles quiet.
 const COMBOS = [
   { id: 'exfil', level: 3, within: 'near', needs: [['secret-path'], ['net']],
@@ -26,7 +29,10 @@ const COMBOS = [
   { id: 'hidden-code', level: 3, within: 'scope', needs: [['decode', 'obfuscated'], ['code']],
     says: 'decodes hidden data and runs it as code in the same function' },
   { id: 'persistence', level: 3, within: 'near', needs: [['persist-path'], ['fs-write']],
-    says: 'writes to a place that makes code start again on its own (shell profile, startup folder, SSH keys)' },
+    says: 'writes to a place that makes code start again on its own (shell profile, startup folder, SSH keys, or the files a coding agent or VS Code runs when a project opens)' },
+  // ChainDrop's return path: a hook or folder-open task whose script hides its code or reaches for secrets
+  { id: 'autorun-payload', level: 3, within: 'chain', needs: [['autorun'], ['obfuscated', 'code', 'secret-path', 'env-secret', 'dynamic-load', 'hidden-chars']],
+    says: 'runs on its own when the project opens, and what it runs hides code, builds code at runtime or reaches for secrets' },
   { id: 'electron-open', level: 3, within: 'file', needs: [['electron-node'], ['electron-isolation-off']],
     says: 'a window with Node.js on and isolation off: any page it loads can run code on your users\' computers' },
   { id: 'ipc-open', level: 3, within: 'scope', needs: [['ipc-unchecked'], ['ipc-sink']],
@@ -45,7 +51,7 @@ export function combos(raw) {
     const groups = new Map();
     for (const f of raw) {
       if (!c.needs.flat().includes(f.cap)) continue;
-      const g = c.within === 'scope' ? f.scope : c.within === 'package' ? '*' : f.file;
+      const g = c.within === 'scope' ? f.scope : c.within === 'package' ? '*' : c.within === 'chain' ? f.chain ?? f.file : f.file;
       groups.has(g) ? groups.get(g).push(f) : groups.set(g, [f]);
     }
     const keys = new Set();

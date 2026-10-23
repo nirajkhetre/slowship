@@ -1796,7 +1796,7 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const S = { run: null, watch: null, filter: 'all', cap: null, q: '', shown: 60, v: null, undo: null, settings: null, sel: null, tab: 'review', drawn: false, prev: new Map() };
-const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime', dep: 'Package' };
+const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime', dep: 'Package', autorun: 'Runs on open' };
 const ORDER = { hold: 3, review: 2, notable: 1, info: 0 };
 
 // line icons drawn for slowship
@@ -1844,6 +1844,7 @@ const KICON = {
   runtime: svg('<rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7 14V9h10v5M9.5 9V5.5h5V9"/><path d="M7.5 17h.01M11 17h5.5"/>'),
 };
 KICON.dep = KICON.npm;  // a package from any lockfile
+KICON.autorun = svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9h17"/><path d="M10 12.5v4.5l4-2.25z"/>');  // a window that starts something
 // what a thing can touch, grouped the way a person thinks about it
 const TOUCH = [
   ['net', 'Network calls', ['net']],
@@ -1851,7 +1852,7 @@ const TOUCH = [
   ['files', 'Writes files', ['fs-write', 'persist-path']],
   ['key', 'Touches secrets', ['env-secret', 'secret-path', 'secret', 'secret-maybe', 'secret-public', 'env-file', 'dpapi']],
   ['code', 'Builds code at runtime', ['code', 'dynamic-load', 'obfuscated', 'hidden-chars']],
-  ['box', 'Runs at install', ['install-script']],
+  ['box', 'Runs on its own', ['install-script', 'autorun', 'autorun-allowed', 'stray-script']],
   ['speech', 'Instructs your agent', ['conceal', 'override']],
   ['app', 'Risky app settings', ['electron-node', 'electron-isolation-off', 'electron-sandbox-off', 'electron-websec-off', 'ipc-unchecked', 'ipc-sink', 'fuse-node', 'fuse-asar', 'devtools', 'open-external', 'sourcemap']],
   ['chip', 'Compiled code', ['built-from', 'swapped-dep', 'dirty-build', 'keys', 'inject']],
@@ -1872,6 +1873,10 @@ const WHY = {
   override: 'Telling an agent to ignore its other instructions is the classic prompt-injection move.',
   'electron-open': 'With Node.js on and isolation off, any page this window loads can run code on your users’ computers.',
   secret: 'A real-looking key in a build ships to every user. Revoke it, then move it behind your server.',
+  autorun: 'Your coding agent runs a project’s hooks, and VS Code runs folder-open tasks, without you typing anything. The ChainDrop worm (August 2026) planted both so that opening a repo started it again. Clear it if you put it there: it asks again whenever it changes.',
+  'autorun-payload': 'Something that runs on its own when the project opens, and hides its code or reaches for secrets, is how ChainDrop came back after the bad package was gone. slowship holds it whatever else is true.',
+  'autorun-allowed': 'VS Code asks once before running a folder’s tasks on open. This setting switches the question off, for this folder.',
+  'stray-script': 'Settings folders hold settings. A script sitting there that nothing runs may be left over, or waiting for a hook to be added.',
   'install-runs': 'Code that runs at install and downloads or starts programs is normal for native tools, and also how install-time worms spread.',
   'hidden-chars': 'Bidirectional control characters can make code read differently from how it runs (“Trojan Source”).',
   'ipc-open': 'This handler trusts every page in the window. If one is ever compromised (a bad link, an injected script), it can make your app start programs or open any URL. Check event.senderFrame before doing anything.',
@@ -2420,7 +2425,8 @@ function detailHTML(i) {
   const fs = [...i.findings.filter(needs), ...i.findings.filter(f => !needs(f))].slice(0, 6);
   const mc = i.findings.map(f => f.matches_claim).filter(x => x && x !== 'unknown');
   const rel = mc.includes('no') ? 'no' : mc.length && mc.every(x => x === 'yes') ? 'yes' : 'unknown';
-  const says = i.kind === 'runtime' ? '<span class="muted">What this project runs on. Storm watch checks it against known storms and the date its fixes stop.</span>'
+  const says = i.kind === 'autorun' ? '<span class="muted">What opening this project runs on its own: your coding agent’s hooks, VS Code’s folder-open tasks, and the scripts they start. Clear it if you put it there; it asks again when it changes.</span>'
+    : i.kind === 'runtime' ? '<span class="muted">What this project runs on. Storm watch checks it against known storms and the date its fixes stop.</span>'
     : i.kind === 'dep' ? `<span class="muted">A ${esc(i.eco)} package pinned in ${esc(i.facts[0].file)}. Only its name and version are matched against public advisories; its code isn’t read.</span>`
     : i.kind === 'app' ? '<span class="muted">Your own code. Here slowship looks for what you didn’t mean to ship: keys, debug switches, source maps, open doors in Electron.</span>'
     : i.claim ? claimHTML(i.claim) : '<span class="muted">No description, so there was nothing to compare its code against.</span>';
@@ -2532,7 +2538,7 @@ function scannerHTML(i, rel) {
       <text class="tl" x="28" y="4.5">${esc(g[1])}</text></g></g>`;
     return { lines, tok };
   });
-  const said = i.kind === 'app' ? 'your own build' : i.claim ? `“${short(i.claim.split('\n')[0], 40)}”` : 'no description';
+  const said = i.kind === 'app' ? 'your own build' : i.kind === 'autorun' ? 'runs when you open it' : i.claim ? `“${short(i.claim.split('\n')[0], 40)}”` : 'no description';
   const tagW = Math.min(340, 80 + said.length * 7.8);
   // the readout: what the analysis did on its way to this verdict
   const combos = i.findings.filter(fd => fd.evidence.length > 1).length, notes = (i.facts || []).filter(x => x.label).length;
@@ -2901,11 +2907,13 @@ function chartBg() {
 const queueOrder = (a, b) => ORDER[b.level] - ORDER[a.level] || label(a).localeCompare(label(b));
 function review() {
   const open = G.filter(i => !i.approved && needs(i)).sort(queueOrder), all = G.filter(needs).length, done = all - open.length;
-  const storm = open.filter(i => i.findings.filter(needs).every(f => STORMY.has(f.kind))).length, code = open.length - storm;
+  const auto = open.filter(i => i.kind === 'autorun').length, storm = open.filter(i => i.kind !== 'autorun' && i.findings.filter(needs).every(f => STORMY.has(f.kind))).length, code = open.length - storm - auto;
+  const parts = [code && `${code === 1 ? '1 does' : `${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say`, auto && 'opening this project starts something on its own', storm && `${storm} ${storm === 1 ? 'is' : 'are'} in a known storm`].filter(Boolean);
   $('#needlede').textContent = !open.length ? 'Nothing needs you.'
-    : !storm ? `${code === 1 ? 'This does' : `These ${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say. Look at each one. If you know why it’s there, clear it.`
-    : !code ? `${storm === 1 ? 'This is' : `These ${storm} are`} in a known storm. Each comes with its fix; clear what you accept for now.`
-    : `${code === 1 ? '1 does' : `${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say, and ${storm} ${storm === 1 ? 'is' : 'are'} in a known storm. Look at each one; clear what you know or accept.`;
+    : parts.length > 1 ? `${cap1(parts.slice(0, -1).join(', '))} and ${parts.at(-1)}. Look at each one; clear what you know or accept.`
+    : code ? `${code === 1 ? 'This does' : `These ${code} do`} something ${code === 1 ? 'its' : 'their'} description doesn’t say. Look at each one. If you know why it’s there, clear it.`
+    : auto ? 'Opening this project starts something on its own. Look at what it runs; clear it if you put it there.'
+    : `${storm === 1 ? 'This is' : `These ${storm} are`} in a known storm. Each comes with its fix; clear what you accept for now.`;
   const qp = $('#qprog');
   if (!all) qp.innerHTML = '';
   else {
@@ -4302,7 +4310,7 @@ const BOX = {  // front, top, side, ink: the container wears its verdict
   hold: ['#C2307F', '#D9549A', '#8C1A5A', '#FFFFFF'], glance: ['#EB9F2C', '#F4BC5E', '#B8751A', '#0F202C'], cleared: ['#0C8A5E', '#2BA779', '#086445', '#FFFFFF'],
   notable: ['#6B808C', '#8396A1', '#4E616C', '#FFFFFF'], quiet: ['#4B6270', '#61798A', '#364955', '#E4EDF0'],
 };
-const CODE = { npm: 'PKG', skill: 'SKILL', mcp: 'MCP', app: 'APP', runtime: 'RUN', dep: 'PKG' };
+const CODE = { npm: 'PKG', skill: 'SKILL', mcp: 'MCP', app: 'APP', runtime: 'RUN', dep: 'PKG', autorun: 'AUTO' };
 const short = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
 function boxSVG(i, st) {
   const [f, t, sd, ink] = BOX[st], [name, ver] = splitName(i);

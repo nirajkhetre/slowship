@@ -5,13 +5,13 @@ import { condense, dirFacts } from './facts.js';
 import { available, judge, MODEL } from './judge.js';
 import { assess, combos, keysOf, risk, worst } from './policy.js';
 import { claimOf, npmPackages } from './inventory.js';
-import { findMcpServers, findSkills, keysFrom, resolveServer, serverBinaryFacts, skillFacts } from './agents.js';
+import { findAutorun, findMcpServers, findSkills, keysFrom, resolveServer, serverBinaryFacts, skillFacts } from './agents.js';
 import { appFacts } from './app.js';
 import { fingerprint, load, newSince, save } from './state.js';
 import { applyStorm } from './storm.js';
 
 // Bump when what gets read changes, so results cached by an older slowship are read again (approvals stay: same bytes).
-const RULES = 6;
+const RULES = 7;
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
 export async function checkItems(items, { model = true, onItem = () => {}, onStep = () => {} } = {}) {
@@ -59,6 +59,8 @@ export async function scanProject(project, { packages = true, agents = true, fet
     kind: 'app', key: `app:${app}`, name: basename(app), dir: app, claim: '', fp: `app-${fingerprint(app)}`, noModel: true, read: () => appFacts(app),
   });
   if (packages) {
+    const auto = findAutorun(project);  // what opening the project runs on its own (the files ChainDrop plants)
+    if (auto) items.push(auto);
     const npm = npmPackages(project);
     warnings.push(...npm.warnings);
     for (const p of npm.packages) items.push({
@@ -89,7 +91,7 @@ export async function scanProject(project, { packages = true, agents = true, fet
   }
   const run = await checkItems(items, opts);
   applyStorm(run, packages ? project : null);  // what it runs on, the advisories, the blast radius: fresh every time, never cached
-  const st = run.storm, other = st.layer.length || Object.keys(st.advisories).length || st.unpinned.length;  // a Python or Go project isn't "nothing to check"
+  const st = run.storm, other = st.layer.length || Object.keys(st.advisories).length || st.unpinned.length || run.items.some(i => i.kind === 'autorun');  // a Python or Go project isn't "nothing to check"
   return { ...run, warnings: other ? warnings.filter(w => !w.includes('nothing to check')) : warnings, unread, project };
 }
 

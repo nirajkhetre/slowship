@@ -60,7 +60,7 @@ const WM = { night: wordmark('#F4F2EE', '#9CB0FF'), mid: wordmark('#5574FF', '#2
 
 // ---------- what the report knows about an item, in the same words ----------
 const ORDER = { info: 0, notable: 1, review: 2, hold: 3 };
-const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime', dep: 'Package' };
+const KIND = { npm: 'Package', skill: 'Skill', mcp: 'MCP server', app: 'Your build', runtime: 'Runtime', dep: 'Package', autorun: 'Runs on open' };
 const ST = { hold: 'Held', glance: 'Worth a glance', cleared: 'Cleared by you', notable: 'Noted', quiet: 'Fine' };
 const stateOf = i => i.approved && ORDER[i.level] >= 2 ? 'cleared' : i.level === 'hold' ? 'hold' : i.level === 'review' ? 'glance' : i.level === 'notable' ? 'notable' : 'quiet';
 const PIP = { hold: '◆', glance: '●', cleared: '✓', notable: '○', quiet: '·' };
@@ -471,6 +471,7 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
     const mc = it.findings.map(f => f.matches_claim).filter(x => x && x !== 'unknown'), rel = mc.includes('no') ? 'no' : mc.length && mc.every(x => x === 'yes') ? 'yes' : '';
     push([['What it says it does', { fg: N.ink2, a: BOLD }], ...(rel ? [[rel === 'no' ? '   ≠ not what its code does' : '   = matches its code', { fg: rel === 'no' ? N.hold : N.clear, a: BOLD }]] : [])]);
     const claim = it.kind === 'app' ? 'Your own code. Here slowship looks for what you didn\'t mean to ship: keys, debug switches, source maps, open doors in Electron.'
+      : it.kind === 'autorun' ? "What opening this project runs on its own: your coding agent's hooks, VS Code's folder-open tasks, and the scripts they start."
       : it.kind === 'runtime' ? 'What this project runs on. Storm watch checks it against known storms and the dates its fixes stop.'
       : it.kind === 'dep' ? `A ${it.eco} package pinned in ${it.facts[0].file}. Only its name and version are matched against public advisories; its code isn't read.`
       : (it.claim || 'No description, so there was nothing to compare its code against.').split('\n')[0];

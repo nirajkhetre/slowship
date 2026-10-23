@@ -453,6 +453,36 @@ test('storm watch: what a project runs on, the PHP2Shell branches, advisories ma
   delete process.env.SLOWSHIP_ADVISORIES;
 });
 
+test('what opening a project runs: ChainDrop\'s planted hook and folder-open task are held, a formatter hook is a glance, and a package that writes those files is held', async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs');
+  const { autorunFacts, findAutorun } = await import('../src/agents.js');
+  const v = verdict(autorunFacts(join(FX, 'chaindrop-repo')));
+  assert.equal(v.level, 'hold');
+  const at = kind => v.findings.filter(f => f.kind === kind).map(f => f.evidence.map(id => v.short.find(x => x.id === id)).map(x => `${x.file}:${x.line}`));
+  assert.deepEqual(at('autorun-payload')[0].slice(0, 2), ['.claude/settings.json:9', '.vscode/tasks.json:8'], 'each autorun is tied to the script it starts');
+  assert.deepEqual(at('autorun'), [['.claude/settings.json:17']], 'the formatter hook stands alone: worth a glance, not a hold');
+  assert.ok(at('hidden-code').length && at('token-net').length, 'the planted scripts are read as code');
+  assert.deepEqual([at('autorun-allowed'), at('stray-script')].map(x => x.length), [1, 1]);
+  assert.ok(!v.findings.some(f => f.kind === 'persist-path'), 'a command naming its own script isn\'t a second finding');
+  const { said } = await import('../src/notify.js');
+  for (const f of v.findings) assert.ok(!/prettier|setup\.mjs|leftover/.test(said(f)), 'the ping and the agent never repeat a command or file name the repo wrote');
+  // a plain project: one formatter hook, nothing else; a hook can't send slowship outside the project
+  const proj = mkdtempSync(join(tmpdir(), 'slowship-auto-'));
+  mkdirSync(join(proj, '.claude'));
+  writeFileSync(join(proj, '.claude', 'settings.json'), JSON.stringify({ hooks: { PostToolUse: [{ matcher: 'Edit', hooks: [{ type: 'command', command: 'npx prettier --write .' }, { type: 'command', command: 'node ../../outside.mjs' }] }] } }, null, 2));
+  const plain = verdict(autorunFacts(proj));
+  assert.equal(plain.level, 'review');
+  assert.ok(!autorunFacts(proj).files.some(f => f.includes('outside')), 'nothing outside the project is read');
+  const item = findAutorun(proj);
+  assert.deepEqual([item.kind, item.noModel, item.dir], ['autorun', true, proj]);
+  writeFileSync(join(proj, '.claude', 'settings.json'), JSON.stringify({ hooks: { PostToolUse: [{ hooks: [{ type: 'command', command: 'npx prettier --check .' }] }] } }));
+  assert.notEqual(findAutorun(proj).fp, item.fp, 'a changed hook asks again');
+  assert.equal(findAutorun(mkdtempSync(join(tmpdir(), 'slowship-none-'))), null, 'opening it runs nothing: no item');
+  // the other half: a package whose code writes those files is held, like one writing a shell profile
+  const pkg = verdict(fileFacts("const fs = require('fs');\nfs.writeFileSync('.claude/settings.json', JSON.stringify(hooks));\nfs.writeFileSync('.vscode/tasks.json', tasks);\n", 'index.js'));
+  assert.equal(pkg.level, 'hold'); assert.ok(pkg.findings.some(f => f.kind === 'persistence'));
+});
+
 test('pnpm: each package read once from its real folder in .pnpm, links skipped, fingerprints from the lockfile, and a strange manifest can\'t stop the watch', async () => {
   const { mkdtempSync, mkdirSync, writeFileSync, symlinkSync } = await import('node:fs');
   const { npmPackages, claimOf } = await import('../src/inventory.js');

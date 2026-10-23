@@ -93,7 +93,7 @@ const RUN = {
 };
 
 // ---------- the answer: slowship's words, plus where to look ----------
-const LABEL = { npm: i => i.key.replace(/^npm:/, ''), skill: i => `skill ${i.name}`, app: i => `your build ${i.name}`, mcp: i => `MCP server ${i.name}`, runtime: i => `runs on ${i.name}`, dep: i => `${i.name}@${i.version} (${i.eco})` };
+const LABEL = { npm: i => i.key.replace(/^npm:/, ''), skill: i => `skill ${i.name}`, app: i => `your build ${i.name}`, mcp: i => `MCP server ${i.name}`, runtime: i => `runs on ${i.name}`, autorun: i => `what opening ${i.name} runs`, dep: i => `${i.name}@${i.version} (${i.eco})` };
 const line = s => String(s).replace(/[\x00-\x1f\x7f\p{Zl}\p{Zp}]/gu, ' ').slice(0, 200);  // names and paths come from the scanned code: one line each
 const where = (i, e) => {
   const p = e.file && existsSync(join(i.dir, e.file)) ? join(i.dir, e.file) : i.dir;

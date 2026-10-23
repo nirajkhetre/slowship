@@ -1,6 +1,7 @@
 // Your agent's supply chain: installed skills (instructions + scripts) and configured MCP servers.
 // A skill is read as both code and instructions, because a skill attacks through either, or through the two together.
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
@@ -73,7 +74,7 @@ const SCRIPT_RULES = [
   { cap: 'fs-write', re: /(open\([^)]*["'][wa]b?\+?["']|>>\s*~?\/?\S|\bOut-File\b|Set-Content|Add-Content)/, says: 'writes files' },
 ];
 const SECRET_LIT = /(\.ssh[\\/]|\bid_rsa\b|\bid_ed25519\b|\.npmrc\b|\.pypirc\b|\.netrc\b|\.git-credentials\b|\.aws[\\/]credentials|Login Data\b|wallet\.dat\b)/i;
-const PERSIST_LIT = /((?:^|[~\\/"'\s])\.(?:bashrc|zshrc|bash_profile|profile|zprofile)\b|[\\/]authorized_keys\b|LaunchAgents[\\/]|Start Menu[\\/]Programs[\\/]Startup|\bcrontab\b)/;
+const PERSIST_LIT = /((?:^|[~\\/"'\s])\.(?:bashrc|zshrc|bash_profile|profile|zprofile)\b|[\\/]authorized_keys\b|LaunchAgents[\\/]|Start Menu[\\/]Programs[\\/]Startup|\bcrontab\b|\.claude[\\/](?:settings(?:\.local)?\.json|[\w.-]+\.[cm]?js)\b|\.vscode[\\/](?:tasks\.json|[\w.-]+\.[cm]?js)\b)/;
 
 export function scriptFacts(text, file) {
   const out = [];
@@ -142,6 +143,81 @@ export function findMcpServers(project) {
     }
   }
   return out;
+}
+
+// ---------- what opening the project runs on its own ----------
+// A coding agent runs a project's hooks (.claude/settings.json) as sessions start and tools run; VS Code runs tasks marked
+// runOn: folderOpen. The ChainDrop worm (Aug 2026) planted both, and the setup.mjs files they call, in the repos it reached,
+// so opening the project started it again after the bad package was gone.
+const AGENT_SETTINGS = ['.claude/settings.json', '.claude/settings.local.json'];
+const WHEN = {
+  SessionStart: 'when your coding agent starts a session here', SessionEnd: 'when your coding agent ends a session here',
+  UserPromptSubmit: 'every time you send your coding agent a message', PreToolUse: 'before your coding agent uses a tool',
+  PostToolUse: 'after your coding agent uses a tool', Stop: 'when your coding agent finishes a reply', SubagentStop: 'when a subagent finishes',
+  Notification: 'when your coding agent sends a notification', PreCompact: 'before your coding agent compacts the conversation',
+};
+const HELPERS = { apiKeyHelper: 'whenever your coding agent needs an API key', awsAuthRefresh: 'when your coding agent refreshes its AWS sign-in', awsCredentialExport: 'when your coding agent needs AWS keys', otelHeadersHelper: 'when your coding agent sends telemetry' };
+const SCRIPT = /\.(m?js|cjs|ts|sh|ps1|py)$/;
+// VS Code's JSON allows comments and trailing commas; strings are kept whole while the rest is cleaned
+const jsonc = t => JSON.parse(t.replace(/("(?:\\.|[^"\\])*")|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, (m, s) => s ?? '').replace(/,(\s*[}\]])/g, '$1'));
+
+/** What opening this project runs without asking: every hook and folder-open task (one fact each, at its line), and the
+ *  code of the scripts they call or that sit in those folders. Read, never run. */
+export function autorunFacts(project) {
+  const facts = [], ran = new Set(), files = new Set(), errors = [];
+  const read = f => { try { const t = readText(join(project, f)); files.add(f); return t; } catch { return null; } };
+  const at = (text, needle) => { const ls = text.split(/\r?\n/), k = Math.max(0, ls.findIndex(l => l.includes(needle))); return { line: k + 1, code: ls[k].trim().slice(0, 160) }; };
+  // each command is a chain: the hook or task, what its own text does, and the script it starts (policy combines along it)
+  const runs = (cmd, when, file, text, needle = cmd) => {
+    const where = at(text, JSON.stringify(needle).slice(1, 41)), scripts = [];
+    for (const [m] of cmd.matchAll(/[\w$.{}/\\-]+\.(?:m?js|cjs|ts|sh|ps1|py)\b/g)) {
+      const rel = m.replace(/^(\$\{workspaceFolder\}|\$CLAUDE_PROJECT_DIR)/, '').replaceAll('\\', '/').replace(/^\.?\//, '');
+      if (!rel.split('/').includes('..')) { ran.add(rel); scripts.push(rel); }
+    }
+    const chain = scripts[0] ?? `${file}:${where.line}`;
+    facts.push({ cap: 'autorun', detail: `runs \`${cmd.slice(0, 120)}\` ${when}`, file, ...where, scope: `${file}#0`, chain });
+    for (const f of scriptFacts(cmd, file)) if (f.cap !== 'persist-path') facts.push({ ...f, ...where, chain });  // a curl | sh in the command itself
+  };
+  for (const file of AGENT_SETTINGS) {
+    const text = read(file); if (text == null) continue;
+    let s; try { s = JSON.parse(text); } catch { errors.push(`${file} (unparseable)`); continue; }
+    for (const [event, groups] of Object.entries(s?.hooks ?? {})) for (const g of [groups].flat()) for (const h of [g?.hooks].flat())
+      if (typeof h?.command === 'string') runs(h.command, WHEN[event] ?? `on your coding agent's ${event} hook`, file, text);
+    if (typeof s?.statusLine?.command === 'string') runs(s.statusLine.command, 'over and over, to draw your coding agent\'s status line', file, text);
+    for (const [k, when] of Object.entries(HELPERS)) if (typeof s?.[k] === 'string') runs(s[k], when, file, text);
+  }
+  const tasks = read('.vscode/tasks.json');
+  if (tasks != null) {
+    let t; try { t = jsonc(tasks); } catch { errors.push('.vscode/tasks.json (unparseable)'); }
+    for (const task of Array.isArray(t?.tasks) ? t.tasks : []) {
+      if (task?.runOptions?.runOn !== 'folderOpen') continue;
+      for (const o of [task, task.windows, task.osx, task.linux]) {  // each platform can have its own command
+        if (typeof o?.command !== 'string') continue;
+        const args = (Array.isArray(o.args) ? o.args : []).map(a => typeof a === 'string' ? a : a?.value ?? '');
+        runs([o.command, ...args].join(' '), 'as soon as the folder opens in VS Code', '.vscode/tasks.json', tasks, o.command);
+      }
+    }
+  }
+  const vs = read('.vscode/settings.json');
+  if (vs != null) { let v; try { v = jsonc(vs); } catch {} if (v?.['task.allowAutomaticTasks'] === 'on') facts.push({ cap: 'autorun-allowed', detail: 'lets folder-open tasks run without asking first', file: '.vscode/settings.json', ...at(vs, 'allowAutomaticTasks'), scope: '.vscode/settings.json#0' }); }
+  // the scripts those commands run, and any script sitting in those folders: settings folders, not code folders
+  const loose = ['.claude', '.claude/hooks', '.vscode'].flatMap(d => { try { return readdirSync(join(project, d), { withFileTypes: true }).filter(e => e.isFile() && SCRIPT.test(e.name)).map(e => `${d}/${e.name}`); } catch { return []; } });
+  for (const f of new Set([...[...ran].filter(f => SCRIPT.test(f)), ...loose])) {
+    const text = read(f); if (text == null) continue;
+    if (!ran.has(f)) facts.push({ cap: 'stray-script', detail: `${f} sits in a settings folder, and nothing here runs it`, file: f, line: 1, scope: `${f}#0`, code: text.split(/\r?\n/)[0].trim().slice(0, 160) });
+    const own = /\.[cm]?js$/.test(f) ? fileFacts(text, f) : { facts: scriptFacts(text, f) };
+    facts.push(...own.facts.map(x => ({ ...x, chain: f })));
+    if (own.error) errors.push(`${f} (${own.error})`);
+  }
+  return { facts, files: [...files], coverage: { files: files.size, read: files.size - errors.length, skipped: [], errors } };
+}
+/** The project's "runs on open" item, or null when opening it runs nothing. Its fingerprint covers every file it read. */
+export function findAutorun(project) {
+  const r = autorunFacts(project);
+  if (!r.facts.some(f => ['autorun', 'stray-script', 'autorun-allowed'].includes(f.cap))) return null;
+  const h = createHash('sha256');
+  for (const f of r.files.sort()) h.update(f).update(readFileSync(join(project, f)));
+  return { kind: 'autorun', key: `autorun:${project}`, name: basename(project), dir: project, claim: '', fp: `autorun-${h.digest('base64')}`, noModel: true, read: () => r };
 }
 
 // ---------- who can spend your money ----------

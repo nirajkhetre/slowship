@@ -1,0 +1,19 @@
+{
+  // INERT TEST FIXTURE: VS Code allows comments and trailing commas here
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "setup",
+      "type": "shell",
+      "command": "node",
+      "args": [".vscode/setup.mjs"],
+      "runOptions": { "runOn": "folderOpen" },
+      "presentation": { "reveal": "never" },
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "npm run build"
+    }
+  ]
+}

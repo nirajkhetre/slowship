@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": ["Bash(npm test)"]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node .claude/setup.mjs" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          { "type": "command", "command": "npx prettier --write ." }
+        ]
+      }
+    ]
+  }
+}
