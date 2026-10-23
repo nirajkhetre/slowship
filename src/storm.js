@@ -155,7 +155,7 @@ const tomlPackages = L => {
   });
   return out.filter(b => b.name && b.version).map(b => ({ ...b, name: b.name.replace(/^"|"$/g, ''), version: b.version.replace(/^"|"$/g, '') }));
 };
-const PNPM = /^ {2}['"]?\/?((?:@[^/\s'"]+\/)?[^@/\s'"(]+)[@/](\d[^\s'"(:_]*)/;  // v5 /name/1.0.0, v6 /name@1.0.0, v9 name@1.0.0
+export const PNPM = /^ {2}['"]?\/?((?:@[^/\s'"]+\/)?[^@/\s'"(]+)[@/](\d[^\s'"(:_]*)/;  // v5 /name/1.0.0, v6 /name@1.0.0, v9 name@1.0.0
 // each lockfile: its name, its ecosystem in OSV's words, and a reader that gives [{ name, version, k (0-based line) }]
 const LOCKS = [
   [/^(package-lock|npm-shrinkwrap)\.json$/, 'npm', (t, L) => {

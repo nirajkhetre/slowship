@@ -453,6 +453,25 @@ test('storm watch: what a project runs on, the PHP2Shell branches, advisories ma
   delete process.env.SLOWSHIP_ADVISORIES;
 });
 
+test('pnpm: each package read once from its real folder in .pnpm, links skipped, fingerprints from the lockfile, and a strange manifest can\'t stop the watch', async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync, symlinkSync } = await import('node:fs');
+  const { npmPackages, claimOf } = await import('../src/inventory.js');
+  const proj = mkdtempSync(join(tmpdir(), 'slowship-pnpm-')), store = join(proj, 'node_modules', '.pnpm');
+  const pkg = (entry, name, version, extra = {}) => { const d = join(store, entry, 'node_modules', ...name.split('/')); mkdirSync(d, { recursive: true }); writeFileSync(join(d, 'package.json'), JSON.stringify({ name, version, ...extra })); return d; };
+  writeFileSync(join(proj, 'pnpm-lock.yaml'), "lockfileVersion: '9.0'\n\npackages:\n\n  left-pad@1.3.0:\n    resolution: {integrity: sha512-AAA}\n\n  '@scope/thing@2.0.0':\n    resolution: {integrity: sha512-BBB, tarball: x}\n\nsnapshots:\n\n  left-pad@1.3.0: {}\n");
+  const lp = pkg('left-pad@1.3.0', 'left-pad', '1.3.0', { keywords: 'not a list', description: { not: 'text' } });
+  pkg('left-pad@1.3.0_peer@1.0.0', 'left-pad', '1.3.0');  // the same version installed again for other peers
+  pkg('@scope+thing@2.0.0', '@scope/thing', '2.0.0');
+  const link = (to, at) => { mkdirSync(join(at, '..'), { recursive: true }); symlinkSync(to, at, 'junction'); };
+  link(lp, join(store, '@scope+thing@2.0.0', 'node_modules', 'left-pad'));  // a dependency is a link to the real folder
+  link(lp, join(store, 'node_modules', 'left-pad')); link(lp, join(proj, 'node_modules', 'left-pad'));
+  const r = npmPackages(proj);
+  assert.deepEqual(r.packages.map(p => [p.key, p.integrity]).sort(), [['npm:@scope/thing@2.0.0', 'sha512-BBB'], ['npm:left-pad@1.3.0', 'sha512-AAA']]);
+  assert.deepEqual(r.warnings, []);
+  assert.equal(r.packages.find(p => p.name === 'left-pad').dir, lp, 'read from its real folder, not through the link @scope/thing has to it');
+  assert.equal(claimOf(lp, r.packages.find(p => p.name === 'left-pad').manifest), '', 'keywords that aren\'t a list, and a description that isn\'t text, are left out');
+});
+
 test('storm watch in every language: lockfiles read with their lines, versions ordered each ecosystem\'s way, names matched the way registries do', async () => {
   const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs');
   const st = await import('../src/storm.js');
