@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Questions · slowship docs</title>
+<meta name="description" content="The things people ask first, answered plainly.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Reference</span><b>Questions</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/" aria-current="page">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Reference</p>
+    <h1>Questions</h1>
+<p class="lead">The things people ask first, answered plainly.</p>
+
+<h2 id="does-it-scan-my-whole-computer"><a class="anchor" href="#does-it-scan-my-whole-computer" aria-label="Link to this section">#</a>Does it scan my whole computer?</h2>
+<p>No. It reads the packages of the project folder you run it in, plus the skill folders your coding agents use and your editors’ MCP settings. Those last two belong to your computer rather than one project, so every project shows the same skills. Nothing else is touched. The verdict card lists exactly what it read.</p>
+
+<h2 id="do-i-need-to-keep-the-server-running-for-the-nightly-watch"><a class="anchor" href="#do-i-need-to-keep-the-server-running-for-the-nightly-watch" aria-label="Link to this section">#</a>Do I need to keep the server running for the nightly watch?</h2>
+<p>No. The nightly watch is a scheduled task (Task Scheduler on Windows, crontab elsewhere) that runs slowship by itself, hidden. The report server is only for reading the results, and only when you open it with <code>slowship ui</code>. Your computer does need to be on, or wake up.</p>
+
+<h2 id="is-it-a-replacement-for-npm-audit"><a class="anchor" href="#is-it-a-replacement-for-npm-audit" aria-label="Link to this section">#</a>Is it a replacement for npm audit?</h2>
+<p>No, use both. <code>npm audit</code> tells you about known vulnerabilities in published versions. slowship asks a different question: does this code do what its description says? That catches a package that is doing something new and quiet, before anyone has reported it.</p>
+
+<h2 id="does-it-need-the-internet"><a class="anchor" href="#does-it-need-the-internet" aria-label="Link to this section">#</a>Does it need the internet?</h2>
+<p>Not for reading. The model runs locally, and your packages are already on disk. It downloads only <code>npx</code> MCP servers so it can read them (<code>--offline</code> turns that off), packages your agent asks it to check, and the morning ping if you connect one.</p>
+
+<h2 id="does-it-work-without-ollama"><a class="anchor" href="#does-it-work-without-ollama" aria-label="Link to this section">#</a>Does it work without Ollama?</h2>
+<p>Yes. It runs on its rules alone and says so in the verdict. You lose the model’s second opinion, which mostly cuts false alarms; holds come from rules either way.</p>
+
+<h2 id="why-a-small-local-model-and-not-a-big-cloud-one"><a class="anchor" href="#why-a-small-local-model-and-not-a-big-cloud-one" aria-label="Link to this section">#</a>Why a small local model and not a big cloud one?</h2>
+<p>Two reasons. Your code stays on your laptop. And the model’s job is deliberately small: compare one description with a short list of facts. It can’t decide a hold or lower one, so a bigger model wouldn’t change what matters most.</p>
+
+<h2 id="could-a-package-trick-it"><a class="anchor" href="#could-a-package-trick-it" aria-label="Link to this section">#</a>Could a package trick it?</h2>
+<p>It can try. A package’s README can say anything to an AI, and in testing an injected README did sway the model. But the model never sees the code in bulk, never decides alone, and can’t lower a hold, which comes from code. Your coding agent can’t clear anything either. See <a href="../../docs/how-it-decides/">How it decides</a>.</p>
+
+<h2 id="what-does-worth-a-glance-mean"><a class="anchor" href="#what-does-worth-a-glance-mean" aria-label="Link to this section">#</a>What does “worth a glance” mean?</h2>
+<p>A single thing the code does that its description doesn’t call for. A date library that also makes a network call, say. Usually there’s a good reason. Look for ten seconds, then clear it.</p>
+
+<h2 id="can-it-break-my-project"><a class="anchor" href="#can-it-break-my-project" aria-label="Link to this section">#</a>Can it break my project?</h2>
+<p>It never writes into your project. It writes only to its own folder, <code>~/.slowship</code>, plus the scheduled task or crontab line if you turn on the nightly watch, and the agent skill if you run <code>slowship connect</code>.</p>
+
+<h2 id="why-does-it-say-nothing-about-most-of-my-packages"><a class="anchor" href="#why-does-it-say-nothing-about-most-of-my-packages" aria-label="Link to this section">#</a>Why does it say nothing about most of my packages?</h2>
+<p>Because most packages do what they say. Silence is the point: a scanner that warns about everything gets ignored. Everything it read is still listed under <b>Everything aboard</b>.</p>
+
+<h2 id="what-if-it-finds-nothing"><a class="anchor" href="#what-if-it-finds-nothing" aria-label="Link to this section">#</a>What if it finds nothing?</h2>
+<p>Then nothing it can see was wrong. That’s not proof of nothing; see <a href="../../docs/blind-spots/">What it can’t see</a>.</p>
+
+<h2 id="where-can-i-try-it-without-installing"><a class="anchor" href="#where-can-i-try-it-without-installing" aria-label="Link to this section">#</a>Where can I try it without installing?</h2>
+<p><a href="../../demo/">The live demo</a> is the real report page, replaying one recorded watch. Nothing in it touches your computer.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/measured/"><small>Previous</small><b>Measured results</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/faq.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#does-it-scan-my-whole-computer">Does it scan my whole computer?</a></li><li><a href="#do-i-need-to-keep-the-server-running-for-the-nightly-watch">Do I need to keep the server running for the nightly watch?</a></li><li><a href="#is-it-a-replacement-for-npm-audit">Is it a replacement for npm audit?</a></li><li><a href="#does-it-need-the-internet">Does it need the internet?</a></li><li><a href="#does-it-work-without-ollama">Does it work without Ollama?</a></li><li><a href="#why-a-small-local-model-and-not-a-big-cloud-one">Why a small local model and not a big cloud one?</a></li><li><a href="#could-a-package-trick-it">Could a package trick it?</a></li><li><a href="#what-does-worth-a-glance-mean">What does “worth a glance” mean?</a></li><li><a href="#can-it-break-my-project">Can it break my project?</a></li><li><a href="#why-does-it-say-nothing-about-most-of-my-packages">Why does it say nothing about most of my packages?</a></li><li><a href="#what-if-it-finds-nothing">What if it finds nothing?</a></li><li><a href="#where-can-i-try-it-without-installing">Where can I try it without installing?</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

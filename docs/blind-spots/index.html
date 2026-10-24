@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What it can’t see · slowship docs</title>
+<meta name="description" content="slowship reads code; it never runs it. That’s what makes it safe, and it’s also its limit. Here is everything it knows it can miss.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>How it works</span><b>What it can’t see</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/" aria-current="page">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">How it works</p>
+    <h1>What it can’t see</h1>
+<p class="lead">slowship reads code; it never runs it. That’s what makes it safe, and it’s also its limit. Here is everything it knows it can miss.</p>
+<div class="note warn"><div><p><b>No findings is not proof of nothing.</b> The report says so too, and lists these blind spots for every watch.</p></div></div>
+
+<h2 id="code-that-only-exists-while-running"><a class="anchor" href="#code-that-only-exists-while-running" aria-label="Link to this section">#</a>Code that only exists while running</h2>
+<p>Code fetched or built while a program runs is invisible to a reader. slowship reports the capability, like <i>downloads and runs code</i>, but it can’t see the payload.</p>
+
+<h2 id="compiled-code"><a class="anchor" href="#compiled-code" aria-label="Link to this section">#</a>Compiled code</h2>
+<p>Compiled code isn’t decompiled. With REA, Go and Rust files are read as far as their build record: what they were built from, not what they do. .NET is read further, method by method, unless an assembly is too big for REA’s member reader (PowerShell’s 13 MB engine is). C and C++ leave no record, so those are only named.</p>
+
+<h2 id="big-electron-apps"><a class="anchor" href="#big-electron-apps" aria-label="Link to this section">#</a>Big Electron apps</h2>
+<p>REA’s map of an Electron app is slow on very big builds: on VS Code’s 6,187 files it got through 156 in 13 minutes. slowship gives it 5 minutes and says so when it gives up. A packaged app gets its fuses read, but its <code>app.asar</code> isn’t mapped; point <code>--app</code> at the unpacked build for the IPC map.</p>
+<p>In your build, only IPC handlers written inline are searched for what they do. A handler that hands off to a function elsewhere isn’t followed.</p>
+
+<h2 id="languages-it-reads-lightly-or-not-yet"><a class="anchor" href="#languages-it-reads-lightly-or-not-yet" aria-label="Link to this section">#</a>Languages it reads lightly, or not yet</h2>
+<ul>
+  <li>Python and shell inside skills are read line by line, not with a full parser. Treat quiet there as “nothing obvious”.</li>
+  <li>TypeScript isn’t read yet.</li>
+  <li>Code inside markdown code blocks is read as instructions, not as code.</li>
+</ul>
+
+<h2 id="prompt-injection"><a class="anchor" href="#prompt-injection" aria-label="Link to this section">#</a>Prompt injection</h2>
+<p>Instructions in <code>SKILL.md</code> are checked for four narrow things: hiding something from you, ignoring other instructions, downloading and running a script, and sending your data somewhere. Other prompt injection passes unnoticed. On the malware benchmark, attacks written as plain English were the biggest single group of misses.</p>
+
+<h2 id="big-files"><a class="anchor" href="#big-files" aria-label="Link to this section">#</a>Big files</h2>
+<p>Files over 2 MB, usually generated bundles, are skipped and named in the report.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/how-it-decides/"><small>Previous</small><b>How it decides</b></a><a class="next" href="../../docs/safety/"><small>Next</small><b>Safety and privacy</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/blind-spots.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#code-that-only-exists-while-running">Code that only exists while running</a></li><li><a href="#compiled-code">Compiled code</a></li><li><a href="#big-electron-apps">Big Electron apps</a></li><li><a href="#languages-it-reads-lightly-or-not-yet">Languages it reads lightly, or not yet</a></li><li><a href="#prompt-injection">Prompt injection</a></li><li><a href="#big-files">Big files</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

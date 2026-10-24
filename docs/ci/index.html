@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>In CI · slowship docs</title>
+<meta name="description" content="slowship can gate a build: the exit code is 2 when the verdict is held, so a pipeline stops before a package that does more than it says reaches production.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Using it</span><b>In CI</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/" aria-current="page">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Using it</p>
+    <h1>In CI</h1>
+<p class="lead">slowship can gate a build: the exit code is <code>2</code> when the verdict is held, so a pipeline stops before a package that does more than it says reaches production.</p>
+
+<h2 id="exit-codes"><a class="anchor" href="#exit-codes" aria-label="Link to this section">#</a>Exit codes</h2>
+<div class="tablewrap"><table>
+  <tr><th>Code</th><th>Means</th></tr>
+  <tr><td><code>0</code></td><td>Cleared to sail, or ready after a glance. Nothing is held.</td></tr>
+  <tr><td><code>2</code></td><td>Held in port. Something does more than it says.</td></tr>
+</table></div>
+<p>The nightly watch is the exception: it always exits cleanly and leaves the verdict in the report.</p>
+
+<h2 id="flags-that-suit-ci"><a class="anchor" href="#flags-that-suit-ci" aria-label="Link to this section">#</a>Flags that suit CI</h2>
+<ul>
+  <li><code>--packages-only</code>: a CI machine has no coding agent, so skip skills and MCP servers.</li>
+  <li><code>--no-model</code>: most CI machines have no local model. Rules only, and the output says so.</li>
+  <li><code>--json slowship.json</code>: write everything found as JSON, to keep as a build artifact.</li>
+  <li><code>--app dist/</code>: also check the build you’re about to ship.</li>
+</ul>
+<p>When output is piped, as it is in CI, slowship prints plain text by itself. <code>--plain</code> forces it anywhere.</p>
+
+<h2 id="an-example-pipeline"><a class="anchor" href="#an-example-pipeline" aria-label="Link to this section">#</a>An example pipeline</h2>
+<p>A sketch for GitHub Actions. Install your dependencies with scripts off, so nothing runs before it’s been read, then let slowship read them:</p>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>- uses: actions/checkout@v4
+- uses: actions/setup-node@v4
+  with:
+    node-version: 22
+- run: npm ci --ignore-scripts
+- run: git clone --depth 1 https://github.com/nirajkhetre/slowship ../slowship && npm --prefix ../slowship install
+- run: node ../slowship/bin/slowship.js . --packages-only --no-model --json slowship.json</code></pre></div>
+<div class="note warn"><div><p>Adjust it to your own pipeline. slowship reads what’s installed in <code>node_modules</code>, so install first. Installing with <code>--ignore-scripts</code> means a package’s install script can’t run before slowship has read it.</p></div></div>
+
+<h2 id="clearing-in-ci"><a class="anchor" href="#clearing-in-ci" aria-label="Link to this section">#</a>Clearing in CI</h2>
+<p>Clears are kept in slowship’s memory folder, which a fresh CI machine doesn’t have. Point <code>SLOWSHIP_HOME</code> at a folder you cache between runs if you want clears and memory to carry over. Clears stay tied to exact bytes, so a cached clear never covers changed code.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/coding-agent/"><small>Previous</small><b>Your coding agent</b></a><a class="next" href="../../docs/what-it-reads/"><small>Next</small><b>What it reads</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/ci.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#exit-codes">Exit codes</a></li><li><a href="#flags-that-suit-ci">Flags that suit CI</a></li><li><a href="#an-example-pipeline">An example pipeline</a></li><li><a href="#clearing-in-ci">Clearing in CI</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

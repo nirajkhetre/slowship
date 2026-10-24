@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clearing things · slowship docs</title>
+<meta name="description" content="When you’ve looked at something and you’re happy with it, clear it. It stops asking, until its code changes.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Using it</span><b>Clearing things</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/" aria-current="page">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Using it</p>
+    <h1>Clearing things</h1>
+<p class="lead">When you’ve looked at something and you’re happy with it, clear it. It stops asking, until its code changes.</p>
+
+<h2 id="what-clearing-means"><a class="anchor" href="#what-clearing-means" aria-label="Link to this section">#</a>What clearing means</h2>
+<p>Clearing says: <i>I’ve seen this, it’s fine.</i> The item turns mint in the harbour and leaves the review queue. Once everything that needed you is cleared, the verdict becomes <b>cleared to sail</b>.</p>
+<p>A clear is tied to the item’s exact bytes. slowship fingerprints every item by its content. If a new version of a package arrives, or a skill’s file changes by a single byte, the fingerprint changes and the item asks again. So a clear can never quietly cover code you haven’t seen.</p>
+
+<h2 id="three-ways-to-clear"><a class="anchor" href="#three-ways-to-clear" aria-label="Link to this section">#</a>Three ways to clear</h2>
+<h3>In the morning report</h3>
+<p>Select the item in the review list and press <b>Clear</b>, or press <kbd>a</kbd>. A ship takes it aboard, a painter rolls it green, and the next one comes up. <b>Undo</b> in the message at the bottom puts it back.</p>
+<h3>In the terminal review</h3>
+<p>Select it and press <kbd>c</kbd>. It slides away. <kbd>u</kbd> brings it back.</p>
+<h3>From the command line</h3>
+<p><code>--approve</code> clears in bulk after a watch:</p>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code><span class="c"># clear one item by name</span>
+slowship --approve tidy-dates
+
+<span class="c"># clear everything that's only "noted"</span>
+slowship --approve notable
+
+<span class="c"># clear everything worth a glance (and below)</span>
+slowship --approve review</code></pre></div>
+<p>It prints how many it cleared and reminds you that they’ll ask again when their code changes.</p>
+<div class="note warn"><div><p>Bulk clearing is handy for a first watch on a big project, but read what you clear. <code>--approve review</code> clears everything worth a glance in one go.</p></div></div>
+
+<h2 id="who-can-clear"><a class="anchor" href="#who-can-clear" aria-label="Link to this section">#</a>Who can clear</h2>
+<p>Only you. Your coding agent can ask slowship to check things and to watch the project, but it gets no tool to clear anything. That’s on purpose: an agent reads text that packages wrote, and that text can be written to talk it into things. See <a href="../../docs/coding-agent/">Your coding agent</a>.</p>
+
+<h2 id="where-it-s-kept"><a class="anchor" href="#where-it-s-kept" aria-label="Link to this section">#</a>Where it’s kept</h2>
+<p>Clears live in <code>state.json</code> inside <code>~/.slowship</code> (or <code>SLOWSHIP_HOME</code>), next to slowship’s memory of what it has read. Delete that file and every item asks again.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/terminal/"><small>Previous</small><b>The terminal review</b></a><a class="next" href="../../docs/nightly/"><small>Next</small><b>The nightly watch</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/clearing.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#what-clearing-means">What clearing means</a></li><li><a href="#three-ways-to-clear">Three ways to clear</a></li><li><a href="#who-can-clear">Who can clear</a></li><li><a href="#where-it-s-kept">Where it’s kept</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

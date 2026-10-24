@@ -1,0 +1,239 @@
+/* ---------- customs: one container, its paperwork, and an x-ray you move yourself ---------- */
+.gate{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:22px;margin-top:56px;align-items:stretch}
+/* the paperwork it came with: a bill of lading, ruled, with a perforated edge */
+.bol{position:relative;padding:24px 24px 26px 30px;border-radius:6px 22px 22px 6px;background:var(--sheet);border:2px solid var(--line);box-shadow:var(--lift-lg);overflow:hidden;
+  background-image:repeating-linear-gradient(180deg,transparent 0 33px,rgb(43 80 255 / .07) 33px 34px)}
+.bol::before{content:"";position:absolute;left:8px;top:16px;bottom:16px;width:2px;background:repeating-linear-gradient(180deg,var(--rule2) 0 6px,transparent 6px 12px)}
+.bol .kind{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;font:700 13px var(--sans);color:var(--ink3)}
+.bol .kind span{font:600 12px var(--data);color:var(--ink3)}
+.bol .cons{margin:0;font:700 30px/1.05 var(--display);letter-spacing:-.02em}
+.bol .cons small{font:500 14px var(--data);color:var(--ink3);margin-left:6px;letter-spacing:0}
+.bol dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 14px;margin:16px 0 18px;font-size:15px}
+.bol dt{font:600 13px var(--sans);color:var(--ink3);padding-top:2px}
+.bol dd{margin:0;color:var(--ink)}
+.bol dd q{font-style:italic;quotes:"“" "”"}
+.xhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;border-top:2px dashed var(--rule2);font:700 14px var(--sans)}
+.xhead b{font:700 12.5px var(--data);padding:3px 9px;border-radius:999px;background:var(--shoal);color:var(--ink2);transition:background-color .4s,color .4s}
+.xhead b.all{background:var(--hold);color:#fff}
+.finds{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.finds li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 11px;border-radius:12px;border:1.5px dashed var(--rule2);color:var(--ink3);font-size:14.5px;transition:border-color .4s,background-color .4s,color .4s}
+.finds li i{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;border:2px solid currentColor;font:800 15px/1 var(--display);font-style:normal;opacity:.45;transition:all .4s}
+.finds li code{font:500 12px var(--data)}
+.finds li.on{border-style:solid;border-color:var(--line);background:var(--paper);color:var(--ink);animation:findin .6s var(--spring)}
+.finds li.on i{opacity:1;color:#0A1633;border-color:#0A1633}
+.finds li.on.eq i{background:var(--clear)}
+.finds li.on.ne i{background:var(--hold);color:#fff}
+@keyframes findin{30%{transform:scale(1.04)}}
+.why{margin:14px 0 0;font-size:14.5px;line-height:1.5;color:var(--ink2);opacity:0;transform:translateY(8px);transition:opacity .5s,transform .6s var(--out)}
+.why.on{opacity:1;transform:none}
+.why b{color:var(--hold-ink)}
+.stamp2{position:absolute;left:50%;top:46%;z-index:3;display:grid;justify-items:center;gap:2px;padding:12px 20px 10px;border:4px double var(--hold);border-radius:12px;color:var(--hold);background:color-mix(in oklab,var(--sheet) 70%,transparent);
+  font:800 34px/1 var(--poster);letter-spacing:-.02em;white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,-50%) rotate(-9deg) scale(2.2)}
+.stamp2 small{font:700 11px var(--data);letter-spacing:.04em}
+.stamp2.on{animation:slam .55s cubic-bezier(.3,1.5,.5,1) forwards}
+@keyframes slam{0%{opacity:0;transform:translate(-50%,-50%) rotate(-9deg) scale(2.2)}60%{opacity:1;transform:translate(-50%,-50%) rotate(-9deg) scale(.94)}100%{opacity:.92;transform:translate(-50%,-50%) rotate(-9deg) scale(1)}}
+.bol.shake{animation:bolshake .4s .2s}
+@keyframes bolshake{30%{transform:translateY(3px)}60%{transform:translateY(-1px)}}
+
+/* the bay: the scanner arch, the belt, and the barrier */
+.bay{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:460px;padding:84px clamp(14px,3vw,34px) 0;border-radius:22px;background:#061335;border:2px solid #01040D;box-shadow:0 6px 0 #01040D;overflow:hidden;
+  background-image:linear-gradient(rgb(255 255 255 / .035) 1px,transparent 1px),linear-gradient(90deg,rgb(255 255 255 / .035) 1px,transparent 1px);background-size:26px 26px}
+.arch{position:absolute;left:50%;top:22px;width:min(78%,560px);height:calc(100% - 60px);translate:-50% 0;border:10px solid #172444;border-bottom:0;border-radius:26px 26px 0 0;pointer-events:none}
+.arch::before{content:"x-ray · read, not run";position:absolute;left:50%;top:-10px;translate:-50% -50%;padding:4px 12px;border-radius:999px;background:#0B1A42;border:2px solid #33467E;font:600 12px var(--data);color:#9CB0FF;white-space:nowrap}
+.arch i{position:absolute;top:-6px;width:12px;height:12px;border-radius:50%;background:#33467E;border:2px solid #01040D}
+.arch i:nth-of-type(1){left:14%}.arch i:nth-of-type(2){right:14%}
+.gate.scanning .arch i{background:var(--glance);box-shadow:0 0 14px var(--glance);animation:blinky .6s steps(1) infinite}
+.gate.scanning .arch i:nth-of-type(2){animation-delay:.3s}
+@keyframes blinky{50%{opacity:.25}}
+.gate.held .arch i{background:var(--hold);box-shadow:0 0 18px var(--hold);animation:blinky .45s steps(1) infinite}
+.box2{position:relative;z-index:1;width:100%;aspect-ratio:64/27;touch-action:none;user-select:none;-webkit-user-select:none}
+.gate:not(.in) .box2{transform:translateX(-120%)}
+.gate.in .box2{animation:rollin 1.5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rollin{from{transform:translateX(-120%)}to{transform:none}}
+/* held: it jolts against the barrier; the roll-in keeps its place in the list, so it isn't replayed */
+.gate.in.held .box2{animation:rollin 1.5s cubic-bezier(.2,.8,.2,1) both,heldjolt .5s}
+@keyframes heldjolt{30%{translate:6px 0}60%{translate:-3px 0}}
+.box2.looking{cursor:none}
+/* inside, as the x-ray sees it: the code itself, and what it carries */
+.xin{position:absolute;inset:7% 2.5% 7.5%;display:flex;flex-direction:column;justify-content:center;padding:0 4%;border-radius:3px;overflow:hidden;background:#020A1E;color:#7FE7FF;
+  background-image:linear-gradient(rgb(127 231 255 / .07) 1px,transparent 1px),linear-gradient(90deg,rgb(127 231 255 / .07) 1px,transparent 1px);background-size:18px 18px;
+  font:500 clamp(8.5px,1.18vw,13.5px)/1.85 var(--mono);text-shadow:0 0 8px rgb(127 231 255 / .55)}
+.xin .ln{display:flex;align-items:center;gap:.6em;white-space:pre}
+.xin .ln s{text-decoration:none;opacity:.45;min-width:1.4em;text-align:right}
+.xin .k{color:#B5F3FF}.xin .c{opacity:.5}
+.obj{display:inline-grid;place-items:center;width:2.1em;height:2.1em;flex:none;margin-left:.2em;border-radius:50%;color:#7FE7FF;transition:color .4s,background-color .4s,box-shadow .4s}
+.obj svg{width:1.45em;height:1.45em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgb(127 231 255 / .7))}
+.obj.on{color:#0A1633;background:var(--c);box-shadow:0 0 0 4px color-mix(in oklab,var(--c) 35%,transparent),0 0 22px var(--c);animation:objpop .6s var(--spring)}
+.obj.on svg{filter:none}
+@keyframes objpop{30%{transform:scale(1.35)}}
+.xin .wire{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.xin .wire path{fill:none;stroke:var(--hold);stroke-width:3;stroke-dasharray:6 6;filter:drop-shadow(0 0 6px var(--hold));opacity:0;transition:opacity .4s}
+.xin .wire path.on{opacity:1;animation:march .6s linear infinite}
+@keyframes march{to{stroke-dashoffset:-12}}
+/* the outside: what everyone sees, until the x-ray looks through it */
+.skin{position:absolute;inset:0;-webkit-mask-image:radial-gradient(circle var(--r,0px) at var(--lx,50%) var(--ly,50%),transparent 97%,#000 100%);mask-image:radial-gradient(circle var(--r,0px) at var(--lx,50%) var(--ly,50%),transparent 97%,#000 100%)}
+.skin svg{display:block;width:100%;height:100%}
+.lens{position:absolute;left:0;top:0;z-index:2;width:calc(var(--r,0px) * 2);height:calc(var(--r,0px) * 2);border-radius:50%;pointer-events:none;
+  transform:translate(calc(var(--lx,0px) - var(--r,0px)),calc(var(--ly,0px) - var(--r,0px)));border:3px solid #9CB0FF;box-shadow:0 0 0 7px rgb(156 176 255 / .16),inset 0 0 34px rgb(127 231 255 / .22),0 10px 30px rgb(1 4 13 / .45);
+  opacity:0;transition:opacity .35s}
+.lens.on{opacity:1}
+.lens::before{content:"";position:absolute;inset:14%;border-radius:50%;border:1.5px dashed rgb(156 176 255 / .5);animation:spin 9s linear infinite}
+.lens::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;background:linear-gradient(#9CB0FF,#9CB0FF) 50% 0/2px 100% no-repeat,linear-gradient(#9CB0FF,#9CB0FF) 0 50%/100% 2px no-repeat;opacity:.8}
+@keyframes spin{to{transform:rotate(360deg)}}
+.belt2{position:relative;z-index:0;height:30px;margin:0 -40px;background:#0B1A42;border-top:3px solid #33467E;
+  background-image:radial-gradient(circle at 12px 15px,#33467E 7px,#172444 7.5px,#172444 9px,transparent 9.5px);background-size:28px 30px}
+.gate.rolling .belt2{animation:roll .5s linear infinite}
+@keyframes roll{to{background-position:28px 0}}
+/* the barrier: up while the container may pass, down across the belt once it's held */
+.barrier{position:absolute;right:clamp(12px,2.4vw,26px);bottom:64px;z-index:3;width:46%;height:16px;border-radius:8px;border:2px solid #01040D;pointer-events:none;
+  background:repeating-linear-gradient(90deg,var(--hold) 0 22px,#F6F4EF 22px 44px);transform-origin:calc(100% - 8px) 50%;transform:rotate(90deg);opacity:0;transition:transform .9s cubic-bezier(.3,1.45,.5,1),opacity .2s}
+.barrier::after{content:"";position:absolute;right:-4px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:#172444;border:2px solid #01040D}
+.gate.held .barrier{transform:rotate(0deg);opacity:1}
+.gatebar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:18px;font-size:14.5px;color:var(--ink3)}
+.gatebar .ghint{display:inline-flex;align-items:center;gap:10px}
+.gatebar .ghint i{width:22px;height:22px;flex:none;border-radius:50%;border:2.5px solid var(--cobalt);box-shadow:0 0 0 4px color-mix(in oklab,var(--cobalt) 18%,transparent);animation:hintp 2s ease-in-out infinite}
+@keyframes hintp{50%{transform:scale(.8)}}
+.gatebar .pbtns{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:980px){.gate .bay{order:-1}.gate{grid-template-columns:1fr}.bay{min-height:0;padding-top:70px}.bay .box2{margin-bottom:0}}
+
+/* ---------- the yard: four containers in a real stack; pick one and it slides out and opens ---------- */
+.yard{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:22px;margin-top:56px;align-items:stretch}
+.ystage{position:relative;min-height:520px;border-radius:22px;border:2px solid var(--line);box-shadow:var(--lift-lg);overflow:hidden;perspective:1300px;perspective-origin:50% 38%;
+  background:linear-gradient(180deg,#CFDBFF 0%,#E8EDFB 58%,#B9C5E6 58.2%,#C7D1EC 100%)}
+.ystage .sun3{position:absolute;right:12%;top:12%;width:70px;height:70px;border-radius:50%;background:var(--glance);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.ystage .cl{position:absolute;height:22px;border-radius:999px;background:#fff;border:2px solid var(--line);opacity:.9;animation:drift 38s linear infinite}
+@keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(900px)}}
+.scene3{position:absolute;left:50%;top:52%;width:0;height:0;transform-style:preserve-3d;transform:scale(var(--s,1)) rotateX(var(--rx,-16deg)) rotateY(var(--ry,-34deg));transition:transform .9s var(--out)}
+.ground3{position:absolute;left:-330px;top:-260px;width:660px;height:520px;transform:translateY(128px) rotateX(90deg);background:#9AA8CF;border:2px solid var(--line);border-radius:8px;
+  background-image:linear-gradient(90deg,transparent 48%,#FFC21A 48% 52%,transparent 52%),repeating-linear-gradient(0deg,transparent 0 58px,rgb(10 22 51 / .12) 58px 60px);background-size:100% 100%,100% 100%}
+.c3{--L:280px;--H:64px;--D:118px;position:absolute;left:calc(var(--L) / -2);top:calc(var(--H) / -2);width:var(--L);height:var(--H);transform-style:preserve-3d;cursor:pointer;
+  transform:translateY(var(--y)) translateZ(var(--z,0px)) translateX(var(--x,0px));transition:transform .8s var(--spring)}
+.c3 .f{position:absolute;border:2px solid #0A1633;backface-visibility:visible}
+.c3 .fr,.c3 .bk{width:var(--L);height:var(--H);left:0;top:0;background:repeating-linear-gradient(90deg,rgb(0 0 0 / .14) 0 4px,transparent 4px 14px),var(--c)}
+.c3 .fr{transform:translateZ(calc(var(--D) / 2))}
+.c3 .bk{transform:rotateY(180deg) translateZ(calc(var(--D) / 2))}
+.c3 .tp,.c3 .bt{width:var(--L);height:var(--D);left:0;top:calc((var(--H) - var(--D)) / 2);background:repeating-linear-gradient(90deg,rgb(255 255 255 / .18) 0 3px,transparent 3px 14px),var(--c3)}
+.c3 .tp{transform:rotateX(90deg) translateZ(calc(var(--H) / 2))}
+.c3 .bt{transform:rotateX(-90deg) translateZ(calc(var(--H) / 2));background:var(--c2)}
+.c3 .en,.c3 .lf,.c3 .in3{width:var(--D);height:var(--H);top:0;left:calc((var(--L) - var(--D)) / 2)}
+.c3 .lf{transform:rotateY(-90deg) translateZ(calc(var(--L) / 2));background:var(--c2)}
+.c3 .in3{transform:rotateY(90deg) translateZ(calc(var(--L) / 2 - 8px));border:0;background:#0A1633;display:grid;place-items:center}
+.c3 .in3 svg{width:78%;height:86%}
+.c3 .en{transform:rotateY(90deg) translateZ(calc(var(--L) / 2));border:0;transform-style:preserve-3d}
+.c3 .dr{position:absolute;top:0;width:50%;height:100%;border:2px solid #0A1633;background:linear-gradient(90deg,transparent 30%,rgb(10 22 51 / .5) 30% 34%,transparent 34% 66%,rgb(10 22 51 / .5) 66% 70%,transparent 70%),var(--c2);
+  transition:transform 1s var(--spring)}
+.c3 .dr.l{left:0;transform-origin:0 50%}.c3 .dr.r{right:0;transform-origin:100% 50%}
+.c3 .fr b{position:absolute;left:16px;top:50%;translate:0 -50%;font:800 17px/1 var(--data);letter-spacing:.06em;color:#0A1633;text-transform:uppercase;white-space:nowrap}
+.c3 .fr small{position:absolute;right:16px;top:50%;translate:0 -50%;padding:3px 7px;border-radius:5px;background:#F4F2EE;border:1.5px solid #0A1633;font:700 11px var(--data);color:#0A1633}
+.c3:hover{--z:18px}
+.c3.open{--z:84px;--x:26px}
+.c3.open .dr.l{transform:rotateY(-104deg)}.c3.open .dr.r{transform:rotateY(104deg)}
+.c3.open .fr{box-shadow:inset 0 0 0 3px #F6F4EF}
+.mochi3{position:absolute;left:-60px;top:-242px;width:120px;height:114px;transform:rotateY(calc(-1 * var(--ry,-34deg))) rotateX(calc(-1 * var(--rx,-16deg)));transform-origin:50% 100%}
+.mochi3 svg{width:100%;height:100%;overflow:visible}
+.mochi3.hop{animation:hop3 .7s var(--out)}
+@keyframes hop3{40%{translate:0 -18px}}
+.yhint{position:absolute;left:16px;bottom:14px;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--sheet);border:2px solid var(--line);box-shadow:0 3px 0 var(--line);font:600 13px var(--sans);color:var(--ink)}
+/* the label the yard keeps for the open container */
+.ytag{display:flex;flex-direction:column;gap:16px;padding:24px;border-radius:22px;background:var(--sheet);border:2px solid var(--line);box-shadow:var(--lift-lg)}
+.ybars{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ybars button{position:relative;height:38px;padding:0;border-radius:10px;border:2px solid var(--line);background:var(--shoal);font:700 12.5px var(--sans);color:var(--ink2);cursor:pointer;overflow:hidden}
+.ybars button span{position:relative;z-index:1}
+.ybars button i{position:absolute;inset:0;width:0;background:var(--c)}
+.ybars button[aria-pressed=true]{color:#0A1633}
+.ybars button[aria-pressed=true] i{width:var(--p,100%)}
+.ytag h3{margin:6px 0 0;font:600 34px/1.05 var(--display);letter-spacing:-.02em}
+.ytag .yd{margin:0;font-size:17px;color:var(--ink2)}
+.ytag h4{margin:0 0 6px;font:700 13.5px var(--sans);color:var(--ink3)}
+.ytag .chips3{display:flex;flex-wrap:wrap;gap:6px}
+.ytag .chips3 span{padding:5px 10px;border-radius:999px;border:1.5px solid var(--rule2);background:var(--paper);font-size:13.5px}
+.ytag code{font-size:13px;padding:2px 7px;border-radius:7px;background:var(--shoal);color:var(--ink)}
+.ytag .ym{margin-top:auto;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--paper);border:1.5px dashed var(--rule2);font-size:14.5px;color:var(--ink2)}
+.ytag .ym b{font:600 30px/1 var(--display);color:var(--ink)}
+.ytag .swap{animation:swapin .55s var(--out)}
+@keyframes swapin{from{opacity:0;transform:translateY(10px)}}
+@media (max-width:980px){.yard{grid-template-columns:1fr}.ystage{min-height:440px}}
+@media (prefers-reduced-motion:reduce){.gate:not(.in) .box2{transform:none}.gate.in .box2,.gate.in.held .box2{animation:none}}
+.obj.ghost{visibility:hidden}
+#ytag{display:flex;flex-direction:column;gap:16px;flex:1}
+
+/* ---------- the report card: the skipper at its desk, the report open on the monitor ---------- */
+.deskscene{position:relative;margin:auto -26px 0;line-height:0}
+.deskscene>svg{display:block;width:100%;height:auto}
+/* the monitor is a part of its own (x 266, y 20, 324 × 216 of 640 × 400), so it can lift off its stand and fly out;
+   the screen is a real button on its glass */
+.deskscene .mon{position:absolute;left:41.5625%;top:5%;width:50.625%;height:54%;border-radius:4.3% / 6.5%;background:#0A1633;border:2px solid #01040D;transform-origin:50% 100%;
+  transition:transform .45s cubic-bezier(.3,1.5,.5,1),box-shadow .45s,opacity .2s}
+.deskscene .mon::after{content:"";position:absolute;left:50%;bottom:2.4%;width:1.6%;aspect-ratio:1;translate:-50% 0;border-radius:50%;background:#33467E}
+.screenbtn{position:absolute;left:3.7%;top:5.56%;width:92.6%;height:87%;display:flex;flex-direction:column;padding:0;border:0;border-radius:5px;overflow:hidden;background:#F4F2EE;cursor:zoom-in;
+  transition:box-shadow .4s,transform .5s var(--spring)}
+.screenbtn .sbar{flex:none;display:block;padding:3px 8px;background:#DCE3F7;border-bottom:1.5px solid #0A1633;font:600 clamp(7px,.75vw,10px)/1.35 var(--mono);color:#3F4B68;text-align:left;white-space:nowrap}
+.screenbtn img{flex:1;min-height:0;width:100%;object-fit:cover;object-position:top left}
+.screenbtn::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgb(255 255 255 / .38) 48%,transparent 60%);transform:translateX(-110%);animation:glare 7s ease-in-out infinite;pointer-events:none}
+@keyframes glare{0%,72%{transform:translateX(-110%)}100%{transform:translateX(110%)}}
+.screenbtn:hover,.screenbtn:focus-visible{box-shadow:0 0 0 3px #9CB0FF,0 0 40px rgb(156 176 255 / .85);transform:scale(1.02)}
+.screenbtn .tap{position:absolute;left:50%;bottom:9%;translate:-50% 0;display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:#0A1633;color:#F6F4EF;
+  font:700 12.5px/1 var(--sans);white-space:nowrap;box-shadow:0 3px 0 #01040D;transition:transform .45s var(--spring)}
+.screenbtn .tap i{width:8px;height:8px;border-radius:50%;background:var(--glance);animation:trypulse 2s ease-in-out infinite}
+.screenbtn:hover .tap{transform:translateY(-4px) scale(1.04)}
+.t-report .try{cursor:pointer}
+.deskscene .glow{opacity:.18;animation:flick 5.5s infinite}
+@keyframes flick{0%,44%,100%{opacity:.18}46%{opacity:.09}48%{opacity:.24}50%{opacity:.16}}
+.deskscene .steam path{animation:steam 3.4s ease-in-out infinite}
+.deskscene .steam path+path{animation-delay:1.5s}
+@keyframes steam{0%{opacity:0;transform:translateY(6px)}40%{opacity:.9}100%{opacity:0;transform:translateY(-16px)}}
+.deskscene .arm-a{animation:typing .3s ease-in-out infinite alternate}
+.deskscene .arm-b{animation:typing .3s ease-in-out .15s infinite alternate}
+@keyframes typing{to{transform:translateY(-3px)}}
+.deskscene .skb{transform-box:fill-box;transform-origin:50% 100%;animation:skbob 3s ease-in-out infinite}
+@keyframes skbob{50%{transform:translateY(1.5px) rotate(-1deg)}}
+.deskscene .feet{transform-box:fill-box;transform-origin:50% 0;animation:feet 2.4s ease-in-out infinite}
+@keyframes feet{50%{transform:rotate(7deg)}}
+.deskscene .sblink{transform-box:fill-box;transform-origin:50% 50%;animation:sblink 5.2s infinite}
+@keyframes sblink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.deskscene .pw{animation:pwave 4s linear infinite}
+@keyframes pwave{to{transform:translateX(-32px)}}
+.deskscene .pboat{animation:pboat 9s ease-in-out infinite alternate}
+@keyframes pboat{to{transform:translateX(34px)}}
+
+/* the tap, as a little film: the skipper swivels its chair round to face you, surprised, then waves; the monitor lifts off
+   its stand and flies out to become the window; closing brings it back down and the skipper turns back to its keys */
+.deskscene .face-front,.deskscene .arm-w,.deskscene .arm-r{opacity:0}
+.deskscene .face-side,.deskscene .face-front,.deskscene .arm-a,.deskscene .arm-b,.deskscene .arm-w,.deskscene .arm-r{transition:opacity .12s}
+.deskscene .backrest,.deskscene .legs{transition:transform .55s cubic-bezier(.3,1.4,.5,1)}
+.deskscene.turned .face-side,.deskscene.turned .arm-a,.deskscene.turned .arm-b{opacity:0}
+.deskscene.turned .face-front,.deskscene.turned .arm-w,.deskscene.turned .arm-r{opacity:1}
+.deskscene.turned .backrest{transform:translateX(73px)}
+.deskscene.turned .legs{transform:translateX(-40px)}
+.deskscene.turning .skb{animation:swivel .6s var(--out)}
+@keyframes swivel{0%{transform:none}35%{transform:scaleX(.74) translateY(-5px)}70%{transform:scaleX(1.06)}100%{transform:none}}
+.deskscene .arm-w{transform-origin:162px 256px}
+.deskscene.turned .arm-w{animation:wave .42s ease-in-out .35s 4 alternate}
+@keyframes wave{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
+.deskscene.turned .m-o2{animation:gasp 1.3s forwards}
+.deskscene .m-sm2{opacity:0}
+.deskscene.turned .m-sm2{animation:grin 1.3s forwards}
+@keyframes gasp{0%,55%{opacity:1}100%{opacity:0}}
+@keyframes grin{0%,55%{opacity:0}100%{opacity:1}}
+.deskscene.turning .tap,.deskscene.turned .tap{opacity:0;transition:opacity .2s}
+.deskscene.lift .mon{transform:translateY(-6%) scale(1.06);box-shadow:0 0 0 4px #9CB0FF,0 0 50px rgb(156 176 255 / .9)}
+.deskscene.away .mon,.deskscene.away .stand{opacity:0}
+.deskscene.away .glow{opacity:0;animation:none}
+.deskscene.back .mon{animation:monback .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes monback{0%{transform:translateY(-10%) scale(1.08)}60%{transform:translateY(2%) scale(.98)}100%{transform:none}}
+
+/* ---------- sailing to the demo (tow.js): the hero clears to the ship; the demo comes in from the left behind the quay ---------- */
+.towpage{position:fixed;inset:0;z-index:60;display:none;width:100%;height:100%;border:0;background:#F4F2EE;transform:translateX(-100%);
+  box-shadow:5px 0 0 #0A1633,40px 0 80px -30px rgb(1 4 13 / .55)}
+html.towing{overflow:hidden}
+/* the words, the buttons, the bar and the lighthouse are hauled up on strings (tow.js); the sky things just fade */
+html.towing .caps,html.towing .hint{opacity:0!important;transition:opacity .3s}
+html.towing .hcopy *,html.towing .nav *{pointer-events:none}
+html.towing .scene .far,html.towing #glints{opacity:0!important;transition:opacity .7s var(--out)}
+.strings{position:fixed;inset:0;z-index:55;pointer-events:none;overflow:hidden}
+.strings .str{position:absolute;top:0;width:2px;margin-left:-1px;border-radius:1px;background:linear-gradient(#6F8BFF,#DCE3F7);box-shadow:0 0 6px rgb(156 176 255 / .45);transform:translateY(calc(-100% - 24px))}
+.strings .str::after{content:"";position:absolute;top:100%;left:-10px;width:16px;height:22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 22'%3E%3Cpath d='M11 0v14a4.5 4.5 0 0 1-9 0v-2' fill='none' stroke='%23FFC21A' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat;filter:drop-shadow(0 0 4px rgb(255 194 26 / .45))}
+#wake{opacity:0;transition:opacity .5s}
+html.towing #wake{opacity:.9}
+html.towing #wake path{stroke-dasharray:14 10;animation:wakeflow .5s linear infinite}
+@keyframes wakeflow{to{stroke-dashoffset:24}}

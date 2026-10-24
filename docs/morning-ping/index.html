@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Morning ping · slowship docs</title>
+<meta name="description" content="The verdict, sent to where you’ll see it when you wake: a Discord channel or a Telegram chat. It’s optional and off until you connect one.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Using it</span><b>Morning ping</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/" aria-current="page">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Using it</p>
+    <h1>Morning ping</h1>
+<p class="lead">The verdict, sent to where you’ll see it when you wake: a Discord channel or a Telegram chat. It’s optional and off until you connect one.</p>
+
+<h2 id="what-gets-sent"><a class="anchor" href="#what-gets-sent" aria-label="Link to this section">#</a>What gets sent</h2>
+<p>Only a short summary, in slowship’s own words:</p>
+<ul>
+  <li>the verdict and the counts,</li>
+  <li>the names of what needs you,</li>
+  <li>and slowship’s own words for why.</li>
+</ul>
+<p>Never code, file paths, key names, or any text a scanned package wrote. Discord mentions are switched off, so a package called <code>@everyone</code> pings nobody.</p>
+<p>It talks only to <code>discord.com</code> and <code>api.telegram.org</code>. This is the only thing slowship ever sends anywhere on its own.</p>
+
+<h2 id="connect-discord"><a class="anchor" href="#connect-discord" aria-label="Link to this section">#</a>Connect Discord</h2>
+<p>Discord uses a webhook: a private address that can post into one channel. There’s no bot to run.</p>
+<ol class="steps">
+  <li><b>Open the channel’s settings</b><p>In Discord, hover the channel, press the gear, and go to <b>Integrations</b>.</p></li>
+  <li><b>Make a webhook</b><p>Press <b>Webhooks</b>, then <b>New Webhook</b>, then <b>Copy Webhook URL</b>.</p></li>
+  <li><b>Give it to slowship</b>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>slowship discord</code></pre></div>
+  <p>Paste the address when it asks. slowship checks it and offers to send a test.</p></li>
+</ol>
+
+<h2 id="connect-telegram"><a class="anchor" href="#connect-telegram" aria-label="Link to this section">#</a>Connect Telegram</h2>
+<p>Telegram uses a bot that you make yourself. It takes a minute.</p>
+<ol class="steps">
+  <li><b>Make a bot</b><p>In Telegram, open a chat with <b>@BotFather</b>, send <code>/newbot</code>, and follow its questions. It gives you a token.</p></li>
+  <li><b>Give the token to slowship</b>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>slowship telegram</code></pre></div>
+  <p>Paste the token when it asks.</p></li>
+  <li><b>Say hello to your bot</b><p>Open the chat with your new bot and press <b>Start</b>. slowship finds that chat by itself and writes there from now on.</p></li>
+</ol>
+
+<h2 id="or-set-it-up-in-the-report"><a class="anchor" href="#or-set-it-up-in-the-report" aria-label="Link to this section">#</a>Or set it up in the report</h2>
+<figure><img src="../../img/report-ping.webp" alt="The morning ping dialog in the report: numbered steps, each with a short animated film of what to click" width="1440" height="900" loading="lazy"><figcaption>In the report, each step has a short animated film of exactly what to click.</figcaption></figure>
+<p>Open <b>Settings</b>, then <b>Morning ping</b>. Each step shows a short film of what to click, the one thing to paste, and a button to send a test. Inside <code>slowship review</code>, <code>/discord</code> and <code>/telegram</code> do the same.</p>
+
+<h2 id="choose-when-it-sends"><a class="anchor" href="#choose-when-it-sends" aria-label="Link to this section">#</a>Choose when it sends</h2>
+<p>By default it sends after every nightly watch.</p>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code><span class="c"># only when something needs you</span>
+slowship notify when needs
+
+<span class="c"># after every nightly watch (the default)</span>
+slowship notify when always
+
+<span class="c"># also after watches you start yourself</span>
+slowship notify manual on</code></pre></div>
+
+<h2 id="test-it-check-it-stop-it"><a class="anchor" href="#test-it-check-it-stop-it" aria-label="Link to this section">#</a>Test it, check it, stop it</h2>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>slowship notify          <span class="c"># what's connected</span>
+slowship notify test     <span class="c"># send one now</span>
+slowship notify off      <span class="c"># disconnect everything</span>
+slowship notify off discord</code></pre></div>
+
+<h2 id="where-the-secret-lives"><a class="anchor" href="#where-the-secret-lives" aria-label="Link to this section">#</a>Where the secret lives</h2>
+<p>The webhook address or bot token is kept in <code>notify.json</code> inside slowship’s folder (<code>~/.slowship</code>), readable only by you. The report and the terminal only ever see a hint of it, never the whole thing.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/nightly/"><small>Previous</small><b>The nightly watch</b></a><a class="next" href="../../docs/coding-agent/"><small>Next</small><b>Your coding agent</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/morning-ping.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#what-gets-sent">What gets sent</a></li><li><a href="#connect-discord">Connect Discord</a></li><li><a href="#connect-telegram">Connect Telegram</a></li><li><a href="#or-set-it-up-in-the-report">Or set it up in the report</a></li><li><a href="#choose-when-it-sends">Choose when it sends</a></li><li><a href="#test-it-check-it-stop-it">Test it, check it, stop it</a></li><li><a href="#where-the-secret-lives">Where the secret lives</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>
