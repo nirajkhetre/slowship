@@ -16,6 +16,10 @@ https://github.com/user-attachments/assets/255fd4af-3d41-4074-810e-4778e57ba32d
 </p>
 
 <p align="center">
+  <a href="https://slowship.celebrable.tech/"><b>Website</b></a> ·
+  <a href="https://slowship.celebrable.tech/demo/"><b>Try the live demo</b></a> ·
+  <a href="https://slowship.celebrable.tech/docs/">Docs</a>
+  <br>
   <a href="#quick-start"><b>Quick start</b></a> ·
   <a href="#what-it-reads">What it reads</a> ·
   <a href="#runs-on-open-the-chaindrop-check">The ChainDrop check</a> ·
