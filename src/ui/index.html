@@ -820,6 +820,12 @@ button.hp:hover{border-color:var(--ink);transform:translateY(-1px)}
 .ikeys li b{font:700 15px var(--display)}
 .ikeys li code{font:600 12.5px var(--mono);overflow-wrap:anywhere}
 .ikeys li small{color:var(--ink3);font-size:12.5px}
+.ireach li{flex-wrap:nowrap;align-items:flex-start}
+.ireach li svg.i{width:15px;height:15px;flex:none;margin-top:3px;color:var(--ink3)}
+.ireach li b{flex:none;width:9.5em;font-size:14px}
+.ireach li span{min-width:0}
+.ireach li span small{display:block;margin-top:2px}
+@media (max-width:560px){.ireach li{flex-wrap:wrap}.ireach li b{width:auto}.ireach li span{flex-basis:100%}}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .seg{position:relative;display:inline-flex;max-width:100%;overflow-x:auto;scrollbar-width:none;padding:3px;border-radius:10px;background:var(--sheet);border:1px solid var(--rule2)}
 .seg button{position:relative;z-index:1;border:0;background:none;padding:7px 13px;border-radius:7px;font-size:14.5px;font-weight:700;color:var(--ink2);white-space:nowrap;transition:color .25s}
@@ -2442,7 +2448,7 @@ function detailHTML(i) {
     <section class="says claimrow"><span class="sdl">What it says it does${rel !== 'unknown' ? `<span class="relw rel-${rel}" data-explain="relation-${rel}">${rel === 'no' ? '≠ not what its code does' : '= matches its code'}</span>` : ''}</span><blockquote${i.claim ? ' title="Tap to read more"' : ''}>${says}</blockquote></section>
     ${fs.length ? `<ol class="fl">${fs.map((f, k) => findingHTML(i, f, k)).join('')}</ol>` : `<div class="calm2">${IC.check}<span>${i.coverage?.compiled ? 'Nothing in its build record to look at.' : 'Read every file it ships: nothing to look at.'}</span></div>`}
     ${i.blast ? `<section class="blast"><span class="sdl">${IC.warn}If it were taken over</span><p>${esc(i.blast.says)}.</p></section>` : ''}
-    ${keysHTML(i)}${ipcHTML(i)}${builtHTML(i)}
+    ${reachHTML(i)}${keysHTML(i)}${ipcHTML(i)}${builtHTML(i)}
     ${COVER(i)}
   </div>`;
 }
@@ -3173,6 +3179,21 @@ function purse() {
         : `<button class="hp" data-fp="${esc(w.i.fp)}">${KICON[w.i.kind]}${esc(w.name)}</button>`).join('')}</span></li>`).join('')}</ol>` : ''}`;
 }
 $('#purse').addEventListener('click', e => { const b = e.target.closest('button.hp'); const i = b && G.find(x => x.fp === b.dataset.fp); if (i) openItem(i); });
+// where a skill or MCP server can reach, from its code: what a "runs whatever you ask" description can't explain away
+function reachHTML(i) {
+  const r = i.reach;
+  if (!r) return '';
+  const list = xs => xs.map(x => `<code>${esc(x)}</code>`).join(' ');
+  const rows = [
+    [IC.run, 'Programs', r.runs === 'open' ? 'Runs ones its code doesn’t pin to a fixed command: in practice, whatever you can run' : r.runs === 'fixed' ? `Only fixed commands ${list(r.fixed)}` : 'None in its code'],
+    [IC.net, 'Network', (r.net ? r.hosts.length ? `Yes, and its code names ${list(r.hosts)}` : 'Yes, to addresses its code doesn’t write out' : r.hosts.length ? `No calls in its code, though it names ${list(r.hosts)}` : 'None in its code')
+      + (r.told.length ? `<small>its instructions point your agent at ${list(r.told)}</small>` : '')],
+    [IC.files, 'Outside its folder', r.files.length ? list(r.files) : 'Nothing written out in its code'],
+    ...(r.secrets.length ? [[IC.key, 'Credential files', list(r.secrets)]] : []),
+  ];
+  return `<section class="ikeys ireach"><span class="sdl">${IC.net}What it can reach<small>from its code, whatever its description says</small></span>
+    <ul>${rows.map(([ic, k, v]) => `<li>${ic}<b>${k}</b><span>${v}</span></li>`).join('')}</ul></section>`;
+}
 function keysHTML(i) {
   const ks = holdsKeys(i);
   if (!ks.length) return '';

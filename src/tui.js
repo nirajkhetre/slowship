@@ -9,6 +9,7 @@ import { codeWindow } from './server.js';
 import { approve } from './scan.js';
 import { load, save } from './state.js';
 import { worst } from './policy.js';
+import { reachSays } from './facts.js';
 import { MODEL } from './judge.js';
 
 // ---------- palette: the report's night watch, signal flags on navy, for a canvas we own; mid-tones for the scrollback, which isn't ours
@@ -513,6 +514,11 @@ export function review(run, { model = run.model, screen, depth = caps().color, m
     if (ks.length) {
       push([['$ ', { fg: N.lamp, a: BOLD }], ['Can spend your money on', { fg: N.ink2, a: BOLD }]]);
       for (const k of ks) push([['  ' + k.service.padEnd(16), { fg: N.ink, a: BOLD }], [k.name, { fg: N.lamp }], [`  ${k.how === 'config' ? 'MCP config' : k.how === 'docs' ? 'named in instructions' : 'read in code'}`, { fg: N.ink3 }]]);
+      gap();
+    }
+    if (it.reach) {
+      push([['⌖ ', { fg: N.sea3, a: BOLD }], ['What it can reach', { fg: N.ink2, a: BOLD }], ['  from its code, whatever it says it does', { fg: N.ink3 }]]);
+      for (const l of reachSays(it.reach)) para(l, { fg: N.ink2 }, 4);
       gap();
     }
     if (it.map?.ipc?.length) {

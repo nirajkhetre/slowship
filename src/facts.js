@@ -29,6 +29,12 @@ const SECRET_ENV = /(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|PRIVATE_?KEY|CREDENTI
 // Bidirectional overrides and isolates ("Trojan Source"). Zero-width joiners are left alone: many scripts need them.
 const BIDI = /[‪-‮⁦-⁩]/;
 const BLOB = /^[A-Za-z0-9+/=_-]{160,}$/;  // base64 / base64url / hex shaped
+export const URL_RE = /\b(?:https?|wss?):\/\/([a-z0-9.-]+\.[a-z]{2,}|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?/i;
+// A path outside the code's own folder, written out whole: a home folder, a system folder, another drive.
+const OUTSIDE = /^(~[\\/]|\/(etc|usr|var|opt|root|home|Users|Library|private|tmp|proc|dev|mnt|Volumes|System)(\/|$)|[A-Za-z]:[\\/]|%(USERPROFILE|APPDATA|LOCALAPPDATA|PROGRAMDATA|TEMP)%)/;
+const HOME_ENV = /^(HOME|USERPROFILE|APPDATA|LOCALAPPDATA|XDG_[A-Z_]+_HOME)$/;
+// Facts that only feed "what it can reach": they describe, and never change a verdict or reach the model (scan.js).
+export const REACH_ONLY = new Set(['path-out', 'doc-url']);
 const MAX_BYTES = 2_000_000;
 const FUNCS = new Set(['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression']);
 
@@ -43,7 +49,7 @@ export function stringFacts(s) {
   const out = [], sec = s.match(SECRET_PATH), per = s.match(PERSIST_PATH);
   if (sec) out.push(['secret-path', `mentions "${sec[0]}"`]);
   if (per) out.push(['persist-path', `mentions "${per[0]}"`]);
-  const url = s.match(/\b(?:https?|wss?):\/\/([a-z0-9.-]+\.[a-z]{2,}|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?/i);
+  const url = s.match(URL_RE);
   if (url) out.push(['url', `URL to ${url[1]}`]);
   if (BLOB.test(s) && entropy(s) > 4.5) out.push(['obfuscated', `${s.length}-character encoded blob`]);
   return out;
@@ -165,12 +171,14 @@ export function fileFacts(src, file) {
         if (o.type === 'MemberExpression' && o.object.type === 'Identifier' && o.object.name === 'process' && o.property.name === 'env') {
           const key = node.computed ? str(node.property) : node.property.name;
           if (key && SECRET_ENV.test(key) && !/^npm_config_/i.test(key)) add('env-secret', `reads process.env.${key}`, node);
+          else if (key && HOME_ENV.test(key)) add('path-out', 'your home folder', node);
         } else if (o.type === 'Identifier' && o.name === 'process' && node.property.name === 'env') add('env', 'reads process.env', node);
         break;
       }
       case 'Literal': case 'TemplateLiteral': {
         const s = str(node);
         if (s) for (const [cap, detail] of stringFacts(s)) add(cap, detail, node);
+        if (s && s.length < 300 && OUTSIDE.test(s)) add('path-out', s.slice(0, 80), node);
         break;
       }
     }
@@ -210,6 +218,38 @@ export function dirFacts(root, { manifest } = {}) {
   for (const k of ['preinstall', 'install', 'postinstall'])
     if (pkg?.scripts?.[k]) facts.unshift({ cap: 'install-script', detail: `runs "${pkg.scripts[k]}" on install`, file: 'package.json', line: 0, scope: 'package.json#0', code: '' });
   return { facts, coverage, map: binaries.length ? { binaries } : undefined };
+}
+
+/** What a skill or MCP server can reach, from its code alone (its .md instructions only add the hosts they point at).
+ *  A description that says "runs whatever you ask" can make running programs expected, but it can't hide where they reach. */
+export function reachOf(facts) {
+  const code = facts.filter(f => !/\.md$/i.test(f.file || '')), of = cap => code.filter(f => f.cap === cap);
+  const uniq = xs => [...new Set(xs)].slice(0, 8);
+  return {
+    runs: code.some(f => ['exec', 'code', 'dynamic-load'].includes(f.cap)) ? 'open' : of('exec-fixed').length ? 'fixed' : null,
+    fixed: uniq(of('exec-fixed').map(f => f.detail.replace(/^.*runs one fixed command: /, ''))),
+    net: of('net').length > 0,
+    hosts: uniq(of('url').map(f => f.detail.replace(/^URL to /, ''))),
+    told: uniq(facts.filter(f => f.cap === 'doc-url').map(f => f.detail)),
+    files: uniq([...(of('os').some(f => /homedir|userInfo/.test(f.detail)) ? ['your home folder'] : []), ...of('path-out').map(f => f.detail)]),
+    secrets: uniq(of('secret-path').map(f => f.detail.replace(/^mentions "|"$/g, ''))),
+  };
+}
+/** The same, as short lines (terminal, plain report). For your agent, `quote: false` counts hosts and paths instead of
+ *  naming them: those are text the scanned code wrote, and an answer to an agent repeats only slowship's own words. */
+export function reachSays(r, { quote = true } = {}) {
+  const count = (n, noun) => `${n} ${noun}${n === 1 ? '' : 's'}`;
+  const list = (xs, noun) => {
+    if (quote) return xs.slice(0, 4).join(', ') + (xs.length > 4 ? ` and ${xs.length - 4} more` : '');
+    const home = xs.includes('your home folder'), rest = xs.length - home;  // "your home folder" is slowship's own words
+    return [...(home ? ['your home folder'] : []), ...(rest ? [count(rest, noun)] : [])].join(' and ');
+  };
+  return [
+    `programs: ${r.runs === 'open' ? 'runs ones its code doesn\'t pin to a fixed command, so in practice whatever you can run' : r.runs === 'fixed' ? `only fixed commands (${list(r.fixed, 'command')})` : 'none'}`,
+    `network: ${r.net ? r.hosts.length ? `yes; its code names ${list(r.hosts, 'host')}` : 'yes, to addresses its code doesn\'t write out' : r.hosts.length ? `no calls in its code, though it names ${list(r.hosts, 'host')}` : 'none in its code'}${r.told.length ? `; its instructions point your agent at ${list(r.told, 'host')}` : ''}`,
+    `outside its folder: ${r.files.length ? list(r.files, 'path') : 'nothing written out in its code'}`,
+    ...(r.secrets.length ? [`credential files: ${list(r.secrets, 'file')}`] : []),
+  ];
 }
 
 /** One fact per (capability, detail, file), with how many times it occurred: short enough for a small model.

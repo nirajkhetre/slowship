@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { condense, dirFacts, fileFacts } from '../src/facts.js';
+import { REACH_ONLY, condense, dirFacts, fileFacts, reachOf, reachSays } from '../src/facts.js';
 import { assess, combos, keysOf, risk } from '../src/policy.js';
 import { resolveServer, skillFacts } from '../src/agents.js';
 import { binaryFacts, reaScript } from '../src/binary.js';
@@ -193,6 +193,7 @@ test('the terminal review: every frame fills the screen exactly, at any size, wh
     { key: 'npm:a-very-long-package-name-that-will-not-fit@1.0.0', name: 'a-very-long-package-name-that-will-not-fit', kind: 'npm', fp: 'f1', level: 'hold', approved: false, claim: 'Formats dates.',
       findings: [{ kind: 'exfil', level: 'hold', says: 'reads credential files and sends them', evidence: ['E1', 'E2'], matches_claim: 'no' }], facts: [fact('E1', 'net', 3), fact('E2', 'secret-path', 0)], coverage: { files: 2, read: 2 } },
     { key: 'skill:tts@x', name: 'tts', kind: 'skill', fp: 'f2', level: 'review', approved: false, claim: 'Speaks.', keys: [{ name: 'ELEVENLABS_API_KEY', service: 'ElevenLabs', file: 'SKILL.md', line: 2, how: 'docs' }],
+      reach: { runs: 'open', fixed: [], net: true, hosts: ['api.elevenlabs.io'], told: ['api.elevenlabs.io'], files: ['your home folder', '/tmp/a-path-long-enough-to-wrap-on-a-small-terminal'], secrets: [] },
       findings: [{ kind: 'net', level: 'review', says: 'fetch()', evidence: ['E1'] }], facts: [fact('E1', 'net', 1)], coverage: { files: 1, read: 1, lineLevel: ['a.py'] } },
     { key: 'app:/b', name: 'my-app', kind: 'app', fp: 'f3', level: 'hold', approved: false, claim: '', findings: [], facts: [], coverage: { files: 1, read: 1 },
       map: { ipc: [{ channel: 'open', file: 'main.js', line: 7, checked: false, via: ['window.api.open'], from: [], does: ['opens a computed URL'] }],
@@ -386,6 +387,7 @@ test('your coding agent: slowship as an MCP server checks and watches, can\'t cl
     assert.match(evil, /HELD {2}skill table-tidy\n {2}- reads credential files/);
     assert.match(evil, /SKILL\.md:\d+/);
     assert.ok(!evil.includes('example.invalid'), 'nothing the skill wrote');
+    assert.match(evil, /what it can reach: programs: none; network: yes; its code names 1 host/, 'where it reaches, counted in slowship\'s own words');
     assert.match((await check({ folder: join(import.meta.dirname, '..', 'skills', 'slowship') })).content[0].text, /^Cleared to sail\./, 'slowship\'s own skill passes slowship');
     const bad = await check({ package: 'x & calc' });
     assert.equal(bad.isError, true); assert.match(bad.content[0].text, /not a plain npm package name/);
@@ -594,4 +596,20 @@ test('storm watch in every language: lockfiles read with their lines, versions o
   assert.match(st.stormText(run), /Django@3\.2\.0 \(PyPI, poetry\.lock:2\)/);
   assert.deepEqual(run.storm.unpinned, [{ file: 'requirements.txt', names: ['flask'] }]); assert.match(st.stormText(run), /1 package with no exact version \(flask\)/);
   delete process.env.SLOWSHIP_ADVISORIES;
+});
+
+test('what a skill can reach comes from its code alone, and never moves a verdict', () => {
+  // a runner that honestly says "runs whatever you ask": the description can't explain away where that reaches
+  const src = "const cp = require('child_process'), os = require('os');\ncp.exec(process.argv[2]);\nfetch('https://api.example.invalid/x');\nrequire('fs').readFileSync('/etc/hosts');\nos.homedir(); process.env.HOME;\ncp.execSync('git status');";
+  const { facts } = fileFacts(src, 'run.js'), r = reachOf(facts);
+  assert.equal(r.runs, 'open');
+  assert.ok(r.net && r.hosts.includes('api.example.invalid'));
+  assert.deepEqual(r.files, ['your home folder', '/etc/hosts']);
+  assert.match(reachSays(r)[0], /whatever you can run/);
+  // the reach-only facts describe; with or without them the verdict is the same
+  assert.equal(verdict({ facts }).level, verdict({ facts: facts.filter(f => !REACH_ONLY.has(f.cap)) }).level);
+  // a skill's Python is read line by line: the home path and the host it posts to; its instructions add where they point
+  const evil = reachOf(skillFacts(join(FX, 'evil-skill')).facts), good = reachOf(skillFacts(join(FX, 'good-skill')).facts);
+  assert.ok(evil.net && evil.files.includes('~/.ssh/id_rsa') && evil.hosts.includes('example.invalid'));
+  assert.deepEqual([good.net, good.runs, good.files, good.told], [false, null, [], ['api.elevenlabs.io']]);
 });

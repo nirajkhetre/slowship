@@ -7,7 +7,7 @@ import { homedir } from 'node:os';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { binaryFacts, isBinary, reaScript } from './binary.js';
-import { dirFacts, fileFacts } from './facts.js';
+import { URL_RE, dirFacts, fileFacts } from './facts.js';
 import { HOME } from './state.js';
 
 const readText = p => readFileSync(p, 'utf8').replace(/^﻿/, '');  // config files sometimes start with a BOM
@@ -74,6 +74,9 @@ const SCRIPT_RULES = [
   { cap: 'fs-write', re: /(open\([^)]*["'][wa]b?\+?["']|>>\s*~?\/?\S|\bOut-File\b|Set-Content|Add-Content)/, says: 'writes files' },
 ];
 const SECRET_LIT = /(\.ssh[\\/]|\bid_rsa\b|\bid_ed25519\b|\.npmrc\b|\.pypirc\b|\.netrc\b|\.git-credentials\b|\.aws[\\/]credentials|Login Data\b|wallet\.dat\b)/i;
+// a path outside the script's own folder: a home folder, a system folder, another drive (for what it can reach)
+const HOME_LIT = /~[\\/][\w./-]+/;
+const OUTSIDE_LIT = /(\$HOME\b|\$\{HOME\}|%(USERPROFILE|APPDATA|LOCALAPPDATA)%|\$env:(USERPROFILE|APPDATA|LOCALAPPDATA)|Path\.home\(\)|expanduser\(|(?<![\w.~])\/(etc|usr|var|opt|root|home|Users|Library|tmp)\/[\w./-]*|\b[A-Z]:\\[\w\\.-]*)/;
 const PERSIST_LIT = /((?:^|[~\\/"'\s])\.(?:bashrc|zshrc|bash_profile|profile|zprofile)\b|[\\/]authorized_keys\b|LaunchAgents[\\/]|Start Menu[\\/]Programs[\\/]Startup|\bcrontab\b|\.claude[\\/](?:settings(?:\.local)?\.json|[\w.-]+\.[cm]?js)\b|\.vscode[\\/](?:tasks\.json|[\w.-]+\.[cm]?js)\b)/;
 
 export function scriptFacts(text, file) {
@@ -84,6 +87,8 @@ export function scriptFacts(text, file) {
     for (const r of SCRIPT_RULES) if (r.re.test(l)) add(r.cap, r.says);
     const s = l.match(SECRET_LIT); if (s) add('secret-path', `mentions "${s[0]}"`);
     const p = l.match(PERSIST_LIT); if (p) add('persist-path', `mentions "${p[0].trim()}"`);
+    const u = l.match(URL_RE); if (u) add('url', `URL to ${u[1]}`);
+    const o = l.match(HOME_LIT) ?? l.match(OUTSIDE_LIT); if (o) add('path-out', o[0].replace(/\($/, '()'));
   });
   return out;
 }
@@ -97,7 +102,11 @@ export function skillFacts(dir) {
       const p = join(d, e.name), rel = relative(dir, p).replaceAll('\\', '/'), ext = extname(e.name).toLowerCase();
       if (e.isDirectory()) { visit(p); continue; }
       if (statSync(p).size > 1_000_000) continue;
-      if (ext === '.md') { const t = readText(p); facts.push(...instructionFacts(t, rel)); named.push(...keysNamed(t, rel)); }
+      if (ext === '.md') {
+        const t = readText(p); facts.push(...instructionFacts(t, rel)); named.push(...keysNamed(t, rel));
+        // the hosts its instructions point your agent at, for what it can reach (never part of the verdict)
+        t.split(/\r?\n/).forEach((l, i) => { const u = l.match(URL_RE); if (u) facts.push({ cap: 'doc-url', detail: u[1], file: rel, line: i + 1, scope: `${rel}#0`, code: l.trim().slice(0, 160) }); });
+      }
       else if (['.py', '.sh', '.bash', '.zsh', '.ps1', '.bat', '.cmd'].includes(ext)) {
         coverage.files++; coverage.read++; (coverage.lineLevel ??= []).push(rel);
         facts.push(...scriptFacts(readText(p), rel));

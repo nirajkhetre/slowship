@@ -1,4 +1,5 @@
 // The morning verdict: one line on top, then only what needs you. Everything else is counted, not listed.
+import { reachSays } from './facts.js';
 const C = process.stdout.isTTY && !process.env.NO_COLOR
   ? { hold: s => `\x1b[1;35m${s}\x1b[0m`, review: s => `\x1b[1;33m${s}\x1b[0m`, ok: s => `\x1b[1;32m${s}\x1b[0m`, dim: s => `\x1b[2m${s}\x1b[0m`, b: s => `\x1b[1m${s}\x1b[0m` }
   : { hold: s => s, review: s => s, ok: s => s, dim: s => s, b: s => s };
@@ -30,6 +31,7 @@ export function terminal(run) {
       if (f.fix) lines.push(`         fix: ${f.fix}`);
     }
     if (i.blast) lines.push(C.dim(`       ${i.blast.says}`));
+    if (i.reach) lines.push(C.dim('       what it can reach, from its code:'), ...reachSays(i.reach).map(l => C.dim(`         ${l}`)));
   }
   const skipped = run.items.reduce((n, i) => n + i.coverage.skipped.length, 0);
   lines.push('', C.dim(`${s.total} checked · ${s.cached} unchanged since last run · ${s.judged} read by ${run.model ?? 'no model (rules only)'}`

@@ -185,6 +185,8 @@ Your agent can ask slowship before anything comes aboard. `slowship connect` pri
 
 There is no tool to clear anything, on purpose. The agent is reading text a package wrote, and that text can be written to talk it into things. Clearing stays with you. Answers use slowship's own words and the file and line to open, never the scanned code. It talks over stdin and stdout, with no network port.
 
+Every answer about a skill or MCP server also says **what it can reach**, worked out from its code: whether it runs programs its code doesn't pin to a fixed command, whether it uses the network, and how many hosts and paths outside its own folder it names. Hosts and paths are counted rather than named for your agent, because they're text the scanned code wrote.
+
 ## The morning report
 
 `slowship ui` serves the report on `127.0.0.1` only.
@@ -205,6 +207,7 @@ There is no tool to clear anything, on purpose. The agent is reading text a pack
 - **A review list with an inspector.** For each finding: what the item says it does next to what its code does, the real lines from the file with the flagged one lit, and what the model thought. Your build gets a map of how pages reach the main process, drawn as lock gates. Clear something and a ship takes it aboard, a painter rolls it green, and the next one comes up; undo rewinds the scene.
 - **Storms, Everything aboard, Blind spots, How it works.** Each is a tab under the verdict: storms with their fixes, every item by what it can touch, an honest list of what couldn't be read, and a live run you can watch.
 - **A command bar.** `Ctrl K` or `⌘K` from anywhere: search everything aboard, or type what you want to do, like "run", "settings" or "connect your agent".
+- **What it can reach.** For every skill and MCP server: the programs it runs, the network and the hosts its code names (and the ones its instructions point your agent at), paths outside its own folder, and credential files, all from its code. A skill that honestly says "runs whatever you ask" can make running programs expected, and this still shows how far that goes. It describes; it never changes a verdict.
 - **Who can spend your money.** Every key to an outside account that your agent's skills and MCP servers read, are told to use, or are handed in an MCP config, by account, with the tools that hold each one. Only key names are read, never their values.
 
 Colours come from signal flags and shipping containers: hot magenta marks what's held (no red anywhere), signal yellow what's worth a glance, mint what's cleared, and cobalt is slowship itself, on sailcloth with navy ink. Everything you can press has an ink outline and sits on a hard shadow, like a hull on its waterline.
@@ -312,6 +315,7 @@ slowship reads code; it never runs it. So:
 - A hook or task's script is read when its command names the file. One that runs a program by name (`npx something`) is named, not followed.
 - Storm watch knows a Python, Go, PHP, Ruby or Rust package only by its name and version. It says when a known advisory names that version, not whether your code reaches the vulnerable part. Maven, Gradle and NuGet aren't read yet.
 - Files over 2 MB (usually generated bundles) are skipped and named. In your build, only inline IPC handler bodies are searched.
+- What a skill can reach is what its code writes out. A host or path built while it runs isn't listed, and a program its code doesn't pin to a fixed command can reach whatever you can: only your agent's own sandbox limits that.
 
 **No findings is not proof of nothing.** The report says so too.
 
@@ -352,11 +356,11 @@ node site/readme.mjs             # this README's pictures, from site/readme/*.ht
 ```
 
 <details>
-<summary><b>The 33 tests</b></summary>
+<summary><b>The 34 tests</b></summary>
 
 <br>
 
-Held fixtures; fixed commands told from ones built at run time (and from fixed ones that download or pipe into a shell); a capability a package names itself counted as expected while a description still can't talk down a credential stealer; a repo shaped like what ChainDrop leaves behind (its planted hook and folder-open task held, a plain formatter hook only a glance, a changed hook asking again); prompt injection that can't lower a hold; parser traps; pnpm's store read once per package from its real folders, links skipped, and a manifest that can't crash the watch; path traversal; secret redaction; server guards; the folder picker; schedule quoting; the IPC map; Go and .NET build records; .NET read method by method; Electron fuses (those four from recorded REA answers); the money ledger, which must never keep a key's value; the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back; the morning ping, which must send only slowship's own words, only to Discord or Telegram, and never ping anyone; the MCP server, which has no tool to clear anything and repeats only slowship's own words; and Storm watch, which must find what a project runs on, tell a PHP2Shell branch that's fixed from one that isn't, match advisories without the network, and read the lockfiles of six languages with each one's own version order. One test checks a recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
+Held fixtures; fixed commands told from ones built at run time (and from fixed ones that download or pipe into a shell); a capability a package names itself counted as expected while a description still can't talk down a credential stealer; a repo shaped like what ChainDrop leaves behind (its planted hook and folder-open task held, a plain formatter hook only a glance, a changed hook asking again); prompt injection that can't lower a hold; parser traps; pnpm's store read once per package from its real folders, links skipped, and a manifest that can't crash the watch; path traversal; secret redaction; server guards; the folder picker; schedule quoting; the IPC map; Go and .NET build records; .NET read method by method; Electron fuses (those four from recorded REA answers); the money ledger, which must never keep a key's value; what a skill can reach, which comes from its code alone and never moves a verdict; the terminal review, which must fill the screen exactly at every size whatever keys and clicks arrive, and always put the terminal back; the morning ping, which must send only slowship's own words, only to Discord or Telegram, and never ping anyone; the MCP server, which has no tool to clear anything and repeats only slowship's own words; and Storm watch, which must find what a project runs on, tell a PHP2Shell branch that's fixed from one that isn't, match advisories without the network, and read the lockfiles of six languages with each one's own version order. One test checks a recording against REA itself, so it runs only when `SLOWSHIP_REA` points at REA's `scripts/rea.mjs`. The test fixtures are inert and point at `.invalid` domains.
 
 </details>
 

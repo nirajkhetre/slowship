@@ -13,6 +13,7 @@ import { checkItems, scanProject } from './scan.js';
 import { folder, saveRun, settingsOf } from './server.js';
 import { fingerprint } from './state.js';
 import { refreshAdvisories, stormText } from './storm.js';
+import { reachSays } from './facts.js';
 
 const VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const PROTOCOLS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
@@ -113,7 +114,11 @@ export function brief(run, head = '') {
       if (f.fix) out.push(`    fix: ${f.fix}`);
     }
     if (i.blast) out.push(`  ${i.blast.says}`);
+    if (i.reach) out.push(`  what it can reach: ${line(reachSays(i.reach, { quote: false }).join('; '))}`);
   }
+  // one skill or server checked and nothing to flag: still say where it can reach, since "it runs anything" can't clear that
+  const solo = run.items.length === 1 && !open.length ? run.items[0] : null;
+  if (solo?.reach) out.push('', 'What it can reach, from its code:', ...reachSays(solo.reach, { quote: false }).map(l => `  ${line(l)}`));
   const big = run.items.reduce((n, i) => n + (i.coverage?.skipped?.length ?? 0), 0);
   if (big) out.push('', `${big} ${big === 1 ? 'file was' : 'files were'} too large to read.`);
   if (run.unread?.length) out.push('', `Couldn't read ${run.unread.length}: ${run.unread.map(u => line(`${u.key.replace(/^mcp:/, '')} (${u.why})`)).join('; ')}`);

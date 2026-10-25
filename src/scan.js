@@ -1,7 +1,7 @@
 // One run: find everything, skip what's unchanged, read the rest, ask the model only where there is something to judge.
 import { readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { condense, dirFacts } from './facts.js';
+import { REACH_ONLY, condense, dirFacts, reachOf } from './facts.js';
 import { available, judge, MODEL } from './judge.js';
 import { assess, combos, keysOf, named, risk, worst } from './policy.js';
 import { claimOf, npmPackages } from './inventory.js';
@@ -11,7 +11,7 @@ import { fingerprint, load, newSince, save } from './state.js';
 import { applyStorm } from './storm.js';
 
 // Bump when what gets read changes, so results cached by an older slowship are read again (approvals stay: same bytes).
-const RULES = 9;
+const RULES = 10;
 
 /** items: [{ key, name, dir, claim, fp, manifest?, kind }]. Returns the run summary; results are stored in state. */
 export async function checkItems(items, { model = true, onItem = () => {}, onStep = () => {} } = {}) {
@@ -23,7 +23,8 @@ export async function checkItems(items, { model = true, onItem = () => {}, onSte
     if (cached?.rules === RULES && (cached.model || !cached.wanted || !useModel)) { r = cached; run.stats.cached++; }
     else {
       onStep({ phase: 'read', key: it.key, name: it.name, kind: it.kind });
-      const { facts, coverage, map } = it.read ? it.read() : dirFacts(it.dir, { manifest: it.manifest });
+      const read = it.read ? it.read() : dirFacts(it.dir, { manifest: it.manifest }), { coverage, map } = read;
+      const facts = read.facts.filter(f => !REACH_ONLY.has(f.cap));  // what it can reach describes; it never moves a verdict
       const found = combos(facts), short = condense(facts, 40, keysOf(found), risk);
       let labels = {}, judged = null;
       const wanted = short.some(f => !['fs', 'os', 'env', 'url', 'fs-read', 'decode', 'imports', 'built-from'].includes(f.cap));
@@ -37,6 +38,7 @@ export async function checkItems(items, { model = true, onItem = () => {}, onSte
       r = {
         key: it.key, kind: it.kind, name: it.name, level: a.level, findings: a.findings, coverage, map, rules: RULES,
         keys: it.kind === 'skill' || it.kind === 'mcp' ? keysFrom(facts, map?.keys) : undefined,  // agent tools only: who can spend your money
+        reach: it.kind === 'skill' || it.kind === 'mcp' ? reachOf(read.facts) : undefined,  // and where it can reach, whatever it claims
         facts: short.map(({ id, cap, detail, file, line, code }) => ({ id, cap, detail, file, line, code, ...labels[id] })),
         caps: [...new Set(short.map(f => f.cap))], model: judged ? MODEL : null, wanted, at: new Date().toISOString(),
       };
