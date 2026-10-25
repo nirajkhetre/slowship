@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { REACH_ONLY, condense, dirFacts, fileFacts, reachOf, reachSays } from '../src/facts.js';
 import { assess, combos, keysOf, risk } from '../src/policy.js';
-import { resolveServer, skillFacts } from '../src/agents.js';
+import { resolveServer, scriptFacts, skillFacts } from '../src/agents.js';
 import { binaryFacts, reaScript } from '../src/binary.js';
 
 const FX = join(import.meta.dirname, 'fixtures');
@@ -387,7 +387,7 @@ test('your coding agent: slowship as an MCP server checks and watches, can\'t cl
     assert.match(evil, /HELD {2}skill table-tidy\n {2}- reads credential files/);
     assert.match(evil, /SKILL\.md:\d+/);
     assert.ok(!evil.includes('example.invalid'), 'nothing the skill wrote');
-    assert.match(evil, /what it can reach: programs: none; network: yes; its code names 1 host/, 'where it reaches, counted in slowship\'s own words');
+    assert.match(evil, /what it can reach: programs: none; network: yes, only to addresses written out in its code: 1 host/, 'where it reaches, counted in slowship\'s own words');
     assert.match((await check({ folder: join(import.meta.dirname, '..', 'skills', 'slowship') })).content[0].text, /^Cleared to sail\./, 'slowship\'s own skill passes slowship');
     const bad = await check({ package: 'x & calc' });
     assert.equal(bad.isError, true); assert.match(bad.content[0].text, /not a plain npm package name/);
@@ -612,4 +612,23 @@ test('what a skill can reach comes from its code alone, and never moves a verdic
   const evil = reachOf(skillFacts(join(FX, 'evil-skill')).facts), good = reachOf(skillFacts(join(FX, 'good-skill')).facts);
   assert.ok(evil.net && evil.files.includes('~/.ssh/id_rsa') && evil.hosts.includes('example.invalid'));
   assert.deepEqual([good.net, good.runs, good.files, good.told], [false, null, [], ['api.elevenlabs.io']]);
+  assert.equal(evil.unknown, 0, 'its Python posts to an address written on the same line');
+});
+
+test('a network call whose address is worked out while it runs is an unknown destination, counted per call', () => {
+  const dests = src => fileFacts(src, 'a.js').facts.filter(f => f.cap === 'net').map(f => f.dest);
+  // written out: a literal, a const, a host written before the part built at run time, new URL() of one, options naming the host
+  assert.deepEqual(dests("const B = 'https://api.example.invalid'; const https = require('https');\nfetch('https://api.example.invalid/x'); fetch(B + '/y'); fetch(`https://api.example.invalid/${p}`);\nfetch(new URL('/z', B)); https.request({ hostname: 'api.example.invalid' });"),
+    ['fixed', 'fixed', 'fixed', 'fixed', 'fixed']);
+  // built: a variable, a template that starts with one, options whose host is a variable, a socket to whatever it's given
+  assert.deepEqual(dests("const https = require('https');\nfetch(url); fetch(`${base}/x`); https.get({ hostname: host }); new WebSocket(addr);"), ['built', 'built', 'built', 'built']);
+  // one written-out host doesn't speak for the call beside it that goes somewhere else
+  const r = reachOf(fileFacts("fetch('https://api.example.invalid/x'); fetch(process.env.TARGET + '/up');", 'a.js').facts);
+  assert.deepEqual([r.hosts, r.unknown], [['api.example.invalid'], 1]);
+  assert.match(reachSays(r)[1], /^network: yes; its code names api\.example\.invalid, and 1 call goes to an unknown destination/);
+  assert.match(reachSays(r, { quote: false })[1], /names 1 host, and 1 call goes to an unknown destination/, 'counted for your agent');
+  // line by line in a skill's scripts: a URL on the call's own line, or not
+  assert.deepEqual(scriptFacts('requests.get("https://api.example.invalid/x")\nrequests.post(url, data=d)', 'a.py').filter(f => f.cap === 'net').map(f => f.dest), ['fixed', 'built']);
+  // a result read before calls were counted keeps its old wording
+  assert.match(reachSays({ net: true, hosts: [], told: [], files: [], secrets: [], fixed: [], runs: null })[1], /addresses its code doesn't write out/);
 });

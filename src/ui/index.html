@@ -825,6 +825,7 @@ button.hp:hover{border-color:var(--ink);transform:translateY(-1px)}
 .ireach li b{flex:none;width:9.5em;font-size:14px}
 .ireach li span{min-width:0}
 .ireach li span small{display:block;margin-top:2px}
+.ireach li span b.unk{display:inline;width:auto;font-size:inherit;color:var(--glance-ink);box-shadow:inset 0 -.45em 0 color-mix(in oklab,var(--glance) 30%,transparent)}
 @media (max-width:560px){.ireach li{flex-wrap:wrap}.ireach li b{width:auto}.ireach li span{flex-basis:100%}}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .seg{position:relative;display:inline-flex;max-width:100%;overflow-x:auto;scrollbar-width:none;padding:3px;border-radius:10px;background:var(--sheet);border:1px solid var(--rule2)}
@@ -3184,10 +3185,15 @@ function reachHTML(i) {
   const r = i.reach;
   if (!r) return '';
   const list = xs => xs.map(x => `<code>${esc(x)}</code>`).join(' ');
+  // a call whose address isn't written out goes somewhere nobody can tell from the code: that is the finding
+  const u = r.unknown, unk = `<b class="unk">${u} call${u === 1 ? '' : 's'} to an unknown destination</b><small>the address is worked out while it runs, not written in its code</small>`;
+  const net = !r.net ? (r.hosts.length ? `No calls in its code, though it names ${list(r.hosts)}` : 'None in its code')
+    : u == null ? (r.hosts.length ? `Yes, and its code names ${list(r.hosts)}` : 'Yes, to addresses its code doesn’t write out')
+    : !r.hosts.length ? (u ? `Yes: ${unk}` : 'Yes, only to addresses written out in its code')
+    : u ? `Yes. Its code names ${list(r.hosts)}, and ${unk}` : `Yes, only to addresses written out in its code: ${list(r.hosts)}`;
   const rows = [
     [IC.run, 'Programs', r.runs === 'open' ? 'Runs ones its code doesn’t pin to a fixed command: in practice, whatever you can run' : r.runs === 'fixed' ? `Only fixed commands ${list(r.fixed)}` : 'None in its code'],
-    [IC.net, 'Network', (r.net ? r.hosts.length ? `Yes, and its code names ${list(r.hosts)}` : 'Yes, to addresses its code doesn’t write out' : r.hosts.length ? `No calls in its code, though it names ${list(r.hosts)}` : 'None in its code')
-      + (r.told.length ? `<small>its instructions point your agent at ${list(r.told)}</small>` : '')],
+    [IC.net, 'Network', net + (r.told.length ? `<small>its instructions point your agent at ${list(r.told)}</small>` : '')],
     [IC.files, 'Outside its folder', r.files.length ? list(r.files) : 'Nothing written out in its code'],
     ...(r.secrets.length ? [[IC.key, 'Credential files', list(r.secrets)]] : []),
   ];

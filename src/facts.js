@@ -86,6 +86,20 @@ function fixedCommand(node, fn, consts) {
   const line = parts.join(' ');
   return RISKY_CMD.test(line) ? null : line;
 }
+// Where a network call goes. Written out: a literal or a const holding one, a URL whose host is written before any
+// part built at run time (`https://api.x.dev/${path}`, 'https://api.x.dev/' + path), new URL() of one, or options that
+// name the host. Anything else is built while it runs, and "unknown destination" is then the honest answer.
+function destOf(node, consts) {
+  const text = n => lit(n) ? str(n) : n?.type === 'Identifier' ? consts.get(n.name)?.text ?? null : null;
+  const lead = n => n?.type === 'BinaryExpression' && n.operator === '+' ? lead(n.left) : n?.type === 'TemplateLiteral' ? n.quasis[0].value.cooked ?? '' : text(n);
+  const written = n => !n ? false : text(n) != null
+    || ((n.type === 'TemplateLiteral' || n.type === 'BinaryExpression') && URL_RE.test(lead(n) ?? ''))
+    || (n.type === 'NewExpression' && n.callee.name === 'URL' && written(n.arguments[n.arguments.length > 1 ? 1 : 0]))
+    || (n.type === 'ObjectExpression' && n.properties.some(p => /^(host|hostname)$/.test(p.key?.name ?? p.key?.value) && written(p.value)));
+  const [a, b] = node.arguments;
+  if (a?.type === 'Literal' && typeof a.value === 'number') return b == null || written(b) ? 'fixed' : 'built';  // net.connect(port, host)
+  return written(a) ? 'fixed' : 'built';
+}
 const reqName = n => n?.type === 'CallExpression' && n.callee.type === 'Identifier' && n.callee.name === 'require' ? str(n.arguments[0]) : null;
 const bare = m => m?.replace(/^node:/, '');
 
@@ -95,6 +109,8 @@ export function fileFacts(src, file) {
   let scope = 0;
   const add = (cap, detail, node, line = node?.loc?.start.line) =>
     out.push({ cap, detail, file, line, scope: `${file}#${scope}`, code: (lines[line - 1] || '').trim().slice(0, 160) });
+  // a network call also carries where it goes, for "what it can reach"; its detail (and so the verdict) is unchanged
+  const addNet = (detail, node) => { add('net', detail, node); out.at(-1).dest = destOf(node, consts); };
 
   const bidi = lines.findIndex(l => BIDI.test(l));
   if (bidi >= 0) add('hidden-chars', 'bidirectional control characters that can make code read differently than it runs', null, bidi + 1);
@@ -140,7 +156,7 @@ export function fileFacts(src, file) {
           const m = str(node.arguments[0]);
           m == null ? add('dynamic-load', 'require() of a computed name', node) : importOf(m, node, 'requires');
         } else if (c.type === 'Identifier' && c.name === 'eval') add('code', 'eval() runs a string as code', node);
-        else if (c.type === 'Identifier' && c.name === 'fetch') add('net', 'fetch()', node);
+        else if (c.type === 'Identifier' && c.name === 'fetch') addNet('fetch()', node);
         const target = c.type === 'Identifier' ? alias.get(c.name)
           : c.type === 'MemberExpression' && !c.computed && c.object.type === 'Identifier' && alias.has(c.object.name)
             ? `${alias.get(c.object.name).split('.')[0]}.${c.property.name}`
@@ -153,7 +169,7 @@ export function fileFacts(src, file) {
           }
           else if ((mod === 'fs' || mod === 'fs/promises') && FS_READ.test(fn)) add('fs-read', `${fn}()`, node);
           else if ((mod === 'fs' || mod === 'fs/promises') && FS_WRITE.test(fn)) add('fs-write', `${fn}()`, node);
-          else if (['http', 'https', 'http2', 'net', 'tls', 'dgram', 'dns'].includes(mod) && NET_CALL.test(fn)) add('net', `${mod}.${fn}()`, node);
+          else if (['http', 'https', 'http2', 'net', 'tls', 'dgram', 'dns'].includes(mod) && NET_CALL.test(fn)) addNet(`${mod}.${fn}()`, node);
           else if (mod === 'os' && /^(homedir|userInfo|networkInterfaces|hostname)$/.test(fn)) add('os', `os.${fn}()`, node);
           else if (mod === 'vm' && /^(runIn|compileFunction|Script)/.test(fn)) add('code', `vm.${fn}() runs a string as code`, node);
         }
@@ -164,7 +180,7 @@ export function fileFacts(src, file) {
       }
       case 'NewExpression':
         if (node.callee.type === 'Identifier' && node.callee.name === 'Function') add('code', 'new Function() builds code at runtime', node);
-        if (node.callee.type === 'Identifier' && node.callee.name === 'WebSocket') add('net', 'new WebSocket()', node);
+        if (node.callee.type === 'Identifier' && node.callee.name === 'WebSocket') addNet('new WebSocket()', node);
         break;
       case 'MemberExpression': {
         const o = node.object;
@@ -229,11 +245,22 @@ export function reachOf(facts) {
     runs: code.some(f => ['exec', 'code', 'dynamic-load'].includes(f.cap)) ? 'open' : of('exec-fixed').length ? 'fixed' : null,
     fixed: uniq(of('exec-fixed').map(f => f.detail.replace(/^.*runs one fixed command: /, ''))),
     net: of('net').length > 0,
+    // calls whose address isn't written out (built while it runs, or compiled code): nobody can tell where they go
+    unknown: of('net').filter(f => f.dest !== 'fixed').length,
     hosts: uniq(of('url').map(f => f.detail.replace(/^URL to /, ''))),
     told: uniq(facts.filter(f => f.cap === 'doc-url').map(f => f.detail)),
     files: uniq([...(of('os').some(f => /homedir|userInfo/.test(f.detail)) ? ['your home folder'] : []), ...of('path-out').map(f => f.detail)]),
     secrets: uniq(of('secret-path').map(f => f.detail.replace(/^mentions "|"$/g, ''))),
   };
+}
+/** The network part of reach, in words: the hosts its code writes out, and how many calls go somewhere it doesn't.
+ *  A result read before slowship counted those (no `unknown`) keeps the old wording. */
+export function netSays(r, list = xs => xs.join(', ')) {
+  const u = r.unknown, calls = `${u} call${u === 1 ? ' goes' : 's go'} to an unknown destination (the address is worked out while it runs, not written in its code)`;
+  if (!r.net) return r.hosts.length ? `no calls in its code, though it names ${list(r.hosts, 'host')}` : 'none in its code';
+  if (u == null) return r.hosts.length ? `yes; its code names ${list(r.hosts, 'host')}` : 'yes, to addresses its code doesn\'t write out';
+  if (!r.hosts.length) return u ? `yes, and ${calls}` : 'yes, only to addresses written out in its code';
+  return u ? `yes; its code names ${list(r.hosts, 'host')}, and ${calls}` : `yes, only to addresses written out in its code: ${list(r.hosts, 'host')}`;
 }
 /** The same, as short lines (terminal, plain report). For your agent, `quote: false` counts hosts and paths instead of
  *  naming them: those are text the scanned code wrote, and an answer to an agent repeats only slowship's own words. */
@@ -246,7 +273,7 @@ export function reachSays(r, { quote = true } = {}) {
   };
   return [
     `programs: ${r.runs === 'open' ? 'runs ones its code doesn\'t pin to a fixed command, so in practice whatever you can run' : r.runs === 'fixed' ? `only fixed commands (${list(r.fixed, 'command')})` : 'none'}`,
-    `network: ${r.net ? r.hosts.length ? `yes; its code names ${list(r.hosts, 'host')}` : 'yes, to addresses its code doesn\'t write out' : r.hosts.length ? `no calls in its code, though it names ${list(r.hosts, 'host')}` : 'none in its code'}${r.told.length ? `; its instructions point your agent at ${list(r.told, 'host')}` : ''}`,
+    `network: ${netSays(r, list)}${r.told.length ? `; its instructions point your agent at ${list(r.told, 'host')}` : ''}`,
     `outside its folder: ${r.files.length ? list(r.files, 'path') : 'nothing written out in its code'}`,
     ...(r.secrets.length ? [`credential files: ${list(r.secrets, 'file')}`] : []),
   ];

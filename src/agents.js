@@ -84,7 +84,10 @@ export function scriptFacts(text, file) {
   text.split(/\r?\n/).forEach((l, i) => {
     if (/^\s*(#|\/\/|REM\b)/.test(l)) return;
     const add = (cap, detail) => out.push({ cap, detail, file, line: i + 1, scope: `${file}#0`, code: l.trim().slice(0, 160) });
-    for (const r of SCRIPT_RULES) if (r.re.test(l)) add(r.cap, r.says);
+    for (const r of SCRIPT_RULES) if (r.re.test(l)) {
+      add(r.cap, r.says);
+      if (r.cap === 'net') out.at(-1).dest = URL_RE.test(l) ? 'fixed' : 'built';  // line by line: a URL on the call's own line
+    }
     const s = l.match(SECRET_LIT); if (s) add('secret-path', `mentions "${s[0]}"`);
     const p = l.match(PERSIST_LIT); if (p) add('persist-path', `mentions "${p[0].trim()}"`);
     const u = l.match(URL_RE); if (u) add('url', `URL to ${u[1]}`);
