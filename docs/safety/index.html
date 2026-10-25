@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safety and privacy · slowship docs</title>
+<meta name="description" content="A checker should never be the way something gets in. Everything slowship reads stays in quarantine, nothing it reads is started, and almost nothing ever leaves your computer.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>How it works</span><b>Safety and privacy</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/" aria-current="page">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">How it works</p>
+    <h1>Safety and privacy</h1>
+<p class="lead">A checker should never be the way something gets in. Everything slowship reads stays in quarantine, nothing it reads is started, and almost nothing ever leaves your computer.</p>
+
+<h2 id="it-never-runs-what-it-reads"><a class="anchor" href="#it-never-runs-what-it-reads" aria-label="Link to this section">#</a>It never runs what it reads</h2>
+<ul>
+  <li><b>No scanned code is executed.</b> No <code>require</code>, no install scripts, no starting MCP servers.</li>
+  <li><b>REA runs only its static readers</b>: <code>analyze-javascript-application</code>, <code>inspect-go-binary</code>, <code>inspect-rust-binary</code>, <code>inspect-managed-artifact</code>, <code>inspect-managed-native-boundaries</code>, <code>inspect-managed-members</code> and <code>inspect-electron-fuses</code>. Each gets fixed arguments, a timeout and a cap on output. None of them loads or starts the file it reads.</li>
+  <li><b>No shell anywhere.</b> Programs are started with fixed arguments, never through a shell. Package names are checked before <code>npm pack</code>, and downloaded packages are unpacked by slowship’s own reader, which refuses any path that tries to leave the quarantine folder.</li>
+</ul>
+
+<h2 id="nothing-is-uploaded"><a class="anchor" href="#nothing-is-uploaded" aria-label="Link to this section">#</a>Nothing is uploaded</h2>
+<p>slowship uses the network for exactly three things, and nothing else:</p>
+<div class="tablewrap"><table>
+  <tr><th>What</th><th>Where to</th><th>When</th></tr>
+  <tr><td>Downloading <code>npx</code> MCP servers so they can be read</td><td>npm</td><td>During a watch. <code>--offline</code> turns it off.</td></tr>
+  <tr><td>A package your agent asks it to check</td><td>npm</td><td>Only when your agent calls <code>check</code>.</td></tr>
+  <tr><td>The morning ping</td><td><code>discord.com</code> or <code>api.telegram.org</code></td><td>Only if you connect one. A summary in slowship’s own words, never code, paths or keys.</td></tr>
+</table></div>
+<p>The model runs on your machine through Ollama. Your code never goes to it in bulk: it gets a description and a short list of facts.</p>
+
+<h2 id="the-report-answers-only-you"><a class="anchor" href="#the-report-answers-only-you" aria-label="Link to this section">#</a>The report answers only you</h2>
+<ul>
+  <li>It listens on <code>127.0.0.1</code>, so other computers can’t reach it.</li>
+  <li>It checks the <code>Host</code> header, so a website can’t reach it by renaming itself (DNS rebinding), and it checks the <code>Origin</code>.</li>
+  <li>It takes JSON only, and caps the size of what it accepts.</li>
+  <li>The code shown around a finding is read only from inside that item’s own folder, and secrets are cut down before they reach the page.</li>
+</ul>
+
+<h2 id="your-agent-can-look-never-clear"><a class="anchor" href="#your-agent-can-look-never-clear" aria-label="Link to this section">#</a>Your agent can look, never clear</h2>
+<p>The coding agent connector has two tools, <code>check</code> and <code>watch</code>, and no tool to clear anything. Answers repeat only slowship’s own words, never the scanned text, and say that names and paths are data. Clearing happens only in <code>slowship review</code> and <code>slowship ui</code>, by you.</p>
+
+<h2 id="key-names-never-values"><a class="anchor" href="#key-names-never-values" aria-label="Link to this section">#</a>Key names, never values</h2>
+<p>“Who can spend your money” keeps only the <b>names</b> of keys that an MCP config hands a server, in its <code>env</code> and auth headers. Their values are never read into the report.</p>
+
+<h2 id="what-s-kept-on-your-computer"><a class="anchor" href="#what-s-kept-on-your-computer" aria-label="Link to this section">#</a>What’s kept on your computer</h2>
+<p>Everything lives in <code>~/.slowship</code> (or <code>SLOWSHIP_HOME</code>): the memory of what it read, your clears, the last watch, and, if you connected one, the morning ping’s webhook or token in <code>notify.json</code>, readable only by you. Delete the folder and it’s all gone.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/blind-spots/"><small>Previous</small><b>What it can’t see</b></a><a class="next" href="../../docs/commands/"><small>Next</small><b>Commands and options</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/safety.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#it-never-runs-what-it-reads">It never runs what it reads</a></li><li><a href="#nothing-is-uploaded">Nothing is uploaded</a></li><li><a href="#the-report-answers-only-you">The report answers only you</a></li><li><a href="#your-agent-can-look-never-clear">Your agent can look, never clear</a></li><li><a href="#key-names-never-values">Key names, never values</a></li><li><a href="#what-s-kept-on-your-computer">What’s kept on your computer</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

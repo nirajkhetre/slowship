@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Measured results · slowship docs</title>
+<meta name="description" content="Every number slowship quotes was measured, on real code, on one laptop. Here they all are, with what they don’t say.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Reference</span><b>Measured results</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/" aria-current="page">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Reference</p>
+    <h1>Measured results</h1>
+<p class="lead">Every number slowship quotes was measured, on real code, on one laptop. Here they all are, with what they don’t say.</p>
+
+<h2 id="one-real-project"><a class="anchor" href="#one-real-project" aria-label="Link to this section">#</a>One real project</h2>
+<p>One project folder: the 174 dependencies of REA’s own npm package, plus 77 installed skills, 1 MCP server and a deliberately risky test build. A laptop with a 6 GB GPU, using <code>gemma4:e2b</code>.</p>
+<div class="tablewrap"><table>
+  <tr><th>What</th><th>Measured</th></tr>
+  <tr><td>Things found</td><td>275 (252 distinct)</td></tr>
+  <tr><td>Settled by rules alone</td><td>202</td></tr>
+  <tr><td>Same bytes as another copy, read once</td><td>23</td></tr>
+  <tr><td>Sent to the local model</td><td>50, in 4 min 23 s of model time</td></tr>
+  <tr><td>Re-run with nothing changed</td><td>about 4 s</td></tr>
+  <tr><td>Code that runs, actually read</td><td>3,827 of 3,829 files (99.95%); 454 test and example files left out on purpose</td></tr>
+  <tr><td>Compiled files read by REA</td><td>4, about 2 to 4 s each: the MCP server (Rust, built without a crate list) and 3 native addons with no Go, Rust or .NET record</td></tr>
+  <tr><td>Who can spend your money</td><td>9 of the agent’s tools hold 18 keys to 13 outside accounts: 3 read 10 keys in their own code, the rest are named in their instructions</td></tr>
+  <tr><td>Verdict</td><td>Held: the test build (an inert fixture with a fake key, risky Electron settings and an IPC handler that opens any address). 10 more worth a glance, 0 holds among real packages and skills</td></tr>
+</table></div>
+<p>The model isn’t repeatable bit for bit: between this run and the one before it, it moved 4 package verdicts by one step. Rules-only verdicts didn’t change at all.</p>
+
+<h2 id="compiled-programs"><a class="anchor" href="#compiled-programs" aria-label="Link to this section">#</a>Compiled programs</h2>
+<p>Reading compiled programs installed on the same laptop, with REA 6.7.0. Nothing was started.</p>
+<div class="tablewrap"><table>
+  <tr><th>File</th><th>What its build record says</th><th>Time</th></tr>
+  <tr><td><code>ollama.exe</code></td><td>Go 1.26.0, 54 modules</td><td>1.2 s</td></tr>
+  <tr><td><code>uv.exe</code></td><td>Rust, 572 crates</td><td>2.6 s</td></tr>
+  <tr><td>PowerShell’s <code>System.Management.Automation.dll</code></td><td>.NET, 62 references, 192 native imports, two flagged: <code>CreateProcess</code> and <code>CryptUnprotectData</code></td><td>5.6 s</td></tr>
+  <tr><td>a C++ <code>.node</code> addon (node-pty)</td><td>No record: named, not read</td><td>3.8 s</td></tr>
+  <tr><td>VS Code’s <code>Code.exe</code></td><td>Fuses as shipped: run as Node, <code>NODE_OPTIONS</code> and <code>--inspect</code> on, asar integrity off</td><td>1.5 s</td></tr>
+  <tr><td>slowship’s inert .NET test loader, compiled</td><td>Held twice: decode-then-load in one method, a browser password file then a POST in another</td><td>6.1 s</td></tr>
+</table></div>
+
+<h2 id="against-known-malware"><a class="anchor" href="#against-known-malware" aria-label="Link to this section">#</a>Against known malware</h2>
+<p>Measured on 200 agent skills from <a href="https://github.com/lxyeternal/MalSkillBench">MalSkillBench</a>: 100 malicious and 100 benign, a fixed and reproducible subset. Each rate has a range it is 95% likely to sit in, because 100 samples can’t pin it to the decimal.</p>
+<div class="tablewrap"><table>
+  <tr><th></th><th>Rules only</th><th>Rules and gemma4:e2b</th></tr>
+  <tr><td><b>Held</b></td><td>12 of 100 malicious skills (7–20%), 2 of 100 benign</td><td>13 malicious (8–21%), 3 benign</td></tr>
+  <tr><td><b>Held or worth a glance</b></td><td>53 malicious (43–62%), 17 benign (11–26%)</td><td>33–36 malicious, 8–9 benign, over two runs</td></tr>
+  <tr><td>Benign npm packages flagged (REA’s 174 dependencies)</td><td>0 held, 18 worth a glance</td><td>0 held, 3 worth a glance</td></tr>
+</table></div>
+<h3>Put plainly</h3>
+<ul>
+  <li><b>A hold is usually right</b>: 12 of 14 (between 60 and 96%).</li>
+  <li><b>It catches about one malicious skill in eight</b> as a hold. Most misses are attacks written as plain English in <code>SKILL.md</code>, or code inside a markdown block, which slowship doesn’t read as code yet.</li>
+  <li><b>The model cuts false alarms by half or more</b>, and it also lets more attacks through, because those attacks come with a description written to make them look expected.</li>
+  <li>Malicious npm packages haven’t been measured yet.</li>
+</ul>
+
+<h2 id="rerun-it-yourself"><a class="anchor" href="#rerun-it-yourself" aria-label="Link to this section">#</a>Rerun it yourself</h2>
+<p>The full write-up, every miss explained, and how to rerun it are in <a href="https://github.com/nirajkhetre/slowship/blob/main/eval/EVAL.md">eval/EVAL.md</a>. <code>node eval/run.mjs compare</code> lines two runs up skill by skill.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/commands/"><small>Previous</small><b>Commands and options</b></a><a class="next" href="../../docs/faq/"><small>Next</small><b>Questions</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/measured.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#one-real-project">One real project</a></li><li><a href="#compiled-programs">Compiled programs</a></li><li><a href="#against-known-malware">Against known malware</a></li><li><a href="#rerun-it-yourself">Rerun it yourself</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

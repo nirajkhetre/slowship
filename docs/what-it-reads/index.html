@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What it reads · slowship docs</title>
+<meta name="description" content="Four kinds of cargo, found in one pass with no setup. Everything is read where it already sits, except MCP servers that live on npm, which are downloaded into quarantine first.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>How it works</span><b>What it reads</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/" aria-current="page">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">How it works</p>
+    <h1>What it reads</h1>
+<p class="lead">Four kinds of cargo, found in one pass with no setup. Everything is read where it already sits, except MCP servers that live on npm, which are downloaded into quarantine first.</p>
+
+<h2 id="packages"><a class="anchor" href="#packages" aria-label="Link to this section">#</a>Packages</h2>
+<p>slowship reads your <code>package-lock.json</code>, so it reads exactly what you’ll ship, at the versions you’ll ship, including every dependency of a dependency. The code itself is read from <code>node_modules</code>.</p>
+<p>No lockfile? It falls back to reading <code>node_modules</code> directly and says so, because then versions aren’t pinned.</p>
+
+<h2 id="agent-skills"><a class="anchor" href="#agent-skills" aria-label="Link to this section">#</a>Agent skills</h2>
+<p>Skills are folders of instructions and scripts that coding agents load. slowship reads the skill folders that coding agents use, in your home folder and in the project, plugin folders included. For example <code>~/.agents/skills</code> and <code>~/.codex/skills</code>.</p>
+<p>A skill has two parts, and both are read:</p>
+<ul>
+  <li><b>Its scripts</b>: JavaScript is parsed properly; Python and shell are read line by line.</li>
+  <li><b>Its instructions</b> in <code>SKILL.md</code>: checked for four narrow things. Telling the agent to hide something from you, to ignore its other instructions, to download and run a script, or to send your data somewhere.</li>
+</ul>
+
+<h2 id="mcp-servers"><a class="anchor" href="#mcp-servers" aria-label="Link to this section">#</a>MCP servers</h2>
+<p>MCP servers are the tools your agents connect to. slowship finds them in the MCP settings of popular coding agents and editors (Cursor, VS Code, Codex and others).</p>
+<ul>
+  <li>An <code>npx</code> server is downloaded into a quarantine folder with every script off, and read there. <code>--offline</code> turns that download off.</li>
+  <li>A compiled server is read as far as its build record, with REA.</li>
+  <li>A remote server or one in a container can’t be read, and the report says so.</li>
+</ul>
+<p><b>None are ever started.</b></p>
+
+<h2 id="compiled-files"><a class="anchor" href="#compiled-files" aria-label="Link to this section">#</a>Compiled files</h2>
+<p>With <a href="../../docs/install/#add-rea-optional">REA installed</a>, compiled files stop being blind spots. That covers a compiled MCP server, or a <code>.node</code>, <code>.exe</code> or <code>.dll</code> inside a package.</p>
+<div class="tablewrap"><table>
+  <tr><th>Kind</th><th>What slowship learns</th></tr>
+  <tr><td>Go and Rust</td><td>What they were built from: modules or crates and their versions, the toolchain, dependencies swapped in at build time, builds from uncommitted changes.</td></tr>
+  <tr><td>.NET</td><td>Its references and the native functions it declares, like starting programs, raw network, keystroke hooks, writing into other programs, or decrypting what Windows protects for you. Then, method by method, the framework calls each method makes and the strings it loads.</td></tr>
+  <tr><td>C and C++</td><td>They leave no build record, so they are named, not read.</td></tr>
+</table></div>
+<p>So a .NET method that decodes base64 and loads it as code, or names the browser’s password file and then posts, is held just like the same JavaScript function.</p>
+
+<h2 id="your-build"><a class="anchor" href="#your-build" aria-label="Link to this section">#</a>Your build</h2>
+<p>Only when you ask, with <code>--app</code> or in Settings. slowship looks for:</p>
+<ul>
+  <li><b>Secrets that slipped in</b>, redacted in every output.</li>
+  <li><b>Shipped <code>.env</code> files and source maps.</b></li>
+  <li><b>Electron settings</b> like <code>nodeIntegration</code> or <code>contextIsolation: false</code>, and DevTools left on.</li>
+  <li><b>The IPC map</b>, with REA: every handler a page can reach (<code>window.api.x</code>), whether it checks who sent the message, and what it does.</li>
+  <li><b>Electron fuses</b> on a packaged app: whether it still lets anyone run it as plain Node.js, inject code through <code>NODE_OPTIONS</code>, attach a debugger with <code>--inspect</code>, or change its code after signing.</li>
+</ul>
+
+<h2 id="what-it-leaves-out"><a class="anchor" href="#what-it-leaves-out" aria-label="Link to this section">#</a>What it leaves out</h2>
+<p>Test and example files inside packages are left out on purpose: they ship, but they don’t run when you use the package. Files over 2 MB, usually generated bundles, are skipped and named. Both appear in <a href="../../docs/blind-spots/">Blind spots</a>.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/ci/"><small>Previous</small><b>In CI</b></a><a class="next" href="../../docs/how-it-decides/"><small>Next</small><b>How it decides</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/what-it-reads.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#packages">Packages</a></li><li><a href="#agent-skills">Agent skills</a></li><li><a href="#mcp-servers">MCP servers</a></li><li><a href="#compiled-files">Compiled files</a></li><li><a href="#your-build">Your build</a></li><li><a href="#what-it-leaves-out">What it leaves out</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

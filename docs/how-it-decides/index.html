@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How it decides · slowship docs</title>
+<meta name="description" content="A funnel that goes from cheap to careful. Most things are settled by plain rules in a blink. Only what’s worth a second opinion goes to the model, and the final word always stays in code.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>How it works</span><b>How it decides</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/" aria-current="page">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">How it works</p>
+    <h1>How it decides</h1>
+<p class="lead">A funnel that goes from cheap to careful. Most things are settled by plain rules in a blink. Only what’s worth a second opinion goes to the model, and the final word always stays in code.</p>
+
+<h2 id="the-funnel"><a class="anchor" href="#the-funnel" aria-label="Link to this section">#</a>The funnel</h2>
+<ol class="steps">
+  <li><b>Inventory</b><p>Find everything aboard, in one pass, with no setup.</p></li>
+  <li><b>Memory by content</b><p>Every item is fingerprinted. Anything whose bytes haven’t changed since last time is skipped, and anything you’ve cleared stays cleared until its code changes.</p></li>
+  <li><b>Facts from the syntax tree</b><p>A pass over the code’s syntax tree finds what it can actually do. Each fact keeps its file and line.</p></li>
+  <li><b>Combinations, in code</b><p>Some pairs of facts mean more than their parts. Only these can hold the ship.</p></li>
+  <li><b>Claim against behaviour, on your laptop</b><p>For anything worth a second opinion, the local model compares the item’s own description with its short list of facts.</p></li>
+  <li><b>Severity stays in code</b><p>The model can nudge a single fact, never a combination.</p></li>
+  <li><b>The morning report</b><p>One verdict, a short queue, the real code, and an honest map of what couldn’t be read.</p></li>
+</ol>
+
+<h2 id="the-facts-it-looks-for"><a class="anchor" href="#the-facts-it-looks-for" aria-label="Link to this section">#</a>The facts it looks for</h2>
+<p>Facts are things the code can do, read from its structure, not guessed from its words:</p>
+<ul>
+  <li>making network calls</li>
+  <li>running other programs</li>
+  <li>writing files, especially in places that survive a restart</li>
+  <li>reading secrets: credential files, keys in the environment</li>
+  <li>building code at runtime, like <code>eval</code> or a <code>Function</code> made from a string</li>
+  <li>install scripts</li>
+  <li>hidden characters, like text that reads differently to you and to the computer</li>
+</ul>
+<p>None of these is bad on its own. A downloader makes network calls. That’s why most facts are only <b>noted</b>.</p>
+
+<h2 id="what-can-hold-the-ship"><a class="anchor" href="#what-can-hold-the-ship" aria-label="Link to this section">#</a>What can hold the ship</h2>
+<p>Only combinations found in code:</p>
+<ul>
+  <li>a credential file read next to a network call,</li>
+  <li>decoding something, then running it as code, in the same function,</li>
+  <li>writing to a place that starts programs at login,</li>
+  <li>hidden direction-changing characters in code,</li>
+  <li>a skill that tells your agent to keep something from you,</li>
+  <li>an IPC handler a page can reach that never checks the sender and starts programs or opens a computed address.</li>
+</ul>
+
+<h2 id="the-four-levels"><a class="anchor" href="#the-four-levels" aria-label="Link to this section">#</a>The four levels</h2>
+<div class="tablewrap"><table>
+  <tr><th>Level</th><th>Means</th><th>Who can set it</th></tr>
+  <tr><td><b>Held</b></td><td>Does more than it says. Look before you ship.</td><td>Only a combination found in code.</td></tr>
+  <tr><td><b>Worth a glance</b></td><td>A fact the description doesn’t call for.</td><td>The rules, or the model raising a single fact.</td></tr>
+  <tr><td><b>Noted</b></td><td>A power you’d expect from it.</td><td>The rules, or the model lowering a single fact.</td></tr>
+  <tr><td><b>Fine</b></td><td>Nothing found.</td><td>The rules.</td></tr>
+</table></div>
+
+<h2 id="what-the-model-does-and-doesn-t"><a class="anchor" href="#what-the-model-does-and-doesn-t" aria-label="Link to this section">#</a>What the model does, and doesn’t</h2>
+<p>The model sees the item’s own description, marked clearly as untrusted data, and the short list of facts. It says, fact by fact, whether the description calls for it, and it must cite fact ids that exist. It never sees your other code, and it never decides alone.</p>
+<ul>
+  <li>It can move a <b>single fact</b> one step up or down, never past “worth a glance”.</li>
+  <li>It can <b>never lower a hold</b>. A combination found in code stays held.</li>
+</ul>
+<div class="note hold"><div><p>This is what makes prompt injection pointless here. A README that tells AI scanners to approve everything can sway the model, and in testing it sometimes did. But the hold comes from code, and the model can’t touch it.</p></div></div>
+<p>The model isn’t repeatable bit for bit: between two runs on the same project it moved 4 package verdicts by one step. Rules-only verdicts didn’t change at all.</p>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/what-it-reads/"><small>Previous</small><b>What it reads</b></a><a class="next" href="../../docs/blind-spots/"><small>Next</small><b>What it can’t see</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/how-it-decides.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#the-funnel">The funnel</a></li><li><a href="#the-facts-it-looks-for">The facts it looks for</a></li><li><a href="#what-can-hold-the-ship">What can hold the ship</a></li><li><a href="#the-four-levels">The four levels</a></li><li><a href="#what-the-model-does-and-doesn-t">What the model does, and doesn’t</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

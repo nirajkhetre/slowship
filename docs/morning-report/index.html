@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The morning report · slowship docs</title>
+<meta name="description" content="The report is where you read a watch properly: the verdict, a short queue of what needs you, and the real code behind every finding. It runs on your own computer and answers nothing else.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Using it</span><b>The morning report</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/" aria-current="page">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Using it</p>
+    <h1>The morning report</h1>
+<p class="lead">The report is where you read a watch properly: the verdict, a short queue of what needs you, and the real code behind every finding. It runs on your own computer and answers nothing else.</p>
+
+<h2 id="open-it"><a class="anchor" href="#open-it" aria-label="Link to this section">#</a>Open it</h2>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>slowship ui</code></pre></div>
+<p>It opens <code>http://127.0.0.1:7798</code> in your browser. Use <code>--port</code> to pick another port, or <code>--no-open</code> to start it without opening a tab. You can also press <kbd>o</kbd> on the verdict card, or in the terminal review.</p>
+<div class="note"><div><p>You don’t need the report running at night. The nightly watch runs by itself and saves its results; the report only reads them when you open it.</p></div></div>
+
+<h2 id="the-verdict"><a class="anchor" href="#the-verdict" aria-label="Link to this section">#</a>The verdict</h2>
+<figure><img src="../../img/report-hero.webp" alt="The top of the report: the verdict headline, a line about the last watch, a button to review, and the harbour scene" width="1440" height="900" loading="lazy"><figcaption>The verdict, with one button for what to do next. The chip above it says when the last watch finished.</figcaption></figure>
+<p>At the top is the verdict in three words: <b>held in port</b>, <b>ready after a glance</b> or <b>cleared to sail</b>. Under it, one line says why, and one button takes you to what to do next.</p>
+<p>Beside it, your project is drawn as a ship in harbour. Each container is one thing aboard, coloured by what was found:</p>
+<div class="tablewrap"><table>
+  <tr><th>Colour</th><th>Means</th></tr>
+  <tr><td>Magenta</td><td>Held: does more than it says</td></tr>
+  <tr><td>Yellow</td><td>Worth a glance</td></tr>
+  <tr><td>Mint</td><td>Cleared by you</td></tr>
+  <tr><td>Grey</td><td>Noted: a power you’d expect from it, like a downloader making network calls</td></tr>
+  <tr><td>Pale</td><td>Fine</td></tr>
+</table></div>
+<p>While something is held, the ship stays moored. Once everything is clear, it sails out.</p>
+
+<h2 id="what-it-read"><a class="anchor" href="#what-it-read" aria-label="Link to this section">#</a>What it read</h2>
+<p>Under the harbour, four counts say where everything came from: packages from the project’s lockfile, skills and MCP servers from this computer, and your build if you chose one. Pick one to list just those.</p>
+
+<h2 id="the-review-list"><a class="anchor" href="#the-review-list" aria-label="Link to this section">#</a>The review list</h2>
+<figure><img src="../../img/report-review.webp" alt="The review list on the left, with cards for each finding, and the inspector on the right showing one package in detail" width="1440" height="900" loading="lazy"><figcaption>The review queue, held things first, with the inspector open on the selected one.</figcaption></figure>
+<p>The <b>Review</b> tab is the short list of what needs you, held things first. Pick one, and the inspector shows:</p>
+<ul>
+  <li><b>What it says</b>, from its own description, beside <b>what its code does</b>, as a list of facts.</li>
+  <li><b>The real code</b> around each finding, with the flagged line lit. Point at a fact to jump to its line.</li>
+  <li><b>The model’s note</b>, in plain words, when the model was asked.</li>
+  <li>For your build, <b>the IPC map</b>: how pages reach the main process, drawn as lock gates. A handler that checks who sent the message shuts its gate. One that doesn’t lets the current run through.</li>
+  <li>For compiled files, <b>what they were built from</b>: modules or crates, versions, the toolchain.</li>
+</ul>
+<figure><img src="../../img/report-inspector.webp" alt="The inspector scrolled down to the code: real lines from a file, with the flagged line highlighted" width="1440" height="900" loading="lazy"><figcaption>The x-ray: each square is a file it ships. A wire runs from the file that writes files to that power, and ≠ says its description doesn’t call for it.</figcaption></figure>
+<p>When you’ve looked, press <b>Clear</b>. A ship takes it aboard, it turns green, and the next one comes up. <b>Undo</b> puts it back. See <a href="../../docs/clearing/">Clearing things</a>.</p>
+
+<h2 id="search-and-commands"><a class="anchor" href="#search-and-commands" aria-label="Link to this section">#</a>Search and commands</h2>
+<p>Press <kbd>Ctrl K</kbd> (or <kbd>⌘K</kbd> on a Mac) from anywhere. Type a name to find anything aboard, what needs you first. Or type what you want to do: <i>run</i>, <i>settings</i>, <i>connect your agent</i>.</p>
+<p>Other keys in the report: <kbd>j</kbd> and <kbd>k</kbd> move through the queue, <kbd>a</kbd> clears, <kbd>/</kbd> searches, <kbd>r</kbd> runs a watch now, <kbd>,</kbd> opens Settings, and <kbd>1</kbd> to <kbd>4</kbd> switch tabs.</p>
+
+<h2 id="everything-aboard"><a class="anchor" href="#everything-aboard" aria-label="Link to this section">#</a>Everything aboard</h2>
+<figure><img src="../../img/report-aboard.webp" alt="The Everything aboard tab: a full table of every item with its kind and what its code can touch" width="1440" height="900" loading="lazy"><figcaption>Every item, filterable by kind or by what its code can touch.</figcaption></figure>
+<p>The full list, not just what needs you. Filter by kind (packages, skills, MCP servers, your build) or by a power, like <i>makes network calls</i> or <i>runs programs</i>, to see only the things that have it.</p>
+
+<h2 id="blind-spots"><a class="anchor" href="#blind-spots" aria-label="Link to this section">#</a>Blind spots</h2>
+<figure><img src="../../img/report-blind.webp" alt="The Blind spots tab: a sonar chart of how much code was read, and a list of what could not be read and why" width="1440" height="900" loading="lazy"><figcaption>How much code was actually read, and an honest list of what wasn’t.</figcaption></figure>
+<p>An honest account of where the watch couldn’t look: MCP servers it couldn’t read, compiled files read only as far as their build record, test files left out on purpose, files too big to parse. See <a href="../../docs/blind-spots/">What it can’t see</a>.</p>
+
+<h2 id="who-can-spend-your-money"><a class="anchor" href="#who-can-spend-your-money" aria-label="Link to this section">#</a>Who can spend your money</h2>
+<figure><img src="../../img/report-keys.webp" alt="A ledger of outside accounts, each with the agent tools that hold a key to it" width="1440" height="900" loading="lazy"><figcaption>Every key to an outside account that your agent’s tools read or are handed, by account.</figcaption></figure>
+<p>Agents with paid keys can run up a bill on their own. This ledger lists every key to an outside account that your skills and MCP servers read in their code, name in their instructions, or are handed in an editor’s MCP config, grouped by account, with the tools that hold each one. Only key <b>names</b> are read, never their values.</p>
+
+<h2 id="the-skipper"><a class="anchor" href="#the-skipper" aria-label="Link to this section">#</a>The skipper</h2>
+<figure><img src="../../img/report-skipper.webp" alt="The skipper card: the mochi captain in a porthole, its line about the verdict, and its five faces" width="1440" height="900" loading="lazy"><figcaption>Point at the skipper for its card. Its face is the verdict.</figcaption></figure>
+<p>The skipper sits in the top bar with a count of what’s waiting. Its face is the verdict at a glance: asleep before any watch, reading during one, worried when something is held, calm when a few things are worth a glance, happy when you’re cleared to sail.</p>
+<p>Every part of the report has a <kbd>?</kbd> or a hover explanation, and a short tour runs on your first visit.</p>
+
+<h2 id="settings"><a class="anchor" href="#settings" aria-label="Link to this section">#</a>Settings</h2>
+<figure><img src="../../img/report-settings.webp" alt="The Settings panel: the project, the nightly watch, what to read, the build folder, the model and the theme" width="1440" height="900" loading="lazy"><figcaption>Settings save as you change them.</figcaption></figure>
+<p>Open Settings with the gear or <kbd>,</kbd>. From here you can:</p>
+<ul>
+  <li><b>Switch project</b> to a recent one, or browse to any folder on this computer.</li>
+  <li>Turn on <b>the nightly watch</b> and pick its time.</li>
+  <li>Choose <b>what to read</b>: packages, agent skills and MCP servers.</li>
+  <li>Add <b>your build folder</b>.</li>
+  <li>Turn <b>the model</b> off, for rules only.</li>
+  <li>Connect a <b>morning ping</b> and <b>your coding agent</b>.</li>
+  <li>Pick a <b>theme</b>: light, dark, or the same as your computer.</li>
+</ul>
+<figure><img src="../../img/report-dark.webp" alt="The report in its dark theme" width="1440" height="900" loading="lazy"><figcaption>The dark theme.</figcaption></figure>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/first-watch/"><small>Previous</small><b>Your first watch</b></a><a class="next" href="../../docs/terminal/"><small>Next</small><b>The terminal review</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/morning-report.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#open-it">Open it</a></li><li><a href="#the-verdict">The verdict</a></li><li><a href="#what-it-read">What it read</a></li><li><a href="#the-review-list">The review list</a></li><li><a href="#search-and-commands">Search and commands</a></li><li><a href="#everything-aboard">Everything aboard</a></li><li><a href="#blind-spots">Blind spots</a></li><li><a href="#who-can-spend-your-money">Who can spend your money</a></li><li><a href="#the-skipper">The skipper</a></li><li><a href="#settings">Settings</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

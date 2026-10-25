@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your coding agent · slowship docs</title>
+<meta name="description" content="Your coding agent installs packages, skills and MCP servers for you now, usually without reading them. slowship can be what it asks first.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Using it</span><b>Your coding agent</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/" aria-current="page">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Using it</p>
+    <h1>Your coding agent</h1>
+<p class="lead">Your coding agent installs packages, skills and MCP servers for you now, usually without reading them. slowship can be what it asks first.</p>
+
+<h2 id="connect-it"><a class="anchor" href="#connect-it" aria-label="Link to this section">#</a>Connect it</h2>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>slowship connect</code></pre></div>
+<p>It prints the exact line to add slowship to your agent as a local MCP server, using your agent’s own command or a snippet for any editor’s MCP settings. For example, with Codex:</p>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>codex mcp add slowship -- node /path/to/slowship/bin/slowship.js mcp</code></pre></div>
+<p>or, in an editor’s MCP settings:</p>
+<div class="codeblock"><button class="copy" type="button" aria-label="Copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><pre><code>"slowship": { "command": "node", "args": ["/path/to/slowship/bin/slowship.js", "mcp"] }</code></pre></div>
+<p><code>slowship connect</code> fills in the real path for you. It also puts a short skill where your agents keep their skills, saying when to ask slowship and what a hold means.</p>
+<figure><img src="../../img/report-agent.webp" alt="The coding agent section in Settings: whether each agent is connected, and the commands to connect one" width="1440" height="900" loading="lazy"><figcaption>Settings shows, live, which agents are connected.</figcaption></figure>
+
+<h2 id="the-two-tools-it-gets"><a class="anchor" href="#the-two-tools-it-gets" aria-label="Link to this section">#</a>The two tools it gets</h2>
+<h3>check: before something comes aboard</h3>
+<p>Give it an npm package, and slowship installs it into a quarantine folder with every install script off, then reads it with its whole dependency tree: exactly what <code>npm install</code> would bring. Or give it a folder: a downloaded skill, plugin or MCP server.</p>
+<h3>watch: before shipping</h3>
+<p>The same watch as running <code>slowship</code> yourself. Anything unchanged is read from memory (2.4 seconds on the project we measured). The run lands in <code>slowship review</code> and <code>slowship ui</code>, for you.</p>
+
+<h2 id="why-there-s-no-tool-to-clear"><a class="anchor" href="#why-there-s-no-tool-to-clear" aria-label="Link to this section">#</a>Why there’s no tool to clear</h2>
+<p>There isn’t one, on purpose. Your agent reads text that packages wrote, and that text can be written to talk it into things. It’s the same reason the model can never lower a hold: <b>clearing stays with you</b>.</p>
+<p>Answers use slowship’s own words and the file and line to open, never the scanned code itself, and they say plainly that names and paths are data, not instructions.</p>
+
+<h2 id="how-it-talks"><a class="anchor" href="#how-it-talks" aria-label="Link to this section">#</a>How it talks</h2>
+<ul>
+  <li>Over stdin and stdout. There’s no network port.</li>
+  <li>The only download is the package you asked it to check, from npm.</li>
+  <li>The model is off by default for these calls, because some agents give a tool a minute at most. Answers the nightly watch already got from the model are reused either way.</li>
+</ul>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/morning-ping/"><small>Previous</small><b>Morning ping</b></a><a class="next" href="../../docs/ci/"><small>Next</small><b>In CI</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/coding-agent.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#connect-it">Connect it</a></li><li><a href="#the-two-tools-it-gets">The two tools it gets</a></li><li><a href="#why-there-s-no-tool-to-clear">Why there’s no tool to clear</a></li><li><a href="#how-it-talks">How it talks</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>

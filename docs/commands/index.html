@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Commands and options · slowship docs</title>
+<meta name="description" content="Everything slowship understands, on one page.">
+<meta name="theme-color" content="#061335">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site.css?v=ada103f5"><link rel="stylesheet" href="../../docs.css?v=ada103f5">
+</head>
+<body class="docs-page" data-base="../../">
+<a class="sr" href="#main">Skip to the content</a>
+<header class="nav"><div class="in">
+  <a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a>
+  <nav class="links" aria-label="Site"><a href="../../#how">How it works</a><a href="../../#features">Features</a><a href="../../#safety">Safety</a><a href="../../docs/" aria-current="page">Docs</a><a href="https://github.com/nirajkhetre/slowship">GitHub</a></nav>
+  <a class="btn primary sm" href="../../demo/">Try the live demo</a>
+  <button class="menu-b" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+</div></header>
+<div class="docs wrap">
+  <aside class="side" id="side" aria-label="Docs">
+    <button class="sbtn" type="button" id="sopen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg>Search docs<kbd>Ctrl K</kbd></button>
+    <button class="sidebtn" type="button" id="sidebtn" aria-expanded="false" aria-controls="sidenav"><span>Reference</span><b>Commands and options</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <nav class="sidenav" id="sidenav"><div class="sg"><h4>Getting started</h4><ul><li><a href="../../docs/">What slowship is</a></li><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li></ul></div><div class="sg"><h4>Using it</h4><ul><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/terminal/">The terminal review</a></li><li><a href="../../docs/clearing/">Clearing things</a></li><li><a href="../../docs/nightly/">The nightly watch</a></li><li><a href="../../docs/morning-ping/">Morning ping</a></li><li><a href="../../docs/coding-agent/">Your coding agent</a></li><li><a href="../../docs/ci/">In CI</a></li></ul></div><div class="sg"><h4>How it works</h4><ul><li><a href="../../docs/what-it-reads/">What it reads</a></li><li><a href="../../docs/how-it-decides/">How it decides</a></li><li><a href="../../docs/blind-spots/">What it can’t see</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li></ul></div><div class="sg"><h4>Reference</h4><ul><li><a href="../../docs/commands/" aria-current="page">Commands and options</a></li><li><a href="../../docs/measured/">Measured results</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div></nav>
+  </aside>
+  <main class="doc" id="main">
+    <p class="crumb">Reference</p>
+    <h1>Commands and options</h1>
+<p class="lead">Everything slowship understands, on one page.</p>
+
+<h2 id="commands"><a class="anchor" href="#commands" aria-label="Link to this section">#</a>Commands</h2>
+<div class="tablewrap"><table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td><code>slowship [dir]</code></td><td>Read <code>dir</code> (here by default), show the verdict, then offer the review.</td></tr>
+  <tr><td><code>slowship review</code></td><td>Review the last watch again, full screen in the terminal.</td></tr>
+  <tr><td><code>slowship ui</code></td><td>Open the morning report in your browser.</td></tr>
+  <tr><td><code>slowship schedule [dir]</code></td><td>Keep watch every night. See <a href="../../docs/nightly/">The nightly watch</a>.</td></tr>
+  <tr><td><code>slowship discord</code></td><td>Connect a Discord channel for the morning ping.</td></tr>
+  <tr><td><code>slowship telegram</code></td><td>Connect a Telegram chat for the morning ping.</td></tr>
+  <tr><td><code>slowship notify</code></td><td>Show, test or stop the morning ping.</td></tr>
+  <tr><td><code>slowship connect</code></td><td>Print how to connect your coding agent, and install its skill.</td></tr>
+  <tr><td><code>slowship mcp</code></td><td>The MCP server your agent talks to. Your agent starts it; you don’t need to.</td></tr>
+  <tr><td><code>slowship help</code></td><td>The mark and the list of commands.</td></tr>
+</table></div>
+
+<h2 id="watch-options"><a class="anchor" href="#watch-options" aria-label="Link to this section">#</a>Watch options</h2>
+<div class="tablewrap"><table>
+  <tr><th>Option</th><th>What it does</th></tr>
+  <tr><td><code>--app &lt;folder&gt;</code></td><td>Also check your own build before it ships.</td></tr>
+  <tr><td><code>--no-model</code></td><td>Rules only, no local model.</td></tr>
+  <tr><td><code>--packages-only</code></td><td>Read only the project’s packages.</td></tr>
+  <tr><td><code>--agents-only</code></td><td>Read only agent skills and MCP servers.</td></tr>
+  <tr><td><code>--offline</code></td><td>Don’t download <code>npx</code> MCP servers to read them.</td></tr>
+  <tr><td><code>--json &lt;file&gt;</code></td><td>Write everything found as JSON.</td></tr>
+  <tr><td><code>--approve &lt;name|notable|review&gt;</code></td><td>Clear one item, or everything at that level and below. See <a href="../../docs/clearing/">Clearing things</a>.</td></tr>
+  <tr><td><code>--notify</code></td><td>Send the morning ping after this watch too.</td></tr>
+  <tr><td><code>--plain</code></td><td>Plain text: no colour, no screens. Automatic when piped.</td></tr>
+  <tr><td><code>--no-motion</code></td><td>Draw, but don’t animate.</td></tr>
+</table></div>
+
+<h2 id="other-options"><a class="anchor" href="#other-options" aria-label="Link to this section">#</a>Other options</h2>
+<div class="tablewrap"><table>
+  <tr><th>Command</th><th>Options</th></tr>
+  <tr><td><code>slowship ui</code></td><td><code>--port 7798</code> to choose the port, <code>--no-open</code> to start without opening the browser.</td></tr>
+  <tr><td><code>slowship schedule</code></td><td><code>--at 03:00</code> for the time, any watch option to keep for the nightly run, <code>--status</code> to see what’s set, <code>--off</code> to stop it.</td></tr>
+  <tr><td><code>slowship notify</code></td><td><code>test</code> sends one now. <code>off [discord|telegram|all]</code> disconnects. <code>when needs|always</code> chooses when it sends. <code>manual on|off</code> also sends after watches you start.</td></tr>
+</table></div>
+
+<h2 id="environment-variables"><a class="anchor" href="#environment-variables" aria-label="Link to this section">#</a>Environment variables</h2>
+<div class="tablewrap"><table>
+  <tr><th>Variable</th><th>What it does</th></tr>
+  <tr><td><code>SLOWSHIP_MODEL</code></td><td>The Ollama model to use. Default <code>gemma4:e2b</code>.</td></tr>
+  <tr><td><code>SLOWSHIP_HOME</code></td><td>Where slowship keeps its memory. Default <code>~/.slowship</code>.</td></tr>
+  <tr><td><code>SLOWSHIP_REA</code></td><td>Where REA’s <code>scripts/rea.mjs</code> is, if it isn’t installed globally.</td></tr>
+  <tr><td><code>SLOWSHIP_PORT</code></td><td>The report’s port, instead of <code>--port</code>.</td></tr>
+  <tr><td><code>SLOWSHIP_NO_MOTION</code></td><td>The same as <code>--no-motion</code>, everywhere.</td></tr>
+  <tr><td><code>NO_COLOR</code></td><td>Plain text, like <code>--plain</code>.</td></tr>
+</table></div>
+
+<h2 id="exit-codes"><a class="anchor" href="#exit-codes" aria-label="Link to this section">#</a>Exit codes</h2>
+<p><code>2</code> when the verdict is held, so it can gate CI; <code>0</code> otherwise. The nightly task always exits cleanly; the verdict waits in the report.</p>
+
+<h2 id="files"><a class="anchor" href="#files" aria-label="Link to this section">#</a>Files</h2>
+<div class="tablewrap"><table>
+  <tr><th>File</th><th>Holds</th></tr>
+  <tr><td><code>~/.slowship/state.json</code></td><td>The memory of what was read, by fingerprint, and your clears.</td></tr>
+  <tr><td><code>~/.slowship/notify.json</code></td><td>The morning ping’s webhook or token, readable only by you.</td></tr>
+</table></div>
+    <nav class="pn" aria-label="More docs"><a class="prev" href="../../docs/safety/"><small>Previous</small><b>Safety and privacy</b></a><a class="next" href="../../docs/measured/"><small>Next</small><b>Measured results</b></a></nav>
+    <p class="edit"><a href="https://github.com/nirajkhetre/slowship/tree/main/site/web/docs/commands.html">Suggest a change to this page</a></p>
+  </main>
+  <nav class="toc" aria-label="On this page"><h4>On this page</h4><ul><li><a href="#commands">Commands</a></li><li><a href="#watch-options">Watch options</a></li><li><a href="#other-options">Other options</a></li><li><a href="#environment-variables">Environment variables</a></li><li><a href="#exit-codes">Exit codes</a></li><li><a href="#files">Files</a></li></ul></nav>
+</div>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5.6" y="9.4" width="24" height="20.6" rx="8" fill="#01040D"/><rect x="3.6" y="7.4" width="24" height="20.6" rx="8" fill="#F4F2EE" stroke="#0A1633" stroke-width="1.5"/><ellipse cx="9.4" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><ellipse cx="22" cy="21.6" rx="2" ry="1.2" fill="#FF7AB8"/><rect x="10.2" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><rect x="19.8" y="15" width="2" height="3.6" rx="1" fill="#0A1633"/><path d="M6.6 9.6C7.4 2.6 23.8 2.6 24.6 9.6Z" fill="#0A1633"/><rect x="3" y="8.2" width="25.2" height="2.8" rx="1.4" fill="#0A1633"/><circle cx="15.6" cy="5.6" r="1.5" fill="#FFC21A"/></svg>slowship</a><p class="tag">Ship safe, slowly. A local, overnight check of everything your project brings aboard. Read, never run.</p></div>
+    <div><h4>Product</h4><ul><li><a href="../../demo/">Try the live demo</a></li><li><a href="../../#how">How it works</a></li><li><a href="../../#features">Features</a></li><li><a href="../../#measured">Measured results</a></li></ul></div>
+    <div><h4>Docs</h4><ul><li><a href="../../docs/install/">Install</a></li><li><a href="../../docs/first-watch/">Your first watch</a></li><li><a href="../../docs/morning-report/">The morning report</a></li><li><a href="../../docs/commands/">Commands</a></li></ul></div>
+    <div><h4>Project</h4><ul><li><a href="https://github.com/nirajkhetre/slowship">Source on GitHub</a></li><li><a href="https://github.com/nirajkhetre/slowship/blob/main/LICENSE">MIT license</a></li><li><a href="../../docs/safety/">Safety and privacy</a></li><li><a href="../../docs/faq/">Questions</a></li></ul></div>
+  </div>
+  <div class="base"><span>Made for the DEV Hacktoberfest 2026 “Slow and Steady” challenge.</span><span>MIT licensed. No trackers on this site.</span></div>
+</div></footer>
+<dialog class="search" id="search" aria-label="Search the docs">
+  <div class="sbox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="sq" placeholder="Search the docs" autocomplete="off" spellcheck="false" aria-label="Search the docs"><kbd>Esc</kbd></div>
+  <ul id="sres" role="listbox"></ul>
+</dialog>
+<script src="../../site.js?v=ada103f5"></script><script src="../../docs.js?v=ada103f5"></script>
+</body>
+</html>
